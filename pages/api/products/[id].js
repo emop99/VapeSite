@@ -6,7 +6,6 @@ import SellerSite from '../../../models/SellerSite';
 import PriceHistory from '../../../models/PriceHistory';
 import Review from '../../../models/Review';
 import User from '../../../models/User';
-import { testConnection } from '../../../lib/db';
 
 /**
  * 단일 제품 API 핸들러
@@ -15,12 +14,6 @@ import { testConnection } from '../../../lib/db';
  * DELETE: 제품 삭제 (관리자 권한 필요)
  */
 export default async function handler(req, res) {
-  // 데이터베이스 연결 확인
-  const isConnected = await testConnection();
-  if (!isConnected) {
-    return res.status(500).json({ error: '데이터베이스 연결 실패' });
-  }
-
   // 제품 ID 가져오기
   const {id} = req.query;
   if (!id || !Number.isInteger(Number(id)) || Number(id) <= 0) {
