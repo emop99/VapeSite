@@ -1,0 +1,142 @@
+create table vapesite.vape_company
+(
+    id       int auto_increment
+        primary key,
+    name     varchar(50)                          not null comment '회사명',
+    createAt datetime default current_timestamp() null,
+    constraint vape_company_pk
+        unique (name)
+)
+    comment '제조사 정보 테이블';
+
+create table vapesite.vape_products
+(
+    id        int auto_increment
+        primary key,
+    companyId int          not null,
+    name      varchar(100) not null comment '상품명',
+    imageUrl  varchar(255) null,
+    createdAt datetime     not null,
+    updatedAt datetime     not null,
+    constraint vape_products_vape_company_id_fk
+        foreign key (companyId) references vapesite.vape_company (id)
+)
+    comment '상품 정보 테이블';
+
+create table vapesite.vape_seller_site
+(
+    id       int auto_increment
+        primary key,
+    siteUrl  varchar(100)                         not null,
+    name     varchar(50)                          not null,
+    createAt datetime default current_timestamp() not null,
+    updateAt datetime                             null on update current_timestamp(),
+    constraint sellerSite_pk_2
+        unique (name)
+)
+    comment '판매 사이트 정보 테이블';
+
+create table vapesite.vape_price_comparisons
+(
+    id        int auto_increment
+        primary key,
+    productId int                                  not null,
+    sellerId  int                                  not null,
+    sellerUrl varchar(255)                         not null,
+    price     int                                  not null,
+    createdAt datetime default current_timestamp() not null,
+    updatedAt datetime                             null on update current_timestamp(),
+    constraint vape_price_comparisons_ibfk_1
+        foreign key (productId) references vapesite.vape_products (id),
+    constraint vape_price_comparisons_vape_seller_site_id_fk
+        foreign key (sellerId) references vapesite.vape_seller_site (id)
+)
+    comment '판매 사이트별 현재 가격 정보 테이블';
+
+create index productId
+    on vapesite.vape_price_comparisons (productId);
+
+create table vapesite.vape_price_history
+(
+    productId        int                                  not null,
+    sellerId         int                                  not null,
+    newPrice         int                                  not null comment '변동된 가격',
+    oldPrice         int                                  not null comment '이전 가격',
+    priceDifference  int                                  not null comment '가격 차',
+    percentageChange float                                not null comment '백분율 변화 정보',
+    createdAt        datetime default current_timestamp() not null,
+    primary key (productId, sellerId, newPrice),
+    constraint vape_price_history_ibfk_1
+        foreign key (productId) references vapesite.vape_products (id),
+    constraint vape_price_history_vape_seller_site_id_fk
+        foreign key (sellerId) references vapesite.vape_seller_site (id)
+)
+    comment '판매 사이트별 가격 변동 시 저장되는 테이블';
+
+create index vape_price_history_createdAt_index
+    on vapesite.vape_price_history (createdAt);
+
+create table vapesite.vape_user
+(
+    id                  int auto_increment
+        primary key,
+    email               varchar(50)                                                     not null,
+    password            varchar(200)                                                    not null comment '계정 비밀번호',
+    nickName            varchar(25)                                                     not null,
+    grade               enum ('NORMAL', 'PREMIUM', 'ADMIN') default 'NORMAL'            not null comment '회원 등급 설정',
+    emailVerification   tinyint                             default 0                   not null comment '이메일 인증 여부',
+    emailVerificationAt datetime                                                        null comment '이메일 인증 일시',
+    createAt            datetime                            default current_timestamp() not null,
+    updateAt            datetime                                                        null on update current_timestamp(),
+    deleteAt            datetime                                                        null comment '회원 탈퇴 일시',
+    constraint vape_user_pk
+        unique (email)
+)
+    comment '유저 정보 테이블';
+
+create table vapesite.vape_reviews
+(
+    id           int auto_increment
+        primary key,
+    productId    int                                    not null,
+    userId       int                                    not null comment '작성자 유저 번호',
+    rating       tinyint    default 1                   not null comment '평점(1~5)'
+        check (`rating` between 1 and 5),
+    title        varchar(100)                           not null,
+    content      text                                   not null,
+    recommended  tinyint(1) default 0                   null comment '추천 여부',
+    pros         tinytext                               not null comment '장점',
+    cons         tinytext                               not null comment '단점',
+    helpfulCount int        default 0                   null comment '도움이 됨 개수',
+    createdAt    datetime   default current_timestamp() not null,
+    updatedAt    datetime                               null on update current_timestamp(),
+    constraint vape_reviews_ibfk_1
+        foreign key (productId) references vapesite.vape_products (id),
+    constraint vape_reviews_vape_user_id_fk
+        foreign key (userId) references vapesite.vape_user (id)
+)
+    comment '판매 상품 리뷰 테이블';
+
+create index productId
+    on vapesite.vape_reviews (productId);
+
+create index vape_user_emailVerification_index
+    on vapesite.vape_user (emailVerification);
+
+create index vape_user_grade_index
+    on vapesite.vape_user (grade);
+
+create index vape_user_nickName_index
+    on vapesite.vape_user (nickName);
+
+create table vapesite.vape_user_login_log
+(
+    id       int auto_increment
+        primary key,
+    userId   int                                  not null,
+    createAt datetime default current_timestamp() not null,
+    constraint vape_user_login_log_vape_user_id_fk
+        foreign key (userId) references vapesite.vape_user (id)
+)
+    comment '회원 로그인 로그';
+

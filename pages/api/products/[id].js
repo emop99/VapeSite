@@ -1,0 +1,97 @@
+// 단일 제품 API 라우트
+import Product from '../../../models/Product';
+import Company from '../../../models/Company';
+import PriceComparison from '../../../models/PriceComparison';
+import SellerSite from '../../../models/SellerSite';
+import PriceHistory from '../../../models/PriceHistory';
+import Review from '../../../models/Review';
+import User from '../../../models/User';
+import { testConnection } from '../../../lib/db';
+
+/**
+ * 단일 제품 API 핸들러
+ * GET: 제품 상세 정보 조회
+ * PUT: 제품 정보 업데이트 (관리자 권한 필요)
+ * DELETE: 제품 삭제 (관리자 권한 필요)
+ */
+export default async function handler(req, res) {
+  // 데이터베이스 연결 확인
+  const isConnected = await testConnection();
+  if (!isConnected) {
+    return res.status(500).json({ error: '데이터베이스 연결 실패' });
+  }
+
+  // 제품 ID 가져오기
+  const {id} = req.query;
+  if (!id || !Number.isInteger(Number(id)) || Number(id) <= 0) {
+    return res.status(400).json({error: '올바른 제품 정보가 필요합니다.'});
+  }
+
+  // HTTP 메소드에 따라 다른 처리
+  switch (req.method) {
+    case 'GET':
+      return getProduct(req, res, id);
+    default:
+      return res.status(405).json({ error: '허용되지 않는 메소드' });
+  }
+}
+
+/**
+ * 제품 상세 정보 조회
+ */
+async function getProduct(req, res, id) {
+  try {
+    // 제품 조회 (제조사 정보 포함)
+    const product = await Product.findByPk(id, {
+      include: [{ model: Company }]
+    });
+
+    if (!product) {
+      return res.status(400).json({ error: '제품을 찾을 수 없습니다.' });
+    }
+
+    // 가격 비교 정보 조회 (판매처 정보 포함)
+    const priceComparisons = await PriceComparison.findAll({
+      where: { productId: id },
+      include: [{ model: SellerSite }],
+      order: [['price', 'ASC']], // 가격 오름차순 정렬
+    });
+
+    // 가격 변동 이력 조회 (최근 10개)
+    const priceHistory = await PriceHistory.findAll({
+      where: { productId: id },
+      include: [{ model: SellerSite }],
+      order: [['createdAt', 'DESC']], // 최신순 정렬
+      limit: 10,
+    });
+
+    // 리뷰 조회 (유저 정보 포함)
+    const reviews = await Review.findAll({
+      where: { productId: id },
+      include: [{ 
+        model: User,
+        attributes: ['id', 'nickName', 'grade'] // 필요한 유저 정보만 가져오기
+      }],
+      order: [['createdAt', 'DESC']], // 최신순 정렬
+    });
+
+    // 평균 평점 계산
+    const averageRating = reviews.length > 0
+      ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
+      : 0;
+
+    // 응답 데이터 구성
+    const responseData = {
+      ...product.toJSON(),
+      priceComparisons,
+      priceHistory,
+      reviews,
+      averageRating,
+    };
+
+    return res.status(200).json(responseData);
+  } catch (error) {
+    console.error('제품 조회 오류:', error);
+    return res.status(500).json({ error: '제품 조회 중 오류가 발생했습니다.' });
+  }
+}
