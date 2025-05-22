@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { FaStar, FaStarHalfAlt, FaRegStar, FaArrowDown, FaArrowUp } from 'react-icons/fa';
 
 // 제품 상세 페이지
-export default function ProductDetail() {
+export default function ProductDetail({ productData, error: serverError }) {
   // 별점 렌더링 헬퍼 함수
   const renderStarRating = (rating) => {
     const stars = [];
@@ -35,82 +35,21 @@ export default function ProductDetail() {
     );
   };
   const router = useRouter();
-  const { id } = router.query;
 
   // 제품 상태
-  const [product, setProduct] = useState(null);
+  const [product, setProduct] = useState(productData || null);
   // 로딩 상태
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!productData);
   // 에러 상태
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(serverError || null);
   // 가격 비교 상태
-  const [priceComparisons, setPriceComparisons] = useState([]);
+  const [priceComparisons, setPriceComparisons] = useState(productData?.priceComparisons || []);
   // 가격 변동 이력 상태
-  const [priceHistory, setPriceHistory] = useState([]);
+  const [priceHistory, setPriceHistory] = useState(productData?.priceHistory || []);
   // 리뷰 상태
-  const [reviews, setReviews] = useState([]);
+  const [reviews, setReviews] = useState(productData?.reviews || []);
   // 평균 평점
-  const [averageRating, setAverageRating] = useState(0);
-
-  // 제품 데이터 가져오기
-  useEffect(() => {
-    if (!id) return;
-
-    const fetchProduct = async () => {
-      try {
-        setLoading(true);
-
-        // API 호출
-        const response = await fetch(`/api/products/${id}`);
-
-        if (!response.ok) {
-          if (response.status === 400) {
-            const data = await response.json();
-            if (data.error) {
-              setError(data.error);
-              return;
-            }
-          }
-          setError('제품을 불러오는데 문제가 발생했습니다.');
-          return;
-        }
-
-        const data = await response.json();
-
-        // 제품 기본 정보 설정
-        setProduct(data);
-
-        // 가격 비교 정보 설정
-        if (data.priceComparisons) {
-          setPriceComparisons(data.priceComparisons);
-        }
-
-        // 가격 변동 이력 설정
-        if (data.priceHistory) {
-          setPriceHistory(data.priceHistory);
-        }
-
-        // 리뷰 설정
-        if (data.reviews) {
-          setReviews(data.reviews);
-        }
-
-        // 평균 평점 설정
-        if (data.averageRating !== undefined) {
-          setAverageRating(data.averageRating);
-        }
-
-        setError(null);
-      } catch (err) {
-        console.error('제품 로딩 오류:', err);
-        setError('제품을 불러오는데 문제가 발생했습니다.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProduct();
-  }, [id]);
+  const [averageRating, setAverageRating] = useState(productData?.averageRating || 0);
 
   // 로딩 중 표시
   if (loading) {
@@ -201,7 +140,7 @@ export default function ProductDetail() {
                 rel="noopener noreferrer"
                 className="btn-primary w-full text-center"
               >
-                구매하기
+                최저가로 구매하러 가기
               </a>
             )}
           </div>
@@ -407,4 +346,51 @@ export default function ProductDetail() {
       </section>
     </div>
   );
+}
+
+// 서버 사이드에서 제품 데이터 가져오기
+export async function getServerSideProps(context) {
+  const { id } = context.params;
+
+  try {
+    // 서버에서 API 직접 호출
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/products/${id}`);
+
+    if (!response.ok) {
+      if (response.status === 400) {
+        const data = await response.json();
+        if (data.error) {
+          return {
+            props: {
+              productData: null,
+              error: data.error
+            }
+          };
+        }
+      }
+      return {
+        props: {
+          productData: null,
+          error: '제품을 불러오는데 문제가 발생했습니다.'
+        }
+      };
+    }
+
+    const productData = await response.json();
+
+    return {
+      props: {
+        productData,
+        error: null
+      }
+    };
+  } catch (err) {
+    console.error('제품 로딩 오류:', err);
+    return {
+      props: {
+        productData: null,
+        error: '제품을 불러오는데 문제가 발생했습니다.'
+      }
+    };
+  }
 }
