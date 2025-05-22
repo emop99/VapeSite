@@ -34,11 +34,20 @@ export default function Layout({ children, title = '전자담배 액상 최저�
               <Link href="/" className={`${isActive('/')} hover:text-accent`}>
                 홈
               </Link>
-              <Link href="/products" className={`${isActive('/products')} hover:text-accent`}>
-                제품목록
+              <Link href="/events" className={`${isActive('/events')} hover:text-accent`}>
+                이벤트
               </Link>
-              <Link href="/brands" className={`${isActive('/brands')} hover:text-accent`}>
-                브랜드
+              <Link href="/popular-liquids" className={`${isActive('/popular-liquids')} hover:text-accent`}>
+                인기액상
+              </Link>
+              <Link href="/mouth-inhalation" className={`${isActive('/mouth-inhalation')} hover:text-accent`}>
+                입호흡
+              </Link>
+              <Link href="/lung-inhalation" className={`${isActive('/lung-inhalation')} hover:text-accent`}>
+                폐호흡
+              </Link>
+              <Link href="/community" className={`${isActive('/community')} hover:text-accent`}>
+                커뮤니티
               </Link>
               <Link href="/about" className={`${isActive('/about')} hover:text-accent`}>
                 소개
@@ -74,13 +83,28 @@ export default function Layout({ children, title = '전자담배 액상 최저�
                   </Link>
                 </li>
                 <li>
-                  <Link href="/products" className="text-gray-300 hover:text-white">
-                    제품목록
+                  <Link href="/events" className="text-gray-300 hover:text-white">
+                    이벤트
                   </Link>
                 </li>
                 <li>
-                  <Link href="/brands" className="text-gray-300 hover:text-white">
-                    브랜드
+                  <Link href="/popular-liquids" className="text-gray-300 hover:text-white">
+                    인기액상
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/products?category=입호흡" className="text-gray-300 hover:text-white">
+                    입호흡
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/products?category=폐호흡" className="text-gray-300 hover:text-white">
+                    폐호흡
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/community" className="text-gray-300 hover:text-white">
+                    커뮤니티
                   </Link>
                 </li>
                 <li>
