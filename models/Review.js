@@ -52,12 +52,12 @@ const Review = sequelize.define('Review', {
   },
   // 장점
   pros: {
-    type: DataTypes.TEXT,
+    type: DataTypes.TEXT('tiny'),
     allowNull: false,
   },
   // 단점
   cons: {
-    type: DataTypes.TEXT,
+    type: DataTypes.TEXT('tiny'),
     allowNull: false,
   },
   // 추천 여부
@@ -77,6 +77,13 @@ const Review = sequelize.define('Review', {
   tableName: 'vape_reviews',
   // 타임스탬프 활성화 (createdAt, updatedAt)
   timestamps: true,
+  // 인덱스 설정
+  indexes: [
+    {
+      name: 'productId',
+      fields: ['productId'],
+    },
+  ],
 });
 
 // 관계 설정: 제품과 리뷰 (1:N)

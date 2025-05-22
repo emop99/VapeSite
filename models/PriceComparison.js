@@ -6,25 +6,21 @@ const SellerSite = require('./SellerSite');
 
 // 가격 비교 모델 정의
 const PriceComparison = sequelize.define('PriceComparison', {
-  // ID (기본 키)
-  id: {
-    type: DataTypes.INTEGER,
-    autoIncrement: true,
-    primaryKey: true,
-  },
-  // 제품 ID (외래 키)
+  // 제품 ID (외래 키, 복합 기본 키의 일부)
   productId: {
     type: DataTypes.INTEGER,
     allowNull: false,
+    primaryKey: true,
     references: {
       model: Product,
       key: 'id',
     },
   },
-  // 판매처 ID (외래 키)
+  // 판매처 ID (외래 키, 복합 기본 키의 일부)
   sellerId: {
     type: DataTypes.INTEGER,
     allowNull: false,
+    primaryKey: true,
     references: {
       model: SellerSite,
       key: 'id',
@@ -32,7 +28,7 @@ const PriceComparison = sequelize.define('PriceComparison', {
   },
   // 판매처 URL
   sellerUrl: {
-    type: DataTypes.STRING(255),
+    type: DataTypes.TEXT('tiny'),
     allowNull: false,
   },
   // 가격

@@ -44,7 +44,7 @@ const User = sequelize.define('User', {
     allowNull: true,
   },
   // 회원 탈퇴 일시
-  deleteAt: {
+  deletedAt: {
     type: DataTypes.DATE,
     allowNull: true,
   },

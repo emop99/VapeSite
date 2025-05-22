@@ -40,12 +40,14 @@ const PriceHistory = sequelize.define('PriceHistory', {
   // 가격 차
   priceDifference: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: true,
+    defaultValue: 0,
   },
   // 백분율 변화 정보
   percentageChange: {
     type: DataTypes.FLOAT,
-    allowNull: false,
+    allowNull: true,
+    defaultValue: 0,
   },
 }, {
   // 테이블 이름 설정
@@ -53,6 +55,13 @@ const PriceHistory = sequelize.define('PriceHistory', {
   // 타임스탬프 설정
   createdAt: 'createdAt',
   updatedAt: false,
+  // 인덱스 설정
+  indexes: [
+    {
+      name: 'vape_price_history_createdAt_index',
+      fields: ['createdAt'],
+    },
+  ],
 });
 
 // 관계 설정: 제품과 가격 이력 (1:N)

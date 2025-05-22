@@ -2,6 +2,7 @@
 // 모든 모델을 한 곳에서 내보내기
 
 const Company = require('./Company');
+const ProductCategory = require('./ProductCategory');
 const Product = require('./Product');
 const SellerSite = require('./SellerSite');
 const PriceComparison = require('./PriceComparison');
@@ -14,6 +15,7 @@ const Review = require('./Review');
 
 module.exports = {
   Company,
+  ProductCategory,
   Product,
   SellerSite,
   PriceComparison,

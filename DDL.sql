@@ -1,36 +1,50 @@
 create table vapesite.vape_company
 (
-    id       int auto_increment
+    id        int auto_increment
         primary key,
-    name     varchar(50)                          not null comment '회사명',
-    createAt datetime default current_timestamp() null,
+    name      varchar(50)                          not null comment '회사명',
+    createdAt datetime default current_timestamp() null,
     constraint vape_company_pk
         unique (name)
 )
     comment '제조사 정보 테이블';
 
-create table vapesite.vape_products
+create table vapesite.vape_product_category
 (
     id        int auto_increment
         primary key,
-    companyId int          not null,
-    name      varchar(100) not null comment '상품명',
-    imageUrl  varchar(255) null,
-    createdAt datetime     not null,
-    updatedAt datetime     not null,
+    name      varchar(15)                          not null,
+    createdAt datetime default current_timestamp() not null,
+    updatedAt datetime default current_timestamp() null on update current_timestamp()
+);
+
+create table vapesite.vape_products
+(
+    id                int auto_increment
+        primary key,
+    companyId         int                                  not null,
+    productCategoryId int                                  not null,
+    name              varchar(100)                         not null comment '상품명',
+    imageUrl          varchar(255)                         null,
+    createdAt         datetime default current_timestamp() not null,
+    updatedAt         datetime default current_timestamp() null on update current_timestamp(),
+    constraint vape_products_unique_company_name_category
+        unique (companyId, name, productCategoryId),
     constraint vape_products_vape_company_id_fk
-        foreign key (companyId) references vapesite.vape_company (id)
+        foreign key (companyId) references vapesite.vape_company (id),
+    constraint vape_products_vape_product_category_id_fk
+        foreign key (productCategoryId) references vapesite.vape_product_category (id)
 )
     comment '상품 정보 테이블';
 
 create table vapesite.vape_seller_site
 (
-    id       int auto_increment
+    id        int auto_increment
         primary key,
-    siteUrl  varchar(100)                         not null,
-    name     varchar(50)                          not null,
-    createAt datetime default current_timestamp() not null,
-    updateAt datetime                             null on update current_timestamp(),
+    siteUrl   varchar(100)                         not null,
+    name      varchar(50)                          not null,
+    createdAt datetime default current_timestamp() not null,
+    updatedAt datetime default current_timestamp() null on update current_timestamp(),
     constraint sellerSite_pk_2
         unique (name)
 )
@@ -38,14 +52,13 @@ create table vapesite.vape_seller_site
 
 create table vapesite.vape_price_comparisons
 (
-    id        int auto_increment
-        primary key,
     productId int                                  not null,
     sellerId  int                                  not null,
-    sellerUrl varchar(255)                         not null,
+    sellerUrl tinytext                             not null,
     price     int                                  not null,
     createdAt datetime default current_timestamp() not null,
-    updatedAt datetime                             null on update current_timestamp(),
+    updatedAt datetime default current_timestamp() null on update current_timestamp(),
+    primary key (productId, sellerId),
     constraint vape_price_comparisons_ibfk_1
         foreign key (productId) references vapesite.vape_products (id),
     constraint vape_price_comparisons_vape_seller_site_id_fk
@@ -53,17 +66,14 @@ create table vapesite.vape_price_comparisons
 )
     comment '판매 사이트별 현재 가격 정보 테이블';
 
-create index productId
-    on vapesite.vape_price_comparisons (productId);
-
 create table vapesite.vape_price_history
 (
     productId        int                                  not null,
     sellerId         int                                  not null,
     newPrice         int                                  not null comment '변동된 가격',
     oldPrice         int                                  not null comment '이전 가격',
-    priceDifference  int                                  not null comment '가격 차',
-    percentageChange float                                not null comment '백분율 변화 정보',
+    priceDifference  int      default 0                   null comment '가격 차',
+    percentageChange float    default 0                   null comment '백분율 변화 정보',
     createdAt        datetime default current_timestamp() not null,
     primary key (productId, sellerId, newPrice),
     constraint vape_price_history_ibfk_1
@@ -86,8 +96,8 @@ create table vapesite.vape_user
     grade               enum ('NORMAL', 'PREMIUM', 'ADMIN') default 'NORMAL'            not null comment '회원 등급 설정',
     emailVerification   tinyint                             default 0                   not null comment '이메일 인증 여부',
     emailVerificationAt datetime                                                        null comment '이메일 인증 일시',
-    createAt            datetime                            default current_timestamp() not null,
-    updateAt            datetime                                                        null on update current_timestamp(),
+    createdAt           datetime                            default current_timestamp() not null,
+    updatedAt           datetime                            default current_timestamp() null on update current_timestamp(),
     deleteAt            datetime                                                        null comment '회원 탈퇴 일시',
     constraint vape_user_pk
         unique (email)
@@ -109,7 +119,7 @@ create table vapesite.vape_reviews
     cons         tinytext                               not null comment '단점',
     helpfulCount int        default 0                   null comment '도움이 됨 개수',
     createdAt    datetime   default current_timestamp() not null,
-    updatedAt    datetime                               null on update current_timestamp(),
+    updatedAt    datetime   default current_timestamp() null on update current_timestamp(),
     constraint vape_reviews_ibfk_1
         foreign key (productId) references vapesite.vape_products (id),
     constraint vape_reviews_vape_user_id_fk
@@ -131,10 +141,10 @@ create index vape_user_nickName_index
 
 create table vapesite.vape_user_login_log
 (
-    id       int auto_increment
+    id        int auto_increment
         primary key,
-    userId   int                                  not null,
-    createAt datetime default current_timestamp() not null,
+    userId    int                                  not null,
+    createdAt datetime default current_timestamp() not null,
     constraint vape_user_login_log_vape_user_id_fk
         foreign key (userId) references vapesite.vape_user (id)
 )

@@ -24,10 +24,8 @@ const UserLoginLog = sequelize.define('UserLoginLog', {
   // 테이블 이름 설정
   tableName: 'vape_user_login_log',
   // 타임스탬프 설정
-  timestamps: {
-    createdAt: 'createAt',
-    updatedAt: false,
-  },
+  createdAt: 'createdAt',
+  updatedAt: false,
 });
 
 // 관계 설정: 유저와 로그인 로그 (1:N)
