@@ -25,7 +25,7 @@ export default async function handler(req, res) {
     case 'GET':
       return getProduct(req, res, id);
     default:
-      return res.status(405).json({ error: '허용되지 않는 메소드' });
+      return res.status(405).json({error: '허용되지 않는 메소드'});
   }
 }
 
@@ -36,32 +36,32 @@ async function getProduct(req, res, id) {
   try {
     // 제품 조회 (제조사 정보 포함)
     const product = await Product.findByPk(id, {
-      include: [{ model: Company }]
+      include: [{model: Company}]
     });
 
     if (!product) {
-      return res.status(400).json({ error: '제품을 찾을 수 없습니다.' });
+      return res.status(400).json({error: '제품을 찾을 수 없습니다.'});
     }
 
     // 가격 비교 정보 조회 (판매처 정보 포함)
     const priceComparisons = await PriceComparison.findAll({
-      where: { productId: id },
-      include: [{ model: SellerSite }],
+      where: {productId: id},
+      include: [{model: SellerSite}],
       order: [['price', 'ASC']], // 가격 오름차순 정렬
     });
 
     // 가격 변동 이력 조회 (최근 10개)
     const priceHistory = await PriceHistory.findAll({
-      where: { productId: id },
-      include: [{ model: SellerSite }],
+      where: {productId: id},
+      include: [{model: SellerSite}],
       order: [['createdAt', 'DESC']], // 최신순 정렬
       limit: 10,
     });
 
     // 리뷰 조회 (유저 정보 포함)
     const reviews = await Review.findAll({
-      where: { productId: id },
-      include: [{ 
+      where: {productId: id},
+      include: [{
         model: User,
         attributes: ['id', 'nickName', 'grade'] // 필요한 유저 정보만 가져오기
       }],
@@ -85,6 +85,6 @@ async function getProduct(req, res, id) {
     return res.status(200).json(responseData);
   } catch (error) {
     console.error('제품 조회 오류:', error);
-    return res.status(500).json({ error: '제품 조회 중 오류가 발생했습니다.' });
+    return res.status(500).json({error: '제품 조회 중 오류가 발생했습니다.'});
   }
 }

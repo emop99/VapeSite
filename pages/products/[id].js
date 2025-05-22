@@ -43,8 +43,6 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true);
   // 에러 상태
   const [error, setError] = useState(null);
-  // 관련 제품 상태
-  const [relatedProducts, setRelatedProducts] = useState([]);
   // 가격 비교 상태
   const [priceComparisons, setPriceComparisons] = useState([]);
   // 가격 변동 이력 상태
@@ -100,14 +98,6 @@ export default function ProductDetail() {
         // 평균 평점 설정
         if (data.averageRating !== undefined) {
           setAverageRating(data.averageRating);
-        }
-
-        // 관련 제품 가져오기 (같은 브랜드 제품)
-        const relatedResponse = await fetch(`/api/products?brand=${data.brand}&limit=4`);
-        if (relatedResponse.ok) {
-          const relatedData = await relatedResponse.json();
-          // 현재 제품 제외
-          setRelatedProducts(relatedData.filter(p => p.id !== data.id).slice(0, 3));
         }
 
         setError(null);
@@ -201,9 +191,6 @@ export default function ProductDetail() {
             )}
 
             <div className="flex space-x-2 mb-4">
-              <span className="inline-block bg-gray-100 rounded-full px-3 py-1 text-sm font-semibold text-gray-600">
-                {product.volume}ml
-              </span>
               {product.nicotine && (
                 <span className="inline-block bg-gray-100 rounded-full px-3 py-1 text-sm font-semibold text-gray-600">
                   {product.nicotine}mg
@@ -211,28 +198,11 @@ export default function ProductDetail() {
               )}
             </div>
 
-            <p className="text-2xl font-bold text-accent mb-4">{product.price.toLocaleString()}원</p>
+            <p className="text-2xl font-bold mb-4 text-price">{product.priceComparisons[0].price.toLocaleString()}원</p>
 
-            <div className="mb-6">
-              <h2 className="text-lg font-bold mb-2">맛 설명</h2>
-              <p className="text-gray-700">{product.flavor}</p>
-            </div>
-
-            {product.description && (
-              <div className="mb-6">
-                <h2 className="text-lg font-bold mb-2">상세 설명</h2>
-                <p className="text-gray-700">{product.description}</p>
-              </div>
-            )}
-
-            <div className="mb-6">
-              <h2 className="text-lg font-bold mb-2">판매처</h2>
-              <p className="text-gray-700">{product.seller}</p>
-            </div>
-
-            {product.sellerUrl && (
+            {product.priceComparisons[0].sellerUrl && (
               <a
-                href={product.sellerUrl}
+                href={product.priceComparisons[0].sellerUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-primary w-full text-center"
@@ -254,8 +224,6 @@ export default function ProductDetail() {
                 <tr>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">판매처</th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">가격</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">배송비</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">재고</th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">최종 가격</th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">링크</th>
                 </tr>
@@ -263,22 +231,10 @@ export default function ProductDetail() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {priceComparisons.map((comparison, index) => (
                   <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{comparison.sellerName}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{comparison.SellerSite.name}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{comparison.price.toLocaleString()}원</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{comparison.shippingCost.toLocaleString()}원</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {comparison.inStock ? (
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                          재고 있음
-                        </span>
-                      ) : (
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                          품절
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
-                      {(comparison.price + comparison.shippingCost).toLocaleString()}원
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-price">
+                      {comparison.price.toLocaleString()}원
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <a
@@ -299,7 +255,7 @@ export default function ProductDetail() {
       )}
 
       {/* 최근 가격 변동 레이아웃 */}
-      {priceHistory.length > 0 && (
+      {priceHistory.length > 1 && (
         <section className="bg-white rounded-lg shadow-md p-6 mb-8">
           <h2 className="text-2xl font-bold mb-4">최근 가격 변동</h2>
           <div className="overflow-x-auto">
@@ -455,46 +411,6 @@ export default function ProductDetail() {
           </div>
         )}
       </section>
-
-      {/* 관련 제품 */}
-      {relatedProducts.length > 0 && (
-        <section className="mt-12">
-          <h2 className="text-2xl font-bold text-text mb-6">관련 제품</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {relatedProducts.map((relatedProduct) => (
-              <div key={relatedProduct.id} className="card group">
-                <div className="h-48 bg-gray-100 flex items-center justify-center overflow-hidden">
-                  {relatedProduct.imageUrl ? (
-                    <img 
-                      src={relatedProduct.imageUrl} 
-                      alt={relatedProduct.name} 
-                      className="w-full h-full object-contain"
-                    />
-                  ) : (
-                    <div className="text-gray-400">이미지 없음</div>
-                  )}
-                </div>
-                <div className="p-4">
-                  <h3 className="text-lg font-bold mb-1 text-text group-hover:text-primary transition-colors">
-                    {relatedProduct.name}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-1">{relatedProduct.brand}</p>
-                  <p className="text-sm text-gray-600 mb-1">{relatedProduct.flavor}</p>
-                  <p className="text-xl font-bold text-accent mb-2">
-                    {relatedProduct.price.toLocaleString()}원
-                  </p>
-                  <Link 
-                    href={`/products/${relatedProduct.id}`}
-                    className="btn-secondary w-full text-center"
-                  >
-                    상세 보기
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
     </div>
   );
 }
