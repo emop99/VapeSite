@@ -154,12 +154,6 @@ export default function ProductDetail() {
   return (
     <div className="container mx-auto px-4 py-8">
       {/* 제품 상세 정보 */}
-      <div className="mb-8">
-        <Link href="/" className="text-primary mb-4 inline-block">
-          &larr; 메인 페이지로 돌아가기
-        </Link>
-      </div>
-
       <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
         <div className="md:flex">
           {/* 제품 이미지 */}

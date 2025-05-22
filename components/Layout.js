@@ -93,12 +93,12 @@ export default function Layout({ children, title = '전자담배 액상 최저�
                   </Link>
                 </li>
                 <li>
-                  <Link href="/products?category=입호흡" className="text-gray-300 hover:text-white">
+                  <Link href="/mouth-inhalation" className="text-gray-300 hover:text-white">
                     입호흡
                   </Link>
                 </li>
                 <li>
-                  <Link href="/products?category=폐호흡" className="text-gray-300 hover:text-white">
+                  <Link href="/lung-inhalation" className="text-gray-300 hover:text-white">
                     폐호흡
                   </Link>
                 </li>
