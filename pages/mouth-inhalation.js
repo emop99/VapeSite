@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import Pagination from '../components/Pagination';
 
 // 입호흡 상품 페이지
 export default function MouthInhalationProducts() {
@@ -9,36 +10,16 @@ export default function MouthInhalationProducts() {
   // 상태 관리
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(null);
 
   // 페이지네이션 상태
   const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-
-  // 무한 스크롤을 위한 observer 참조
-  const observer = useRef();
-  const lastProductElementRef = useCallback(node => {
-    if (loading || loadingMore) return;
-    if (observer.current) observer.current.disconnect();
-
-    observer.current = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && hasMore) {
-        loadMoreProducts();
-      }
-    }, { threshold: 0.5 });
-
-    if (node) observer.current.observe(node);
-  }, [loading, loadingMore, hasMore]);
+  const [totalPages, setTotalPages] = useState(1);
 
   // 제품 데이터 가져오기
-  const fetchProducts = useCallback(async (pageNum = 1, replace = true) => {
+  const fetchProducts = useCallback(async (pageNum = 1) => {
     try {
-      if (pageNum === 1) {
-        setLoading(true);
-      } else {
-        setLoadingMore(true);
-      }
+      setLoading(true);
 
       // API 호출 (입호흡 카테고리로 필터링)
       const response = await fetch(`/api/products?page=${pageNum}&limit=12&category=입호흡`);
@@ -52,22 +33,17 @@ export default function MouthInhalationProducts() {
       // API 응답 구조 확인
       const productList = data.products || data;
 
-      // 제품 목록 업데이트 (첫 페이지면 교체, 아니면 추가)
-      setProducts(prevProducts => {
-        if (replace) {
-          return productList;
-        } else {
-          return [...prevProducts, ...productList];
-        }
-      });
+      // 제품 목록 업데이트 (항상 교체)
+      setProducts(productList);
 
-      // 더 불러올 제품이 있는지 확인
+      // 페이지네이션 정보 업데이트
       if (data.pagination) {
-        setHasMore(data.pagination.page < data.pagination.totalPages);
         setPage(data.pagination.page);
+        setTotalPages(data.pagination.totalPages);
       } else {
-        // 페이지네이션 정보가 없으면 더 이상 불러올 제품이 없다고 가정
-        setHasMore(false);
+        // 페이지네이션 정보가 없으면 기본값 설정
+        setPage(1);
+        setTotalPages(1);
       }
 
       setError(null);
@@ -76,22 +52,34 @@ export default function MouthInhalationProducts() {
       setError('제품을 불러오는데 문제가 발생했습니다.');
     } finally {
       setLoading(false);
-      setLoadingMore(false);
     }
   }, []);
 
-  // 추가 제품 로드 함수
-  const loadMoreProducts = useCallback(() => {
-    if (!loadingMore && hasMore) {
-      fetchProducts(page + 1, false);
-    }
-  }, [fetchProducts, page, loadingMore, hasMore]);
+  // 페이지 변경 처리 함수
+  const handlePageChange = useCallback((newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      // URL 업데이트하여 히스토리에 기록
+      router.push({
+        pathname: router.pathname,
+        query: { page: newPage }
+      }, undefined, { shallow: true });
 
-  // 초기 데이터 로드
+      fetchProducts(newPage);
+    }
+  }, [fetchProducts, totalPages, router]);
+
+  // 초기 데이터 로드 및 URL 파라미터 처리
   useEffect(() => {
-    setPage(1);
-    fetchProducts(1, true);
-  }, [fetchProducts]);
+    // URL에서 페이지 파라미터 읽기
+    const pageParam = router.query.page ? parseInt(router.query.page, 10) : 1;
+
+    // 유효한 페이지 번호인지 확인
+    if (pageParam >= 1) {
+      fetchProducts(pageParam);
+    } else {
+      fetchProducts(1);
+    }
+  }, [fetchProducts, router.query.page]);
 
   // 로딩 중 표시
   if (loading) {
@@ -128,10 +116,9 @@ export default function MouthInhalationProducts() {
       {products.length > 0 ? (
         <div className="mb-12">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {products.map((product, index) => (
+            {products.map((product) => (
               <div 
                 key={product.id} 
-                ref={index === products.length - 1 ? lastProductElementRef : null}
                 className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
               >
                 <Link href={`/products/${product.id}`}>
@@ -173,19 +160,12 @@ export default function MouthInhalationProducts() {
             ))}
           </div>
 
-          {/* 추가 로딩 인디케이터 */}
-          {loadingMore && (
-            <div className="flex justify-center items-center py-8">
-              <div className="animate-pulse text-primary">더 많은 제품을 불러오는 중...</div>
-            </div>
-          )}
-
-          {/* 더 이상 제품이 없을 때 메시지 */}
-          {!hasMore && products.length > 0 && (
-            <div className="text-center py-8 text-gray-500">
-              모든 제품을 불러왔습니다.
-            </div>
-          )}
+          {/* 페이지네이션 UI */}
+          <Pagination 
+            page={page} 
+            totalPages={totalPages} 
+            onPageChange={handlePageChange} 
+          />
         </div>
       ) : (
         <div className="text-center py-12 bg-gray-50 rounded-lg">
