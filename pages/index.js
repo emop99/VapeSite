@@ -53,7 +53,7 @@ export default function Home() {
             />
             <button
               type="submit"
-              className="bg-primary text-white px-6 py-4 rounded-r-full hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary"
+              className="bg-primary text-white px-6 py-4 rounded-r-full hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary whitespace-nowrap"
             >
               검색
             </button>

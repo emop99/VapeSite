@@ -98,7 +98,7 @@ create table vapesite.vape_user
     emailVerificationAt datetime                                                        null comment '이메일 인증 일시',
     createdAt           datetime                            default current_timestamp() not null,
     updatedAt           datetime                            default current_timestamp() null on update current_timestamp(),
-    deleteAt            datetime                                                        null comment '회원 탈퇴 일시',
+    deletedAt           datetime                                                        null comment '회원 탈퇴 일시',
     constraint vape_user_pk
         unique (email)
 )

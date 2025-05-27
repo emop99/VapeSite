@@ -2,6 +2,7 @@ import Layout from '../components/Layout';
 import '../styles/globals.css';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
+import { SessionProvider } from 'next-auth/react';
 
 // 앱 컴포넌트
 function MyApp({ Component, pageProps }) {
@@ -41,9 +42,11 @@ function MyApp({ Component, pageProps }) {
   }, [router]);
 
   return (
-    <Layout>
-      <Component {...pageProps} />
-    </Layout>
+    <SessionProvider session={pageProps.session}>
+      <Layout>
+        <Component {...pageProps} />
+      </Layout>
+    </SessionProvider>
   );
 }
 

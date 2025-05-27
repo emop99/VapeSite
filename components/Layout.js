@@ -1,6 +1,7 @@
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import AuthNav from './AuthNav';
 
 // 레이아웃 컴포넌트
 export default function Layout({ children, title = '전자담배 액상 최저가 사이트' }) {
@@ -30,29 +31,34 @@ export default function Layout({ children, title = '전자담배 액상 최저�
             </Link>
 
             {/* 네비게이션 */}
-            <nav className="flex items-center space-x-6">
-              <Link href="/" className={`${isActive('/')} hover:text-accent`}>
-                홈
-              </Link>
-              <Link href="/events" className={`${isActive('/events')} hover:text-accent`}>
-                이벤트
-              </Link>
-              <Link href="/popular-liquids" className={`${isActive('/popular-liquids')} hover:text-accent`}>
-                인기액상
-              </Link>
-              <Link href="/mouth-inhalation" className={`${isActive('/mouth-inhalation')} hover:text-accent`}>
-                입호흡
-              </Link>
-              <Link href="/lung-inhalation" className={`${isActive('/lung-inhalation')} hover:text-accent`}>
-                폐호흡
-              </Link>
-              <Link href="/community" className={`${isActive('/community')} hover:text-accent`}>
-                커뮤니티
-              </Link>
-              <Link href="/about" className={`${isActive('/about')} hover:text-accent`}>
-                소개
-              </Link>
-            </nav>
+            <div className="flex items-center justify-between w-full">
+              <nav className="flex items-center space-x-6">
+                <Link href="/" className={`${isActive('/')} hover:text-accent`}>
+                  홈
+                </Link>
+                <Link href="/events" className={`${isActive('/events')} hover:text-accent`}>
+                  이벤트
+                </Link>
+                <Link href="/popular-liquids" className={`${isActive('/popular-liquids')} hover:text-accent`}>
+                  인기액상
+                </Link>
+                <Link href="/mouth-inhalation" className={`${isActive('/mouth-inhalation')} hover:text-accent`}>
+                  입호흡
+                </Link>
+                <Link href="/lung-inhalation" className={`${isActive('/lung-inhalation')} hover:text-accent`}>
+                  폐호흡
+                </Link>
+                <Link href="/community" className={`${isActive('/community')} hover:text-accent`}>
+                  커뮤니티
+                </Link>
+                <Link href="/about" className={`${isActive('/about')} hover:text-accent`}>
+                  소개
+                </Link>
+              </nav>
+
+              {/* 인증 네비게이션 */}
+              <AuthNav />
+            </div>
           </div>
         </div>
       </header>
