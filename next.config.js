@@ -1,12 +1,12 @@
 /** @type {import('next').NextConfig} */
-// 환경에 따라 .env 또는 .env.dev 파일 로드
+// 환경에 따라 .env 또는 .env.development 파일 로드
 const path = require('path');
 const fs = require('fs');
 
 // 환경 변수 로드 함수
 const loadEnvConfig = () => {
   const isDev = process.env.NODE_ENV !== 'production';
-  const envFile = isDev ? '.env.dev' : '.env';
+  const envFile = isDev ? '.env.development' : '.env';
 
   try {
     const envPath = path.resolve(process.cwd(), envFile);

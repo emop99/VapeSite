@@ -25,6 +25,9 @@ export default function AuthNav() {
       <Link href="/auth/signin" className="text-sm bg-primary text-white px-3 py-1 rounded hover:bg-primary-dark">
         로그인
       </Link>
+      <Link href="/auth/signup" className="text-sm border border-primary text-primary px-3 py-1 rounded hover:bg-gray-100">
+        회원가입
+      </Link>
     </div>
   );
 }

@@ -11,6 +11,7 @@ const hashPassword = (password) => {
 export default NextAuth({
   providers: [
     CredentialsProvider({
+      debug: process.env.NODE_ENV === 'development',
       name: 'Credentials',
       credentials: {
         email: { label: "이메일", type: "email", placeholder: "이메일을 입력하세요" },

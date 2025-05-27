@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import AuthNav from './AuthNav';
 
 // 레이아웃 컴포넌트
-export default function Layout({ children, title = '전자담배 액상 최저가 사이트' }) {
+export default function Layout({ children, title = '쥬스고블린' }) {
   const router = useRouter();
 
   // 현재 경로에 따라 네비게이션 링크 활성화 여부 결정
@@ -16,7 +16,7 @@ export default function Layout({ children, title = '전자담배 액상 최저�
     <div className="min-h-screen flex flex-col bg-background">
       <Head>
         <title>{title}</title>
-        <meta name="description" content="전자담배 액상 제품의 최저가를 비교해보세요." />
+        <meta name="description" content="쥬스고블린에 오신 것을 환영합니다." />
         <link rel="icon" href="/favicon.ico" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
@@ -27,7 +27,7 @@ export default function Layout({ children, title = '전자담배 액상 최저�
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             {/* 로고 */}
             <Link href="/" className="text-2xl font-bold text-primary hover:text-primary">
-              VapeSite
+              쥬스고블린
             </Link>
 
             {/* 네비게이션 */}
@@ -74,9 +74,9 @@ export default function Layout({ children, title = '전자담배 액상 최저�
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* 회사 정보 */}
             <div>
-              <h3 className="text-xl font-bold mb-4">VapeSite</h3>
-              <p className="mb-2">전자담배 액상 최저가 비교 사이트</p>
-              <p className="text-sm text-gray-300">© 2023 VapeSite. All rights reserved.</p>
+              <h3 className="text-xl font-bold mb-4">쥬스고블린</h3>
+              <p className="mb-2">쥬스고블린 공식 사이트</p>
+              <p className="text-sm text-gray-300">© 2025 쥬스고블린. All rights reserved.</p>
             </div>
 
             {/* 빠른 링크 */}
@@ -125,7 +125,7 @@ export default function Layout({ children, title = '전자담배 액상 최저�
             <div>
               <h3 className="text-xl font-bold mb-4">연락처</h3>
               <p className="mb-2">문의사항이 있으시면 연락주세요.</p>
-              <p className="mb-2">이메일: info@vapesite.com</p>
+              <p className="mb-2">이메일: 8362855@gmail.com</p>
               <div className="flex space-x-4 mt-4">
                 {/* 소셜 미디어 아이콘 */}
                 <a href="#" className="text-gray-300 hover:text-white">

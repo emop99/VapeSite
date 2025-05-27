@@ -38,7 +38,7 @@ export default function Home() {
       {/* 히어로 섹션 - 검색 엔진 스타일 */}
       <section className="flex flex-col items-center justify-center min-h-[50vh] mb-8">
         <h1 className="text-5xl md:text-6xl font-bold text-primary mb-8">
-          베이프 서치
+          쥬스고블린
         </h1>
 
         {/* 메인 검색바 */}
