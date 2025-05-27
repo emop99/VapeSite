@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { FaStar, FaStarHalfAlt, FaRegStar, FaArrowDown, FaArrowUp } from 'react-icons/fa';
+import Image from 'next/image';
 
 // 제품 상세 페이지
 export default function ProductDetail({ productData, error: serverError }) {
@@ -98,9 +99,11 @@ export default function ProductDetail({ productData, error: serverError }) {
           {/* 제품 이미지 */}
           <div className="md:w-1/2 p-8 flex items-center justify-center bg-gray-50">
             {product.imageUrl ? (
-              <img 
+              <Image
                 src={product.imageUrl} 
                 alt={product.name} 
+                width={500}
+                height={500}
                 className="max-w-full max-h-96 object-contain"
               />
             ) : (
@@ -309,10 +312,12 @@ export default function ProductDetail({ productData, error: serverError }) {
                     <p className="font-semibold mb-2">리뷰 이미지</p>
                     <div className="flex space-x-2 overflow-x-auto">
                       {review.imageUrls.map((url, imgIndex) => (
-                        <img
+                        <Image
                           key={imgIndex}
                           src={url}
                           alt={`리뷰 이미지 ${imgIndex + 1}`}
+                          width={96}
+                          height={96}
                           className="w-24 h-24 object-cover rounded"
                         />
                       ))}

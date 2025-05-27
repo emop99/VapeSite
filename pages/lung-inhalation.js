@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Pagination from '../components/Pagination';
+import Image from "next/image";
 
 // 폐호흡 상품 페이지
 export default function LungInhalationProducts() {
@@ -125,9 +126,11 @@ export default function LungInhalationProducts() {
                   <div className="p-4">
                     <div className="h-48 bg-gray-100 flex items-center justify-center mb-4">
                       {product.imageUrl ? (
-                        <img 
+                        <Image
                           src={product.imageUrl} 
                           alt={product.name} 
+                          width={300}
+                          height={300}
                           className="max-h-full max-w-full object-contain"
                         />
                       ) : (
