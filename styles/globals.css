@@ -3,7 +3,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 전역 스타일 */
+/* 전역 스타일 - 고블린 테마 적용 */
 @layer base {
   html {
     @apply scroll-smooth;
@@ -11,10 +11,11 @@
 
   body {
     @apply bg-background text-text font-sans antialiased;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23a9c496' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-bold;
+    @apply font-bold text-goblin-dark;
   }
 
   h1 {
@@ -30,14 +31,31 @@
   }
 
   a {
-    @apply text-primary hover:text-primary/80 transition-colors;
+    @apply text-primary hover:text-accent transition-colors;
+  }
+
+  /* 고블린 테마 스크롤바 */
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-background;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-goblin-light rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-primary;
   }
 }
 
-/* 커스텀 컴포넌트 클래스 */
+/* 커스텀 컴포넌트 클래스 - 고블린 테마 적용 */
 @layer components {
   .text-price {
-    @apply text-[#cb1400];
+    @apply text-accent;
   }
 
   .container {
@@ -49,28 +67,38 @@
   }
 
   .btn-primary {
-    @apply btn bg-primary text-white hover:bg-primary/90;
+    @apply btn bg-primary text-white hover:bg-goblin-dark;
   }
 
   .btn-secondary {
-    @apply btn bg-secondary text-white hover:bg-secondary/90;
+    @apply btn bg-secondary text-white hover:bg-secondary/80;
   }
 
   .btn-accent {
-    @apply btn bg-accent text-white hover:bg-accent/90;
+    @apply btn bg-accent text-white hover:bg-accent/80;
+  }
+
+  /* 고블린 테마 버튼 */
+  .btn-goblin {
+    @apply btn bg-goblin-dark text-goblin-light hover:bg-primary hover:text-white;
   }
 
   .card {
-    @apply bg-white rounded-lg shadow-md overflow-hidden transition-all hover:shadow-lg;
+    @apply bg-white rounded-lg shadow-md overflow-hidden transition-all hover:shadow-lg border border-goblin-light/30;
+  }
+
+  /* 고블린 테마 카드 */
+  .card-goblin {
+    @apply bg-goblin-light/10 rounded-lg shadow-md overflow-hidden transition-all hover:shadow-lg border border-goblin-light;
   }
 
   .input {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary;
+    @apply w-full px-3 py-2 border border-goblin-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary;
   }
 
   .select {
     @apply input appearance-none bg-no-repeat bg-right pr-8;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%232D5F2D' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
     background-size: 1.5em 1.5em;
   }
 }

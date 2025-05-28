@@ -37,8 +37,8 @@ export default function Home() {
     <div className="container mx-auto px-4 py-8">
       {/* 히어로 섹션 - 검색 엔진 스타일 */}
       <section className="flex flex-col items-center justify-center min-h-[50vh] mb-8">
-        <h1 className="text-5xl md:text-6xl font-bold text-primary mb-8">
-          쥬스고블린
+        <h1 className="text-5xl md:text-6xl font-bold text-primary mb-8 font-fantasy">
+          JuiceGoblin
         </h1>
 
         {/* 메인 검색바 */}
@@ -48,7 +48,7 @@ export default function Home() {
               type="text"
               value={searchTerm}
               onChange={handleSearchChange}
-              placeholder="브랜드, 제품명, 맛 등을 검색해보세요"
+              placeholder="브랜드, 제품명 등을 검색해보세요."
               className="w-full px-5 py-4 text-lg border border-gray-300 rounded-l-full focus:outline-none focus:ring-2 focus:ring-primary"
             />
             <button

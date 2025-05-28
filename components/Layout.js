@@ -1,5 +1,6 @@
 import Head from 'next/head';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
 import AuthNav from './AuthNav';
 
@@ -17,42 +18,37 @@ export default function Layout({ children, title = '쥬스고블린' }) {
       <Head>
         <title>{title}</title>
         <meta name="description" content="쥬스고블린에 오신 것을 환영합니다." />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
 
-      {/* 헤더 */}
-      <header className="bg-white shadow-sm">
+      {/* 헤더 - 고블린 테마 적용 */}
+      <header className="bg-goblin-dark text-white shadow-md border-b-2 border-goblin-light">
         <div className="container py-4">
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             {/* 로고 */}
-            <Link href="/" className="text-2xl font-bold text-primary hover:text-primary">
-              쥬스고블린
+            <Link href="/" className="flex items-center">
+              <Image 
+                src="/image/juicegoblin_bi.png" 
+                alt="쥬스고블린" 
+                width={100}
+                height={25}
+                priority
+                className="drop-shadow-md"
+              />
             </Link>
 
-            {/* 네비게이션 */}
+            {/* 네비게이션 - 고블린 테마 적용 */}
             <div className="flex items-center justify-between w-full">
               <nav className="flex items-center space-x-6">
-                <Link href="/" className={`${isActive('/')} hover:text-accent`}>
-                  홈
-                </Link>
-                <Link href="/events" className={`${isActive('/events')} hover:text-accent`}>
-                  이벤트
-                </Link>
-                <Link href="/popular-liquids" className={`${isActive('/popular-liquids')} hover:text-accent`}>
-                  인기액상
-                </Link>
-                <Link href="/mouth-inhalation" className={`${isActive('/mouth-inhalation')} hover:text-accent`}>
+                <Link href="/mouth-inhalation" className={`${isActive('/mouth-inhalation')} hover:text-accent text-goblin-light font-medium`}>
                   입호흡
                 </Link>
-                <Link href="/lung-inhalation" className={`${isActive('/lung-inhalation')} hover:text-accent`}>
+                <Link href="/lung-inhalation" className={`${isActive('/lung-inhalation')} hover:text-accent text-goblin-light font-medium`}>
                   폐호흡
                 </Link>
-                <Link href="/community" className={`${isActive('/community')} hover:text-accent`}>
+                <Link href="/community" className={`${isActive('/community')} hover:text-accent text-goblin-light font-medium`}>
                   커뮤니티
-                </Link>
-                <Link href="/about" className={`${isActive('/about')} hover:text-accent`}>
-                  소개
                 </Link>
               </nav>
 
@@ -63,90 +59,32 @@ export default function Layout({ children, title = '쥬스고블린' }) {
         </div>
       </header>
 
-      {/* 메인 콘텐츠 */}
-      <main className="flex-grow">
-        {children}
+      {/* 메인 콘텐츠 - 고블린 테마 적용 */}
+      <main className="flex-grow bg-background py-6">
+        <div className="container mx-auto px-4">
+          {children}
+        </div>
       </main>
 
-      {/* 푸터 */}
-      <footer className="bg-text text-white py-8">
+      {/* 푸터 - 고블린 테마 적용 */}
+      <footer className="bg-goblin-dark text-white py-8 border-t-2 border-goblin-light">
         <div className="container">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* 회사 정보 */}
             <div>
-              <h3 className="text-xl font-bold mb-4">쥬스고블린</h3>
-              <p className="mb-2">쥬스고블린 공식 사이트</p>
-              <p className="text-sm text-gray-300">© 2025 쥬스고블린. All rights reserved.</p>
+              <h3 className="text-xl font-bold mb-8 text-accent">쥬스고블린</h3>
+              <p className="mb-2 text-goblin-light">쥬스고블린 공식 사이트</p>
+              <p className="text-sm text-goblin-light opacity-80">© 2025 쥬스고블린. All rights reserved.</p>
             </div>
 
-            {/* 빠른 링크 */}
-            <div>
-              <h3 className="text-xl font-bold mb-4">빠른 링크</h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link href="/" className="text-gray-300 hover:text-white">
-                    홈
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/events" className="text-gray-300 hover:text-white">
-                    이벤트
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/popular-liquids" className="text-gray-300 hover:text-white">
-                    인기액상
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/mouth-inhalation" className="text-gray-300 hover:text-white">
-                    입호흡
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/lung-inhalation" className="text-gray-300 hover:text-white">
-                    폐호흡
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/community" className="text-gray-300 hover:text-white">
-                    커뮤니티
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/about" className="text-gray-300 hover:text-white">
-                    소개
-                  </Link>
-                </li>
-              </ul>
+            <div className="hidden md:block">
             </div>
 
             {/* 연락처 */}
             <div>
-              <h3 className="text-xl font-bold mb-4">연락처</h3>
-              <p className="mb-2">문의사항이 있으시면 연락주세요.</p>
-              <p className="mb-2">이메일: 8362855@gmail.com</p>
-              <div className="flex space-x-4 mt-4">
-                {/* 소셜 미디어 아이콘 */}
-                <a href="#" className="text-gray-300 hover:text-white">
-                  <span className="sr-only">Facebook</span>
-                  <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd" />
-                  </svg>
-                </a>
-                <a href="#" className="text-gray-300 hover:text-white">
-                  <span className="sr-only">Instagram</span>
-                  <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path fillRule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.45 2.525c.636-.247 1.363-.416 2.427-.465C8.901 2.013 9.256 2 11.685 2h.63zm-.081 1.802h-.468c-2.456 0-2.784.011-3.807.058-.975.045-1.504.207-1.857.344-.467.182-.8.398-1.15.748-.35.35-.566.683-.748 1.15-.137.353-.3.882-.344 1.857-.047 1.023-.058 1.351-.058 3.807v.468c0 2.456.011 2.784.058 3.807.045.975.207 1.504.344 1.857.182.466.399.8.748 1.15.35.35.683.566 1.15.748.353.137.882.3 1.857.344 1.054.048 1.37.058 4.041.058h.08c2.597 0 2.917-.01 3.96-.058.976-.045 1.505-.207 1.858-.344.466-.182.8-.398 1.15-.748.35-.35.566-.683.748-1.15.137-.353.3-.882.344-1.857.048-1.055.058-1.37.058-4.041v-.08c0-2.597-.01-2.917-.058-3.96-.045-.976-.207-1.505-.344-1.858a3.097 3.097 0 00-.748-1.15 3.098 3.098 0 00-1.15-.748c-.353-.137-.882-.3-1.857-.344-1.023-.047-1.351-.058-3.807-.058zM12 6.865a5.135 5.135 0 110 10.27 5.135 5.135 0 010-10.27zm0 1.802a3.333 3.333 0 100 6.666 3.333 3.333 0 000-6.666zm5.338-3.205a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z" clipRule="evenodd" />
-                  </svg>
-                </a>
-                <a href="#" className="text-gray-300 hover:text-white">
-                  <span className="sr-only">Twitter</span>
-                  <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
-                  </svg>
-                </a>
-              </div>
+              <h3 className="text-xl font-bold mb-5 text-accent">연락처</h3>
+              <p className="mb-2 text-goblin-light">문의사항이 있으시면 연락주세요.</p>
+              <p className="mb-2 text-goblin-light">이메일: juicegoblinofficial@gmail.com</p>
             </div>
           </div>
         </div>
