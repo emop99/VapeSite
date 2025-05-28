@@ -3,9 +3,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Google Fonts 임포트 */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Dancing+Script:wght@400;700&display=swap');
-
 /* 전역 스타일 - 고블린 테마 적용 */
 @layer base {
   html {
