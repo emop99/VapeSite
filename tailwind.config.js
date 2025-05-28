@@ -9,6 +9,7 @@ module.exports = {
     extend: {
       fontFamily: {
         'fantasy': ['Fantasy', 'fantasy', 'sans-serif'],
+        'cursive': ['Brush Script MT', 'cursive', 'sans-serif'],
       },
       // 고블린 테마에 맞는 커스텀 색상 설정
       colors: {

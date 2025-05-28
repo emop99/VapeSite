@@ -26,16 +26,17 @@ export default function Layout({ children, title = '쥬스고블린' }) {
       <header className="bg-goblin-dark text-white shadow-md border-b-2 border-goblin-light">
         <div className="container py-4">
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-            {/* 로고 */}
-            <Link href="/" className="flex items-center">
+            {/* 로고 및 브랜드명 */}
+            <Link href="/" className="flex items-center space-x-2">
               <Image 
                 src="/image/juicegoblin_bi.png" 
                 alt="쥬스고블린" 
-                width={100}
-                height={25}
+                width={80}
+                height={20}
                 priority
                 className="drop-shadow-md"
               />
+              <span className="font-cursive text-3xl text-accent drop-shadow-sm inline md:hidden">JuiceGoblin</span>
             </Link>
 
             {/* 네비게이션 - 고블린 테마 적용 */}
@@ -53,7 +54,7 @@ export default function Layout({ children, title = '쥬스고블린' }) {
               </nav>
 
               {/* 인증 네비게이션 */}
-              <AuthNav />
+              {/*<AuthNav />*/}
             </div>
           </div>
         </div>
