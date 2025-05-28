@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { FaStar, FaStarHalfAlt, FaRegStar, FaArrowDown, FaArrowUp } from 'react-icons/fa';
 import Image from 'next/image';
+import {normalizeImageUrl} from '../../utils/helper';
 
 // 제품 상세 페이지
 export default function ProductDetail({ productData, error: serverError }) {
@@ -100,7 +101,7 @@ export default function ProductDetail({ productData, error: serverError }) {
           <div className="md:w-1/2 p-8 flex items-center justify-center bg-gray-50">
             {product.imageUrl ? (
               <Image
-                src={product.imageUrl} 
+                src={normalizeImageUrl(product.imageUrl)}
                 alt={product.name} 
                 width={500}
                 height={500}

@@ -48,9 +48,6 @@ export default function Layout({ children, title = '쥬스고블린' }) {
                 <Link href="/lung-inhalation" className={`${isActive('/lung-inhalation')} hover:text-accent text-goblin-light font-medium`}>
                   폐호흡
                 </Link>
-                <Link href="/community" className={`${isActive('/community')} hover:text-accent text-goblin-light font-medium`}>
-                  커뮤니티
-                </Link>
               </nav>
 
               {/* 인증 네비게이션 */}
