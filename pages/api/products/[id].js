@@ -1,7 +1,7 @@
 // 단일 제품 API 라우트
 import Product from '../../../models/Product';
 import Company from '../../../models/Company';
-import PriceComparison from '../../../models/PriceComparison';
+import PriceComparisons from '../../../models/PriceComparisons';
 import SellerSite from '../../../models/SellerSite';
 import PriceHistory from '../../../models/PriceHistory';
 import Review from '../../../models/Review';
@@ -44,7 +44,7 @@ async function getProduct(req, res, id) {
     }
 
     // 가격 비교 정보 조회 (판매처 정보 포함)
-    const priceComparisons = await PriceComparison.findAll({
+    const priceComparisons = await PriceComparisons.findAll({
       where: {productId: id},
       include: [{model: SellerSite}],
       order: [['price', 'ASC']], // 가격 오름차순 정렬

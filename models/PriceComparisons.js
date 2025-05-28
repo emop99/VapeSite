@@ -5,7 +5,7 @@ const Product = require('./Product');
 const SellerSite = require('./SellerSite');
 
 // 가격 비교 모델 정의
-const PriceComparison = sequelize.define('PriceComparison', {
+const PriceComparisons = sequelize.define('PriceComparisons', {
   // 제품 ID (외래 키, 복합 기본 키의 일부)
   productId: {
     type: DataTypes.INTEGER,
@@ -44,11 +44,11 @@ const PriceComparison = sequelize.define('PriceComparison', {
 });
 
 // 관계 설정: 제품과 가격 비교 (1:N)
-Product.hasMany(PriceComparison, { foreignKey: 'productId' });
-PriceComparison.belongsTo(Product, { foreignKey: 'productId' });
+Product.hasMany(PriceComparisons, { foreignKey: 'productId' });
+PriceComparisons.belongsTo(Product, { foreignKey: 'productId' });
 
 // 관계 설정: 판매처와 가격 비교 (1:N)
-SellerSite.hasMany(PriceComparison, { foreignKey: 'sellerId' });
-PriceComparison.belongsTo(SellerSite, { foreignKey: 'sellerId' });
+SellerSite.hasMany(PriceComparisons, { foreignKey: 'sellerId' });
+PriceComparisons.belongsTo(SellerSite, { foreignKey: 'sellerId' });
 
-module.exports = PriceComparison;
+module.exports = PriceComparisons;

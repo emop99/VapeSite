@@ -1,14 +1,12 @@
-// Redirect from /products to the main page
-export async function getServerSideProps() {
-  return {
-    redirect: {
-      destination: '/',
-      permanent: false,
-    },
-  };
-}
+import ProductListPage from "../../components/ProductListPage";
 
-// This component won't be rendered since we're redirecting
-export default function ProductsPage() {
-  return null;
+// 제품 검색 결과 페이지
+export default function ProductsPage({initialProducts, initialPagination, searchTerm}) {
+  return (
+    <ProductListPage
+      category=""
+      title="제품 목록"
+      emptyMessage="검색된 제품이 없습니다."
+    />
+  );
 }

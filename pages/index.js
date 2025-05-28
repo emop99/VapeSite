@@ -1,43 +1,37 @@
-import {useState, useEffect} from 'react';
+import {useState} from 'react';
+import {useRouter} from 'next/router';
 
 // 메인 페이지 컴포넌트
 export default function Home() {
-  // 제품 데이터 상태
-  const [products, setProducts] = useState([]);
+  const router = useRouter();
 
   // 검색어 상태
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchKeyword, setSearchKeyword] = useState('');
 
   // 검색어 변경 핸들러
   const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
+    setSearchKeyword(e.target.value);
   };
 
   // 검색 제출 핸들러
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    // 검색어를 사용하여 제품 필터링 (이미 filteredProducts에서 처리됨)
-    console.log('검색어:', searchTerm);
+    console.log('검색어:', searchKeyword);
 
-    // 검색 결과로 스크롤
-    const productSection = document.querySelector('#product-section');
-    if (productSection) {
-      productSection.scrollIntoView({behavior: 'smooth'});
+    // 검색어가 있으면 products 페이지로 리다이렉트
+    if (searchKeyword.trim()) {
+      router.push({
+        pathname: '/products',
+        query: {search: searchKeyword}
+      });
     }
   };
-
-  // 검색어에 따른 필터링된 제품 목록
-  const filteredProducts = products.filter(product =>
-    searchTerm === '' ||
-    product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.detail_comment.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   return (
     <div className="container mx-auto px-4 py-8">
       {/* 히어로 섹션 - 검색 엔진 스타일 */}
       <section className="flex flex-col items-center justify-center min-h-[50vh] mb-8">
-        <h1 className="text-5xl md:text-6xl font-bold text-primary mb-8 font-fantasy">
+        <h1 className="text-5xl md:text-6xl font-bold text-primary mb-8 font-poppins">
           JuiceGoblin
         </h1>
 
@@ -46,7 +40,7 @@ export default function Home() {
           <form onSubmit={handleSearchSubmit} className="flex">
             <input
               type="text"
-              value={searchTerm}
+              value={searchKeyword}
               onChange={handleSearchChange}
               placeholder="브랜드, 제품명 등을 검색해보세요."
               className="w-full px-5 py-4 text-lg border border-gray-300 rounded-l-full focus:outline-none focus:ring-2 focus:ring-primary"

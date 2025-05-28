@@ -17,9 +17,29 @@ export default function Layout({ children, title = '쥬스고블린' }) {
     <div className="min-h-screen flex flex-col bg-background">
       <Head>
         <title>{title}</title>
-        <meta name="description" content="쥬스고블린에 오신 것을 환영합니다." />
+        <meta name="description" content="쥬스고블린에 오신 것을 환영합니다. 최고의 베이핑 제품을 만나보세요." />
+        <meta name="keywords" content="쥬스고블린, 베이핑, 전자담배, 입호흡, 폐호흡, 액상" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={`${process.env.NEXT_PUBLIC_SITE_URL}${router.asPath}`} />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content="쥬스고블린에 오신 것을 환영합니다. 최고의 베이핑 제품을 만나보세요." />
+        <meta property="og:image" content={`${process.env.NEXT_PUBLIC_SITE_URL}/image/juicegoblin_bi.png`} />
+
+        {/* Twitter */}
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content={`${process.env.NEXT_PUBLIC_SITE_URL}${router.asPath}`} />
+        <meta property="twitter:title" content={title} />
+        <meta property="twitter:description" content="쥬스고블린에 오신 것을 환영합니다. 최고의 베이핑 제품을 만나보세요." />
+        <meta property="twitter:image" content={`${process.env.NEXT_PUBLIC_SITE_URL}/image/juicegoblin_bi.png`} />
+
+        {/* Additional SEO tags */}
+        <meta name="robots" content="index, follow" />
+        <meta name="language" content="Korean" />
+        <meta name="author" content="쥬스고블린" />
       </Head>
 
       {/* 헤더 - 고블린 테마 적용 */}

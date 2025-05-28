@@ -2,8 +2,9 @@
 import Product from '../../models/Product';
 import ProductCategory from '../../models/ProductCategory';
 import Company from '../../models/Company';
-import PriceComparison from '../../models/PriceComparison';
+import PriceComparisons from '../../models/PriceComparisons';
 import SellerSite from '../../models/SellerSite';
+import {Op} from "sequelize";
 
 /**
  * 제품 API 핸들러
@@ -16,7 +17,7 @@ export default async function handler(req, res) {
     case 'GET':
       return getProducts(req, res);
     default:
-      return res.status(405).json({ error: '허용되지 않는 메소드' });
+      return res.status(405).json({error: '허용되지 않는 메소드'});
   }
 }
 
@@ -29,17 +30,15 @@ export default async function handler(req, res) {
  * - page: 페이지 번호 (기본값: 1)
  * - limit: 페이지당 항목 수 (기본값: 12)
  * - category: 카테고리로 필터링
+ * - search: 검색어 (제품명, 회사명, 판매사이트명 검색)
  */
 async function getProducts(req, res) {
   try {
-    const { 
-      brand, 
-      minPrice, 
-      maxPrice, 
-      sort, 
-      page = 1, 
+    const {
+      page = 1,
       limit = 12,
-      category 
+      category,
+      search
     } = req.query;
 
     // 페이지네이션 파라미터 처리
@@ -49,39 +48,76 @@ async function getProducts(req, res) {
 
     // 필터 조건 구성
     const where = {};
-    if (brand) where.brand = brand;
-    if (minPrice || maxPrice) {
-      where.price = {};
-      if (minPrice) where.price.$gte = parseInt(minPrice);
-      if (maxPrice) where.price.$lte = parseInt(maxPrice);
-    }
+
+    // 조건 처리
+    const {Op} = require('sequelize');
 
     // 카테고리 필터링
     const include = [
-      { 
-        model: ProductCategory,
-        ...(category ? { where: { name: category } } : {})
-      },
-      { model: Company },
       {
-        model: PriceComparison,
-        include: [{ model: SellerSite }],
-        order: [['price', 'ASC']], // 가격 오름차순 정렬
-        separate: true, // 별도의 쿼리로 실행하여 정렬이 적용되도록 함
+        model: ProductCategory,
+        attributes: ['id', 'name', 'createdAt', 'updatedAt'],
+        required: true
+      },
+      {
+        model: Company,
+        attributes: ['id', 'name', 'createdAt'],
+        required: true
+      },
+      {
+        model: PriceComparisons,
+        attributes: ['productId', 'sellerId', 'sellerUrl', 'price', 'createdAt', 'updatedAt'],
+        required: true
       }
     ];
 
+    // 기본 조건: PriceComparisons.price > 0
+    const priceCondition = {'$PriceComparisons.price$': {[Op.gt]: 0}};
+
+    // 필터링 조건 구성
+    if (category && search) {
+      // 카테고리와 검색어가 모두 있는 경우 (SQL 쿼리와 동일한 구조)
+      where[Op.and] = [
+        priceCondition,
+        {'$ProductCategory.name$': category},
+        {
+          [Op.or]: [
+            {'name': {[Op.like]: `%${search}%`}},
+            {'$Company.name$': {[Op.like]: `%${search}%`}}
+          ]
+        }
+      ];
+    } else if (category) {
+      // 카테고리만 있는 경우
+      where[Op.and] = [
+        priceCondition,
+        {'$ProductCategory.name$': category}
+      ];
+    } else if (search) {
+      // 검색어만 있는 경우
+      where[Op.and] = [
+        priceCondition,
+        {
+          [Op.or]: [
+            {'name': {[Op.like]: `%${search}%`}},
+            {'$Company.name$': {[Op.like]: `%${search}%`}}
+          ]
+        }
+      ];
+    } else {
+      // 필터가 없는 경우에도 가격 조건 적용
+      where[Op.and] = [priceCondition];
+    }
+
     // 정렬 조건 구성
     let order = [];
-    // if (sort === 'price_asc') order.push(['price', 'ASC']);
-    // else if (sort === 'price_desc') order.push(['price', 'DESC']);
-    // else if (sort === 'name') order.push(['name', 'ASC']);
-    // else order.push(['price', 'ASC']); // 기본 정렬: 가격 오름차순
 
     // 전체 제품 수 조회
     const count = await Product.count({
       where,
-      include: category ? [{ model: ProductCategory, where: { name: category } }] : []
+      include,
+      subQuery: false,
+      distinct: true,
     });
 
     // 제품 조회 (페이지네이션 적용)
@@ -90,7 +126,9 @@ async function getProducts(req, res) {
       order,
       include,
       limit: limitNum,
-      offset: offset
+      offset: offset,
+      subQuery: false,
+      group: ['Product.id']
     });
 
     return res.status(200).json({
@@ -104,6 +142,6 @@ async function getProducts(req, res) {
     });
   } catch (error) {
     console.error('제품 조회 오류:', error);
-    return res.status(500).json({ error: '제품 조회 중 오류가 발생했습니다.' });
+    return res.status(500).json({error: '제품 조회 중 오류가 발생했습니다.'});
   }
 }

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import Head from 'next/head';
 import { FaStar, FaStarHalfAlt, FaRegStar, FaArrowDown, FaArrowUp } from 'react-icons/fa';
 import Image from 'next/image';
 import {normalizeImageUrl} from '../../utils/helper';
@@ -92,8 +93,68 @@ export default function ProductDetail({ productData, error: serverError }) {
     );
   }
 
+  // 제품 설명 생성 (SEO용)
+  const productDescription = `${product.name} - ${product.brand}${product.nicotine ? ` (${product.nicotine}mg)` : ''} - 최저가 ${product.priceComparisons[0].price.toLocaleString()}원. ${reviews.length > 0 ? `평점 ${averageRating.toFixed(1)}/5 (${reviews.length}개의 리뷰)` : ''}`;
+
+  // 제품 이미지 URL (SEO용)
+  const productImageUrl = product.imageUrl ? normalizeImageUrl(product.imageUrl) : `${process.env.NEXT_PUBLIC_SITE_URL}/image/juicegoblin_bi.png`;
+
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* 제품 SEO 메타 태그 */}
+      <Head>
+        <title>{`${product.name} - ${product.brand} | 쥬스고블린`}</title>
+        <meta name="description" content={productDescription} />
+        <meta name="keywords" content={`${product.name}, ${product.brand}, 베이핑, 전자담배, ${product.nicotine ? product.nicotine + 'mg, ' : ''}쥬스고블린`} />
+
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="product" />
+        <meta property="og:title" content={`${product.name} - ${product.brand} | 쥬스고블린`} />
+        <meta property="og:description" content={productDescription} />
+        <meta property="og:image" content={productImageUrl} />
+        <meta property="product:price:amount" content={product.priceComparisons[0].price.toString()} />
+        <meta property="product:price:currency" content="KRW" />
+        <meta property="product:brand" content={product.brand} />
+
+        {/* Twitter */}
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:title" content={`${product.name} - ${product.brand} | 쥬스고블린`} />
+        <meta property="twitter:description" content={productDescription} />
+        <meta property="twitter:image" content={productImageUrl} />
+
+        {/* 구조화된 데이터 (JSON-LD) */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org/',
+              '@type': 'Product',
+              name: product.name,
+              image: productImageUrl,
+              description: productDescription,
+              brand: {
+                '@type': 'Brand',
+                name: product.brand,
+              },
+              offers: {
+                '@type': 'Offer',
+                url: `${process.env.NEXT_PUBLIC_SITE_URL}${router.asPath}`,
+                priceCurrency: 'KRW',
+                price: product.priceComparisons[0].price,
+                availability: 'https://schema.org/InStock',
+              },
+              ...(reviews.length > 0 && {
+                aggregateRating: {
+                  '@type': 'AggregateRating',
+                  ratingValue: averageRating.toFixed(1),
+                  reviewCount: reviews.length,
+                },
+              }),
+            })
+          }}
+        />
+      </Head>
+
       {/* 제품 상세 정보 */}
       <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
         <div className="md:flex">
