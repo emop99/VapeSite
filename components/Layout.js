@@ -20,6 +20,7 @@ export default function Layout({ children, title = '쥬스고블린' }) {
         <meta name="description" content="쥬스고블린에 오신 것을 환영합니다." />
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet" />
       </Head>
 
       {/* 헤더 - 고블린 테마 적용 */}

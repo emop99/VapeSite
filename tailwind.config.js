@@ -8,8 +8,9 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        'fantasy': ['Fantasy', 'fantasy', 'sans-serif'],
-        'cursive': ['Brush Script MT', 'cursive', 'sans-serif'],
+        'sans': ['Poppins', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        'fantasy': ['Poppins', 'Fantasy', 'fantasy', 'sans-serif'],
+        'cursive': ['Dancing Script', 'Brush Script MT', 'cursive', 'sans-serif'],
       },
       // 고블린 테마에 맞는 커스텀 색상 설정
       colors: {
