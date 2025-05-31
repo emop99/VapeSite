@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
-import { FiUsers, FiBox, FiShoppingBag } from 'react-icons/fi';
+import {FiUsers, FiBox, FiShoppingBag, FiUser} from 'react-icons/fi';
 
 // 대시보드 페이지
 export default function AdminDashboard () {
@@ -155,11 +155,7 @@ export default function AdminDashboard () {
                   {dashboardData.recentUsers.map((user) => (
                     <li key={user.id} className="p-4 hover:bg-gray-50">
                       <div className="flex items-center">
-                        <img
-                          className="h-10 w-10 rounded-full"
-                          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random`}
-                          alt={user.name}
-                        />
+                        <FiUser className="h-5 w-5 text-gray-600" />
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">{user.name}</div>
                           <div className="text-sm text-gray-500">{user.email}</div>
