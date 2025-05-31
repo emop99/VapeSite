@@ -76,6 +76,11 @@ function MyApp({ Component, pageProps }) {
           `,
         }}
       />
+      <Script
+        strategy="afterInteractive"
+        src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4259248617155600`}
+        crossorigin={`anonymous`}>
+      </Script>
       <SessionProvider session={pageProps.session}>
         <Layout>
           <Component {...pageProps} />
