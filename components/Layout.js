@@ -40,8 +40,6 @@ export default function Layout({ children, title = '쥬스고블린' }) {
         <meta name="robots" content="index, follow"/>
         <meta name="language" content="Korean"/>
         <meta name="author" content="쥬스고블린"/>
-
-        <meta name="google-adsense-account" content="ca-pub-4259248617155600"/>
       </Head>
 
       {/* 헤더 - 고블린 테마 적용 */}
