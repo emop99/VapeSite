@@ -105,7 +105,7 @@ export default function ProductDetail({ productData, error: serverError }) {
       <Head>
         <title>{`${product.name} - ${product.brand} | 쥬스고블린`}</title>
         <meta name="description" content={productDescription} />
-        <meta name="keywords" content={`${product.name}, ${product.brand}, 베이핑, 전자담배, ${product.nicotine ? product.nicotine + 'mg, ' : ''}쥬스고블린`} />
+        <meta name="keywords" content={`${product.name}, ${product.brand}, 쥬스고블린, 베이핑, 전자담배, 입호흡, 폐호흡, 액상, 액상최저가, 최저가, 최저가검색, 액상 추천, 액상추천, 전자담배 추천, 전자담배추천`} />
 
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="product" />
