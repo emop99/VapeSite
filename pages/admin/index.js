@@ -57,7 +57,7 @@ export default function AdminDashboard () {
   return (
     <>
       <Head>
-        <title>관리자 대시보드 - VapeSite</title>
+        <title>관리자 대시보드 - 쥬스고블린</title>
       </Head>
 
       {loading ? (
