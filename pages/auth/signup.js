@@ -8,8 +8,7 @@ export default function SignUp() {
     password: '',
     confirmPassword: '',
     nickName: '',
-    termsAgreed: false,
-    marketingAgreed: false
+    termsAgreed: false
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -81,8 +80,7 @@ export default function SignUp() {
           email: formData.email,
           password: formData.password,
           nickName: formData.nickName,
-          termsAgreed: formData.termsAgreed,
-          marketingAgreed: formData.marketingAgreed
+          termsAgreed: formData.termsAgreed
         }),
       });
 
@@ -353,25 +351,6 @@ export default function SignUp() {
                   이용약관 및 개인정보 수집에 동의합니다 <span className="text-red-500">*</span>
                 </label>
                 <p className="text-gray-500">서비스 이용을 위해 필수적으로 동의해야 합니다.</p>
-              </div>
-            </div>
-
-            <div className="flex items-start">
-              <div className="flex items-center h-5">
-                <input
-                  id="marketingAgreed"
-                  name="marketingAgreed"
-                  type="checkbox"
-                  checked={formData.marketingAgreed}
-                  onChange={handleChange}
-                  className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-                />
-              </div>
-              <div className="ml-3 text-sm">
-                <label htmlFor="marketingAgreed" className="font-medium text-gray-700">
-                  마케팅 정보 수신에 동의합니다 <span className="text-gray-500">(선택)</span>
-                </label>
-                <p className="text-gray-500">이벤트 및 할인 정보를 받아보실 수 있습니다.</p>
               </div>
             </div>
           </div>

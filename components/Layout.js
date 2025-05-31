@@ -74,7 +74,7 @@ export default function Layout({ children, title = '쥬스고블린' }) {
               </nav>
 
               {/* 인증 네비게이션 */}
-              {/*<AuthNav />*/}
+              <AuthNav />
             </div>
           </div>
         </div>

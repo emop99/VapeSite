@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { SessionProvider } from 'next-auth/react';
 import Script from 'next/script';
 import * as gtag from '../lib/gtag';
+import AdminLayout from "../components/admin/AdminLayout";
 
 // 앱 컴포넌트
 function MyApp({ Component, pageProps }) {
@@ -83,9 +84,13 @@ function MyApp({ Component, pageProps }) {
         crossorigin={`anonymous`}>
       </Script>
       <SessionProvider session={pageProps.session}>
-        <Layout>
-          <Component {...pageProps} />
-        </Layout>
+        {router.pathname.startsWith('/admin') ?
+          <AdminLayout>
+            <Component {...pageProps} />
+          </AdminLayout> :
+          <Layout>
+            <Component {...pageProps} />
+          </Layout>}
       </SessionProvider>
     </>
   );
