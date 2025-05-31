@@ -29,6 +29,7 @@ export default function Layout({ children, title = '쥬스고블린' }) {
           <meta property="og:title" content={title}/>
           <meta property="og:description" content="쥬스고블린에서 최저가 액상을 검색해보세요."/>
           <meta property="og:image" content={`${process.env.NEXT_PUBLIC_SITE_URL}/image/juicegoblin_bi.png`}/>
+          <meta property="og:site_name" content="쥬스고블린" />
 
           {/* Twitter */}
           <meta property="twitter:card" content="summary_large_image"/>

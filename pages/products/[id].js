@@ -112,6 +112,7 @@ export default function ProductDetail({ productData, error: serverError }) {
         <meta property="og:title" content={`${product.name} - ${product.Company.name} | 쥬스고블린`} />
         <meta property="og:description" content={productDescription} />
         <meta property="og:image" content={productImageUrl} />
+        <meta property="og:site_name" content="쥬스고블린" />
         <meta property="product:price:amount" content={product.priceComparisons[0].price.toString()} />
         <meta property="product:price:currency" content="KRW" />
         <meta property="product:brand" content={product.Company.name} />
