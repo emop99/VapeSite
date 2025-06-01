@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { SessionProvider } from 'next-auth/react';
 import * as gtag from '../lib/gtag';
 import AdminLayout from "../components/admin/AdminLayout";
+import Script from "next/script";
 
 // 앱 컴포넌트
 function MyApp({ Component, pageProps }) {
