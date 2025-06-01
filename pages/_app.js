@@ -34,32 +34,34 @@ function MyApp({ Component, pageProps }) {
   return (
     <>
       {/* Google Tag Manager - Global base code */}
-      {process.env.NODE_ENV !== 'development' ?
-        `<Script
-        strategy="afterInteractive"
-        src={\`https://www.googletagmanager.com/gtag/js?id=${gtag.GA_TRACKING_ID}\`}
-      />
-      <Script
-        id="gtag-init"
-        strategy="afterInteractive"
-        dangerouslySetInnerHTML={{
-          __html: \`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${gtag.GA_TRACKING_ID}', {
-              page_path: window.location.pathname,
-            });
-          \`
-        }}
-      />
-      <Script
-        id="google-ads"
-        strategy="afterInteractive"
-        src={\`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4259248617155600\`}
-        crossorigin={\`anonymous\`}>
-      </Script>` :
-        ``}
+      {process.env.NODE_ENV !== 'development' ? (
+        <>
+        <Script
+          strategy="afterInteractive"
+          src={`https://www.googletagmanager.com/gtag/js?id=${gtag.GA_TRACKING_ID}`}
+        />
+        <Script
+          id="gtag-init"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${gtag.GA_TRACKING_ID}', {
+                page_path: window.location.pathname,
+              });
+            `
+          }}
+        />
+        <Script
+          id="google-ads"
+          strategy="afterInteractive"
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4259248617155600`}
+            crossOrigin="anonymous"
+          />
+        </>
+      ) : null}
       <SessionProvider session={pageProps.session}>
         {router.pathname.startsWith('/admin') ?
           <AdminLayout>
