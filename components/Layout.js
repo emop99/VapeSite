@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import AuthNav from './AuthNav';
 
 // 레이아웃 컴포넌트
-export default function Layout({ children, title = '쥬스고블린' }) {
+export default function Layout({ children, title = '쥬스고블린 | 전자담배 액상 최저가 비교 가격 변동' }) {
   const router = useRouter();
 
   // 현재 경로에 따라 네비게이션 링크 활성화 여부 결정
@@ -18,7 +18,7 @@ export default function Layout({ children, title = '쥬스고블린' }) {
       {!router.pathname.startsWith('/products/') ? (
         <Head>
           <title>{title}</title>
-          <meta name="description" content="쥬스고블린에 오신 것을 환영합니다. 최고의 베이핑 제품을 만나보세요."/>
+          <meta name="description" content="전자담배 액상 최저가 비교 가격 변동 확인 사이트"/>
           <meta name="keywords" content="쥬스고블린, 베이핑, 전자담배, 입호흡, 폐호흡, 액상, 액상최저가, 최저가, 최저가검색, 액상 추천, 액상추천, 전자담배 추천, 전자담배추천, 가격비교, 액상가격비교, 액상 가격비교, 최저가 찾기, 최저가찾기"/>
           <link rel="icon" href="/favicon.ico" sizes="any"/>
           <meta name="viewport" content="width=device-width, initial-scale=1.0"/>

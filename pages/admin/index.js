@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import {useState, useEffect} from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
 import {FiUsers, FiBox, FiShoppingBag, FiUser} from 'react-icons/fi';
 
 // 대시보드 페이지
-export default function AdminDashboard () {
+export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState({
     recentUsers: [],
@@ -45,13 +45,7 @@ export default function AdminDashboard () {
   // 날짜 포맷 함수
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    return date.toLocaleDateString();
   };
 
   return (
@@ -75,7 +69,7 @@ export default function AdminDashboard () {
                   <p className="text-2xl font-semibold mt-2">{dashboardData.stats.totalProducts.toLocaleString()}</p>
                 </div>
                 <div className="p-3 bg-blue-50 rounded-full">
-                  <FiBox className="w-6 h-6 text-blue-500" />
+                  <FiBox className="w-6 h-6 text-blue-500"/>
                 </div>
               </div>
             </div>
@@ -88,7 +82,7 @@ export default function AdminDashboard () {
                   <p className="text-2xl font-semibold mt-2">{dashboardData.stats.totalCompanies.toLocaleString()}</p>
                 </div>
                 <div className="p-3 bg-green-50 rounded-full">
-                  <FiShoppingBag className="w-6 h-6 text-green-500" />
+                  <FiShoppingBag className="w-6 h-6 text-green-500"/>
                 </div>
               </div>
             </div>
@@ -101,7 +95,7 @@ export default function AdminDashboard () {
                   <p className="text-2xl font-semibold mt-2">{dashboardData.stats.totalUsers.toLocaleString()}</p>
                 </div>
                 <div className="p-3 bg-purple-50 rounded-full">
-                  <FiUsers className="w-6 h-6 text-purple-500" />
+                  <FiUsers className="w-6 h-6 text-purple-500"/>
                 </div>
               </div>
             </div>
@@ -120,7 +114,7 @@ export default function AdminDashboard () {
                     <li key={product.id} className="p-4 hover:bg-gray-50">
                       <div className="flex items-center">
                         <div className="h-10 w-10 bg-gray-200 rounded flex items-center justify-center">
-                          <FiBox className="h-6 w-6 text-gray-500" />
+                          <FiBox className="h-6 w-6 text-gray-500"/>
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">{product.name}</div>
@@ -155,7 +149,7 @@ export default function AdminDashboard () {
                   {dashboardData.recentUsers.map((user) => (
                     <li key={user.id} className="p-4 hover:bg-gray-50">
                       <div className="flex items-center">
-                        <FiUser className="h-5 w-5 text-gray-600" />
+                        <FiUser className="h-5 w-5 text-gray-600"/>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">{user.name}</div>
                           <div className="text-sm text-gray-500">{user.email}</div>
