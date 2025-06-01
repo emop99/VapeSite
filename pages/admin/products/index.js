@@ -58,6 +58,14 @@ export default function ProductsManagement() {
           setProducts(result.data.products);
           setPagination(result.data.pagination);
           setFilters(result.data.filters);
+
+          // 회사 ID에 해당하는 이름을 찾아서 검색어에 설정
+          if (company && result.data.filters.companies?.length > 0) {
+            const companyObj = result.data.filters.companies.find(c => c.id === parseInt(company));
+            if (companyObj) {
+              setCompanySearchTerm(companyObj.name);
+            }
+          }
         }
       } catch (error) {
         console.error('상품 데이터 로딩 오류:', error);

@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { FiSave, FiUpload, FiX, FiAlertTriangle } from 'react-icons/fi';
 import Image from "next/image";
+import {normalizeImageUrl} from "../../utils/helper";
 
 /**
  * 상품 폼 컴포넌트
@@ -264,7 +265,7 @@ const ProductForm = ({
 
                 {/* 이미지 미리보기 */}
                 <Image
-                  src={formData.imageUrl.startsWith('/') || formData.imageUrl.startsWith('http') ? formData.imageUrl : `/${formData.imageUrl}`}
+                  src={normalizeImageUrl(formData.imageUrl)}
                   width={150}
                   height={150}
                   alt="상품 이미지 미리보기"

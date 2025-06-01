@@ -125,7 +125,7 @@ export default function EditProduct() {
 
   // 취소 핸들러
   const handleCancel = () => {
-    router.push(getBackToListUrl());
+    history.back();
   };
 
   return (
@@ -138,13 +138,6 @@ export default function EditProduct() {
         {/* 상단 제목 */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">상품 수정</h1>
-          <Link
-            href={getBackToListUrl()}
-            className="flex items-center text-gray-600 hover:text-blue-600 transition-colors"
-          >
-            <FiArrowLeft className="mr-1"/>
-            목록으로 돌아가기
-          </Link>
         </div>
 
         {loading ? (
