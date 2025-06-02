@@ -1,4 +1,4 @@
-import { withAdminAuth } from '../../../utils/adminAuth';
+import {withAdminAuth} from '../../../utils/adminAuth';
 import formidable from 'formidable';
 import fs from 'fs';
 import path from 'path';
@@ -37,7 +37,7 @@ async function uploadImageHandler(req, res) {
     const options = {
       uploadDir,
       keepExtensions: true,
-      maxFileSize: 5 * 1024 * 1024, // 5MB 제한
+      maxFileSize: 2 * 1024 * 1024, // 2MB 제한
       filter: (part) => {
         // 이미지 파일만 허용 (MIME 타입 체크)
         return part.mimetype?.includes('image/') || false;
@@ -57,7 +57,7 @@ async function uploadImageHandler(req, res) {
     }
 
     // 업로드된 파일 경로 생성 - '/uploads/product/' 경로로 수정
-    const relativePath = `/uploads/product/${path.basename(uploadedFile[0].filepath)}`;
+    const relativePath = `${process.env.NEXT_PUBLIC_SITE_URL}/uploads/product/${path.basename(uploadedFile[0].filepath)}`;
 
     // 성공 응답 반환
     return res.status(200).json({
