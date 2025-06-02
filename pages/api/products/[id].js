@@ -35,8 +35,12 @@ export default async function handler(req, res) {
 async function getProduct(req, res, id) {
   try {
     // 제품 조회 (제조사 정보 포함)
-    const product = await Product.findByPk(id, {
-      include: [{model: Company}]
+    const product = await Product.findOne({
+      where: {
+        id: id,
+        isShow: true
+      },
+      include: [{model: Company}],
     });
 
     if (!product) {

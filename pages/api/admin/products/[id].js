@@ -17,6 +17,8 @@ async function productDetailHandler(req, res) {
       return updateProduct(req, res, id);
     case 'DELETE':
       return deleteProduct(req, res, id);
+    case 'PATCH':
+      return updateVisibility(req, res, id);
     default:
       return res.status(405).json({success: false, message: '허용되지 않는 메소드입니다.'});
   }
@@ -67,6 +69,37 @@ async function updateProduct(req, res, id) {
 
   } catch (error) {
     console.error('상품 업데이트 오류:', error);
+    return res.status(500).json({success: false, message: '서버 오류가 발생했습니다.'});
+  }
+}
+
+// 상품 노출 상태 변경 (PATCH 메소드로 처리)
+async function updateVisibility(req, res, id) {
+  try {
+    const {isShow} = req.body;
+
+    if (isShow === undefined) {
+      return res.status(400).json({success: false, message: '노출 상태가 제공되지 않았습니다.'});
+    }
+
+    // 상품 존재 여부 확인
+    const product = await Product.findByPk(id);
+
+    if (!product) {
+      return res.status(404).json({success: false, message: '상품을 찾을 수 없습니다.'});
+    }
+
+    // 노출 상태만 업데이트
+    await product.update({isShow});
+
+    return res.status(200).json({
+      success: true,
+      message: `상품이 ${isShow ? '노출' : '숨김'} 상태로 변경되었습니다.`,
+      data: {id, isShow}
+    });
+
+  } catch (error) {
+    console.error('상품 노출 상태 변경 오류:', error);
     return res.status(500).json({success: false, message: '서버 오류가 발생했습니다.'});
   }
 }

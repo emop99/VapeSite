@@ -1,13 +1,13 @@
-import { useState } from 'react';
-import { useRouter } from 'next/router';
+import {useState} from 'react';
+import {useRouter} from 'next/router';
 import Link from 'next/link';
 import Head from 'next/head';
-import { FaStar, FaStarHalfAlt, FaRegStar, FaArrowDown, FaArrowUp } from 'react-icons/fa';
+import {FaArrowDown, FaArrowUp, FaRegStar, FaStar, FaStarHalfAlt} from 'react-icons/fa';
 import Image from 'next/image';
 import {normalizeImageUrl} from '../../utils/helper';
 
 // 제품 상세 페이지
-export default function ProductDetail({ productData, error: serverError }) {
+export default function ProductDetail({productData, error: serverError}) {
   // 별점 렌더링 헬퍼 함수
   const renderStarRating = (rating) => {
     const stars = [];
@@ -16,18 +16,18 @@ export default function ProductDetail({ productData, error: serverError }) {
 
     // 꽉 찬 별
     for (let i = 0; i < fullStars; i++) {
-      stars.push(<FaStar key={`star-${i}`} className="text-yellow-400" />);
+      stars.push(<FaStar key={`star-${i}`} className="text-yellow-400"/>);
     }
 
     // 반 별
     if (hasHalfStar) {
-      stars.push(<FaStarHalfAlt key="half-star" className="text-yellow-400" />);
+      stars.push(<FaStarHalfAlt key="half-star" className="text-yellow-400"/>);
     }
 
     // 빈 별
     const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
     for (let i = 0; i < emptyStars; i++) {
-      stars.push(<FaRegStar key={`empty-star-${i}`} className="text-yellow-400" />);
+      stars.push(<FaRegStar key={`empty-star-${i}`} className="text-yellow-400"/>);
     }
 
     return (
@@ -41,8 +41,6 @@ export default function ProductDetail({ productData, error: serverError }) {
 
   // 제품 상태
   const [product, setProduct] = useState(productData || null);
-  // 로딩 상태
-  const [loading, setLoading] = useState(!productData);
   // 에러 상태
   const [error, setError] = useState(serverError || null);
   // 가격 비교 상태
@@ -54,12 +52,18 @@ export default function ProductDetail({ productData, error: serverError }) {
   // 평균 평점
   const [averageRating, setAverageRating] = useState(productData?.averageRating || 0);
 
-  // 로딩 중 표시
-  if (loading) {
+  // 제품이 없을 때
+  if (!product) {
     return (
-      <div className="container mx-auto px-4 py-12">
-        <div className="flex justify-center items-center py-20">
-          <div className="animate-pulse text-primary text-lg">제품 정보를 불러오는 중...</div>
+      <div className="container mx-auto px-4 py-16">
+        <div className="max-w-lg mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+          <div className="p-8 text-center">
+            <h2 className="text-2xl font-bold text-gray-700 mb-3">제품을 찾을 수 없습니다</h2>
+            <p className="text-gray-500 mb-9">요청하신 제품이 존재하지 않거나 삭제되었을 수 있습니다.</p>
+            <Link href="/" className="inline-block bg-primary hover:bg-primary-dark text-white font-medium py-2 px-6 rounded-md transition-colors duration-300">
+              메인 페이지로 돌아가기
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -79,20 +83,6 @@ export default function ProductDetail({ productData, error: serverError }) {
     );
   }
 
-  // 제품이 없을 때
-  if (!product) {
-    return (
-      <div className="container mx-auto px-4 py-12">
-        <div className="bg-gray-50 border border-gray-200 rounded-md p-8 text-center">
-          <p className="text-gray-500 text-lg">제품을 찾을 수 없습니다.</p>
-          <Link href="/" className="text-primary mt-4 inline-block">
-            메인 페이지로 돌아가기
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
   // 제품 설명 생성 (SEO용)
   const productDescription = `${product.name} - ${product.Company.name} - 최저가 ${product.priceComparisons[0].price.toLocaleString()}원. ${reviews.length > 0 ? `평점 ${averageRating.toFixed(1)}/5 (${reviews.length}개의 리뷰)` : ''}`;
 
@@ -104,24 +94,25 @@ export default function ProductDetail({ productData, error: serverError }) {
       {/* 제품 SEO 메타 태그 */}
       <Head>
         <title>{`${product.name} - ${product.Company.name} | 쥬스고블린 전자담배 액상 최저가 비교 가격 변동`}</title>
-        <meta name="description" content={productDescription} />
-        <meta name="keywords" content={`${product.name}, ${product.Company.name}, 쥬스고블린, 베이핑, 전자담배, 입호흡, 폐호흡, 액상, 액상최저가, 최저가, 최저가검색, 액상 추천, 액상추천, 전자담배 추천, 전자담배추천, 가격비교, 액상가격비교, 액상 가격비교, 최저가 찾기, 최저가찾기`} />
+        <meta name="description" content={productDescription}/>
+        <meta name="keywords"
+              content={`${product.name}, ${product.Company.name}, 쥬스고블린, 베이핑, 전자담배, 입호흡, 폐호흡, 액상, 액상최저가, 최저가, 최저가검색, 액상 추천, 액상추천, 전자담배 추천, 전자담배추천, 가격비교, 액상가격비교, 액상 가격비교, 최저가 찾기, 최저가찾기`}/>
 
         {/* Open Graph / Facebook */}
-        <meta property="og:type" content="product" />
-        <meta property="og:title" content={`${product.name} - ${product.Company.name} | 쥬스고블린`} />
-        <meta property="og:description" content={productDescription} />
-        <meta property="og:image" content={productImageUrl} />
-        <meta property="og:site_name" content="쥬스고블린" />
-        <meta property="product:price:amount" content={product.priceComparisons[0].price.toString()} />
-        <meta property="product:price:currency" content="KRW" />
-        <meta property="product:brand" content={product.Company.name} />
+        <meta property="og:type" content="product"/>
+        <meta property="og:title" content={`${product.name} - ${product.Company.name} | 쥬스고블린`}/>
+        <meta property="og:description" content={productDescription}/>
+        <meta property="og:image" content={productImageUrl}/>
+        <meta property="og:site_name" content="쥬스고블린"/>
+        <meta property="product:price:amount" content={product.priceComparisons[0].price.toString()}/>
+        <meta property="product:price:currency" content="KRW"/>
+        <meta property="product:brand" content={product.Company.name}/>
 
         {/* Twitter */}
-        <meta property="twitter:card" content="summary_large_image" />
-        <meta property="twitter:title" content={`${product.name} - ${product.Company.name} | 쥬스고블린`} />
-        <meta property="twitter:description" content={productDescription} />
-        <meta property="twitter:image" content={productImageUrl} />
+        <meta property="twitter:card" content="summary_large_image"/>
+        <meta property="twitter:title" content={`${product.name} - ${product.Company.name} | 쥬스고블린`}/>
+        <meta property="twitter:description" content={productDescription}/>
+        <meta property="twitter:image" content={productImageUrl}/>
 
         {/* 구조화된 데이터 (JSON-LD) */}
         <script
@@ -164,7 +155,7 @@ export default function ProductDetail({ productData, error: serverError }) {
             {product.imageUrl ? (
               <Image
                 src={normalizeImageUrl(product.imageUrl)}
-                alt={product.name} 
+                alt={product.name}
                 width={500}
                 height={500}
                 className="max-w-full max-h-96 object-contain"
@@ -220,33 +211,33 @@ export default function ProductDetail({ productData, error: serverError }) {
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">판매처</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">가격</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">최종 가격</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">링크</th>
-                </tr>
+              <tr>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">판매처</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">가격</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">최종 가격</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">링크</th>
+              </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {priceComparisons.map((comparison, index) => (
-                  <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{comparison.SellerSite.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{comparison.price.toLocaleString()}원</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-price">
-                      {comparison.price.toLocaleString()}원
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <a
-                        href={comparison.sellerUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:text-primary-dark"
-                      >
-                        구매하기
-                      </a>
-                    </td>
-                  </tr>
-                ))}
+              {priceComparisons.map((comparison, index) => (
+                <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{comparison.SellerSite.name}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{comparison.price.toLocaleString()}원</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-price">
+                    {comparison.price.toLocaleString()}원
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <a
+                      href={comparison.sellerUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:text-primary-dark"
+                    >
+                      구매하기
+                    </a>
+                  </td>
+                </tr>
+              ))}
               </tbody>
             </table>
           </div>
@@ -260,48 +251,48 @@ export default function ProductDetail({ productData, error: serverError }) {
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">날짜</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">이전 가격</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">새 가격</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">변동</th>
-                </tr>
+              <tr>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">날짜</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">이전 가격</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">새 가격</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">변동</th>
+              </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
               {priceHistory.filter(history => history.oldPrice > 0).map((history, index) => (
                 <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(history.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {history.oldPrice.toLocaleString()}원
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {history.newPrice.toLocaleString()}원
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <div className="flex items-center">
-                        {history.priceDifference < 0 ? (
-                          <>
-                            <FaArrowDown className="text-green-500 mr-1" />
-                            <span className="text-green-500 font-medium">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {new Date(history.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {history.oldPrice.toLocaleString()}원
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {history.newPrice.toLocaleString()}원
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <div className="flex items-center">
+                      {history.priceDifference < 0 ? (
+                        <>
+                          <FaArrowDown className="text-green-500 mr-1"/>
+                          <span className="text-green-500 font-medium">
                               {Math.abs(history.priceDifference).toLocaleString()}원 ({Math.abs(history.percentageChange).toFixed(1)}%)
                             </span>
-                          </>
-                        ) : history.priceDifference > 0 ? (
-                          <>
-                            <FaArrowUp className="text-red-500 mr-1" />
-                            <span className="text-red-500 font-medium">
+                        </>
+                      ) : history.priceDifference > 0 ? (
+                        <>
+                          <FaArrowUp className="text-red-500 mr-1"/>
+                          <span className="text-red-500 font-medium">
                               {history.priceDifference.toLocaleString()}원 ({history.percentageChange.toFixed(1)}%)
                             </span>
-                          </>
-                        ) : (
-                          <span className="text-gray-500">변동 없음</span>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                        </>
+                      ) : (
+                        <span className="text-gray-500">변동 없음</span>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
               </tbody>
             </table>
           </div>
@@ -418,7 +409,7 @@ export default function ProductDetail({ productData, error: serverError }) {
 
 // 서버 사이드에서 제품 데이터 가져오기
 export async function getServerSideProps(context) {
-  const { id } = context.params;
+  const {id} = context.params;
 
   try {
     // 서버에서 API 직접 호출

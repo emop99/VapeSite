@@ -35,6 +35,12 @@ const Product = sequelize.define('Product', {
     type: DataTypes.STRING(100),
     allowNull: false,
   },
+  // 상품 노출 여부
+  isShow: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true, // 기본값은 true로 설정
+  },
   // 이미지 URL
   imageUrl: {
     type: DataTypes.STRING(255),

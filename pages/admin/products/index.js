@@ -1,8 +1,8 @@
-import {useState, useEffect, useCallback} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
 import {useRouter} from 'next/router';
-import {FiEdit, FiTrash2, FiPlus, FiSearch, FiFilter} from 'react-icons/fi';
+import {FiEdit, FiEye, FiEyeOff, FiFilter, FiPlus, FiSearch, FiTrash2} from 'react-icons/fi';
 import AdminPagination from '../../../components/admin/AdminPagination';
 
 // 상품 관리 페이지
@@ -25,6 +25,7 @@ export default function ProductsManagement() {
   const [selectedCompany, setSelectedCompany] = useState('');
   const [companySearchTerm, setCompanySearchTerm] = useState('');
   const [hasImage, setHasImage] = useState(''); // 이미지 유무 필터링 ('yes', 'no', '')
+  const [updatingVisibility, setUpdatingVisibility] = useState(null); // 노출 상태 업데이트 중인 상품 ID
 
   // 상품 데이터 불러오기
   const fetchProducts = useCallback(
@@ -125,13 +126,6 @@ export default function ProductsManagement() {
     updateUrlWithFilters(1, searchTerm, newCategory, selectedCompany, hasImage);
   }
 
-  // 제조사 변경 처리
-  const handleCompanyChange = (e) => {
-    const newCompany = e.target.value;
-    setSelectedCompany(newCompany);
-    updateUrlWithFilters(1, searchTerm, selectedCategory, newCompany, hasImage);
-  }
-
   // 제조사 검색어 변경 처리
   const handleCompanySearchChange = (e) => {
     setCompanySearchTerm(e.target.value);
@@ -191,6 +185,39 @@ export default function ProductsManagement() {
         console.error('상품 삭제 오류:', error);
         alert('상품 삭제 중 오류가 발생했습니다.');
       }
+    }
+  };
+
+  // 노출 상태 토글
+  const handleToggleVisibility = async (id, currentVisibility) => {
+    try {
+      setUpdatingVisibility(id);
+
+      const response = await fetch(`/api/admin/products/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({isShow: !currentVisibility}),
+      });
+
+      if (!response.ok) {
+        throw new Error('상품 노출 상태 변경에 실패했습니다');
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        // 성공 시 상품 목록에서 해당 상품의 isShow 상태만 갱신
+        setProducts(products.map(product =>
+          product.id === id ? {...product, isShow: !currentVisibility} : product
+        ));
+      }
+    } catch (error) {
+      console.error('상품 노출 상태 변경 오류:', error);
+      alert('상품 노출 상태 변경 중 오류가 발생했습니다.');
+    } finally {
+      setUpdatingVisibility(null);
     }
   };
 
@@ -331,6 +358,7 @@ export default function ProductsManagement() {
                   <th className="py-3 px-4 text-left">카테고리</th>
                   <th className="py-3 px-4 text-left">제조사</th>
                   <th className="py-3 px-4 text-left">등록일</th>
+                  <th className="py-3 px-4 text-center">노출</th>
                   <th className="py-3 px-4 text-center">관리</th>
                 </tr>
                 </thead>
@@ -344,6 +372,26 @@ export default function ProductsManagement() {
                       <td className="py-3 px-4">{product.Company?.name || '-'}</td>
                       <td className="py-3 px-4">
                         {new Date(product.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        <button
+                          onClick={() => handleToggleVisibility(product.id, product.isShow)}
+                          disabled={updatingVisibility === product.id}
+                          className={`p-2 rounded-full ${
+                            product.isShow
+                              ? 'bg-green-100 text-green-600 hover:bg-green-200'
+                              : 'bg-red-100 text-red-600 hover:bg-red-200'
+                          } transition-colors`}
+                          title={product.isShow ? '클릭하여 숨김 처리' : '클릭하여 공개 처리'}
+                        >
+                          {updatingVisibility === product.id ? (
+                            <div className="w-5 h-5 border-t-2 border-current rounded-full animate-spin"></div>
+                          ) : product.isShow ? (
+                            <FiEye size={18}/>
+                          ) : (
+                            <FiEyeOff size={18}/>
+                          )}
+                        </button>
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex justify-center gap-2">
@@ -367,7 +415,7 @@ export default function ProductsManagement() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="6" className="py-10 px-4 text-center text-gray-500">
+                    <td colSpan="7" className="py-10 px-4 text-center text-gray-500">
                       상품이 없습니다. 새 상품을 추가해주세요.
                     </td>
                   </tr>

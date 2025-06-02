@@ -22,12 +22,13 @@ create table vapesite.vape_products
 (
     id                int auto_increment
         primary key,
-    companyId         int                                  not null,
-    productCategoryId int                                  not null,
-    name              varchar(100)                         not null comment '상품명',
-    imageUrl          varchar(255)                         null,
-    createdAt         datetime default current_timestamp() not null,
-    updatedAt         datetime default current_timestamp() null on update current_timestamp(),
+    companyId         int                                    not null,
+    productCategoryId int                                    not null,
+    name              varchar(100)                           not null comment '상품명',
+    isShow            tinyint(1) default 1                   not null comment '상품 노출 여부',
+    imageUrl          varchar(255)                           null,
+    createdAt         datetime   default current_timestamp() not null,
+    updatedAt         datetime   default current_timestamp() null on update current_timestamp(),
     constraint vape_products_unique_company_name_category
         unique (companyId, name, productCategoryId),
     constraint vape_products_vape_company_id_fk

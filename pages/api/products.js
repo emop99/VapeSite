@@ -3,7 +3,6 @@ import Product from '../../models/Product';
 import ProductCategory from '../../models/ProductCategory';
 import Company from '../../models/Company';
 import PriceComparisons from '../../models/PriceComparisons';
-import SellerSite from '../../models/SellerSite';
 import {Op} from "sequelize";
 
 /**
@@ -73,11 +72,14 @@ async function getProducts(req, res) {
 
     // 기본 조건: PriceComparisons.price > 0
     const priceCondition = {'$PriceComparisons.price$': {[Op.gt]: 0}};
+    // 기본 조건: 제품이 노출되는 경우
+    const isShowCondition = {isShow: true};
 
     // 필터링 조건 구성
     if (category && search) {
       // 카테고리와 검색어가 모두 있는 경우 (SQL 쿼리와 동일한 구조)
       where[Op.and] = [
+        isShowCondition,
         priceCondition,
         {'$ProductCategory.name$': category},
         {
@@ -90,12 +92,14 @@ async function getProducts(req, res) {
     } else if (category) {
       // 카테고리만 있는 경우
       where[Op.and] = [
+        isShowCondition,
         priceCondition,
         {'$ProductCategory.name$': category}
       ];
     } else if (search) {
       // 검색어만 있는 경우
       where[Op.and] = [
+        isShowCondition,
         priceCondition,
         {
           [Op.or]: [
@@ -105,8 +109,8 @@ async function getProducts(req, res) {
         }
       ];
     } else {
-      // 필터가 없는 경우에도 가격 조건 적용
-      where[Op.and] = [priceCondition];
+      // 필터가 없는 경우에 기본 조건만 적용
+      where[Op.and] = [priceCondition, priceCondition];
     }
 
     // 정렬 조건 구성
