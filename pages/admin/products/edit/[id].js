@@ -1,8 +1,6 @@
-import {useState, useEffect} from 'react';
+import {useEffect, useState} from 'react';
 import {useRouter} from 'next/router';
 import Head from 'next/head';
-import Link from 'next/link';
-import {FiArrowLeft} from 'react-icons/fi';
 import ProductForm from '../../../../components/admin/ProductForm';
 
 export default function EditProduct() {
@@ -22,6 +20,7 @@ export default function EditProduct() {
     companyId: '',
     imageUrl: '',
     stock: '',
+    isShow: true,
   });
 
   // 목록으로 돌아가는 URL 생성
@@ -54,16 +53,19 @@ export default function EditProduct() {
         const result = await response.json();
 
         if (result.success && result.data) {
-          // 폼 데이터 초기화
+          // 폼 데이터 초기화 - productCategoryId를 categoryId로 매핑
           setFormData({
             name: result.data.name || '',
             description: result.data.description || '',
             price: result.data.price ? String(result.data.price) : '',
-            categoryId: result.data.categoryId || '',
+            categoryId: result.data.productCategoryId || '',
             companyId: result.data.companyId || '',
             imageUrl: result.data.imageUrl || '',
             stock: result.data.stock ? String(result.data.stock) : '',
+            isShow: result.data.isShow !== undefined ? result.data.isShow : true,
           });
+
+          console.log('로드된 상품 데이터:', result.data);
         }
 
         // 카테고리와 제조사 정보 가져오기
@@ -73,6 +75,7 @@ export default function EditProduct() {
           if (filtersResult.success) {
             setCategories(filtersResult.data.filters.categories);
             setCompanies(filtersResult.data.filters.companies);
+            console.log('카테고리:', filtersResult.data.filters.categories);
           }
         }
       } catch (error) {
@@ -104,6 +107,7 @@ export default function EditProduct() {
           companyId: formData.companyId || null,
           imageUrl: formData.imageUrl,
           stock: formData.stock ? parseInt(formData.stock) : 0,
+          isShow: formData.isShow,
         }),
       });
 

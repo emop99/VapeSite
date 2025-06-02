@@ -17,7 +17,7 @@ async function productsHandler(req, res) {
 // 상품 목록 조회
 async function getProducts(req, res) {
   try {
-    const {page = 1, limit = 10, search = '', category = '', company = '', hasImage = ''} = req.query;
+    const {page = 1, limit = 10, search = '', category = '', company = '', hasImage = '', isShow = ''} = req.query;
     const offset = (page - 1) * limit;
 
     // 검색 조건 설정
@@ -56,6 +56,13 @@ async function getProducts(req, res) {
           { [Op.eq]: '' }  // 빈 문자열인 경우도 포함
         ]
       };
+    }
+
+    // 노출 여부 필터링
+    if (isShow === 'yes') {
+      whereClause.isShow = true;
+    } else if (isShow === 'no') {
+      whereClause.isShow = false;
     }
 
     // 상품 목록 조회

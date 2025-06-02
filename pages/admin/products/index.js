@@ -25,18 +25,20 @@ export default function ProductsManagement() {
   const [selectedCompany, setSelectedCompany] = useState('');
   const [companySearchTerm, setCompanySearchTerm] = useState('');
   const [hasImage, setHasImage] = useState(''); // 이미지 유무 필터링 ('yes', 'no', '')
+  const [isShow, setIsShow] = useState(''); // 노출 여부 필터링 ('yes', 'no', '')
   const [updatingVisibility, setUpdatingVisibility] = useState(null); // 노출 상태 업데이트 중인 상품 ID
+  const [pageSize, setPageSize] = useState(10); // 페이지당 상품 개수 (기본값 10)
 
   // 상품 데이터 불러오기
   const fetchProducts = useCallback(
-    async (page = 1, search = '', category = '', company = '', imageFilter = '') => {
+    async (page = 1, search = '', category = '', company = '', imageFilter = '', showFilter = '', limit = 10) => {
       try {
         setLoading(true);
 
         // 쿼리 파라미터 구성
         const queryParams = new URLSearchParams({
           page,
-          limit: pagination.limit,
+          limit,
           search,
           category,
           company
@@ -45,6 +47,11 @@ export default function ProductsManagement() {
         // 이미지 필터가 있는 경우 추가
         if (imageFilter) {
           queryParams.append('hasImage', imageFilter);
+        }
+
+        // 노출 여부 필터가 있는 경우 추가
+        if (showFilter) {
+          queryParams.append('isShow', showFilter);
         }
 
         const response = await fetch(`/api/admin/products?${queryParams.toString()}`);
@@ -74,17 +81,19 @@ export default function ProductsManagement() {
         setLoading(false);
       }
     },
-    [pagination.limit]
+    []
   );
 
   // URL 쿼리에서 초기 검색 조건 설정
   useEffect(() => {
     if (router.isReady) {
-      const { search = '', category = '', company = '', page = '1', hasImage = '' } = router.query;
+      const {search = '', category = '', company = '', page = '1', hasImage = '', isShow = '', limit = '10'} = router.query;
       setSearchTerm(search);
       setSelectedCategory(category);
       setSelectedCompany(company);
       setHasImage(hasImage);
+      setIsShow(isShow);
+      setPageSize(parseInt(limit));
 
       // 회사 ID에 해당하는 이름을 찾아서 검색어에 설정
       if (company && filters.companies?.length > 0) {
@@ -94,7 +103,7 @@ export default function ProductsManagement() {
         }
       }
 
-      fetchProducts(parseInt(page), search, category, company, hasImage);
+      fetchProducts(parseInt(page), search, category, company, hasImage, isShow, parseInt(limit));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.isReady, router.query, fetchProducts]);
@@ -105,13 +114,16 @@ export default function ProductsManagement() {
     search = searchTerm,
     category = selectedCategory,
     company = selectedCompany,
-    imageFilter = hasImage
+    imageFilter = hasImage,
+    showFilter = isShow,
+    limit = pageSize
   ) => {
-    const query = { page: page.toString() };
+    const query = {page: page.toString(), limit: limit.toString()};
     if (search) query.search = search;
     if (category) query.category = category;
     if (company) query.company = company;
     if (imageFilter) query.hasImage = imageFilter;
+    if (showFilter) query.isShow = showFilter;
 
     router.push({
       pathname: router.pathname,
@@ -123,7 +135,7 @@ export default function ProductsManagement() {
   const handleCategoryChange = (e) => {
     const newCategory = e.target.value;
     setSelectedCategory(newCategory);
-    updateUrlWithFilters(1, searchTerm, newCategory, selectedCompany, hasImage);
+    updateUrlWithFilters(1, searchTerm, newCategory, selectedCompany, hasImage, isShow);
   }
 
   // 제조사 검색어 변경 처리
@@ -141,11 +153,11 @@ export default function ProductsManagement() {
     // 일치하는 회사가 있으면 해당 ID를 선택
     if (selectedComp) {
       setSelectedCompany(selectedComp.id);
-      updateUrlWithFilters(1, searchTerm, selectedCategory, selectedComp.id, hasImage);
+      updateUrlWithFilters(1, searchTerm, selectedCategory, selectedComp.id, hasImage, isShow);
     } else {
       // 일치하는 회사가 없으면 선택 초기화
       setSelectedCompany('');
-      updateUrlWithFilters(1, searchTerm, selectedCategory, '', hasImage);
+      updateUrlWithFilters(1, searchTerm, selectedCategory, '', hasImage, isShow);
     }
   }
 
@@ -153,13 +165,27 @@ export default function ProductsManagement() {
   const handleImageFilterChange = (e) => {
     const imageFilter = e.target.value;
     setHasImage(imageFilter);
-    updateUrlWithFilters(1, searchTerm, selectedCategory, selectedCompany, imageFilter);
+    updateUrlWithFilters(1, searchTerm, selectedCategory, selectedCompany, imageFilter, isShow);
+  }
+
+  // 노출 여부 필터링 처리
+  const handleIsShowFilterChange = (e) => {
+    const showFilter = e.target.value;
+    setIsShow(showFilter);
+    updateUrlWithFilters(1, searchTerm, selectedCategory, selectedCompany, hasImage, showFilter);
+  }
+
+  // 페이지당 상품 개수 변경 처리
+  const handlePageSizeChange = (e) => {
+    const newSize = parseInt(e.target.value);
+    setPageSize(newSize);
+    updateUrlWithFilters(1, searchTerm, selectedCategory, selectedCompany, hasImage, isShow, newSize);
   }
 
   // 검색 처리
   const handleSearch = (e) => {
     e.preventDefault();
-    updateUrlWithFilters(1, searchTerm, selectedCategory, selectedCompany, hasImage);
+    updateUrlWithFilters(1, searchTerm, selectedCategory, selectedCompany, hasImage, isShow);
   };
 
   // 상품 삭제
@@ -179,7 +205,7 @@ export default function ProductsManagement() {
         if (result.success) {
           alert('상품이 성공적으로 삭제되었습니다.');
           // 현재 페이지의 쿼리 파라미터를 유지하며 데이터 다시 불러오기
-          fetchProducts(pagination.currentPage, searchTerm, selectedCategory, selectedCompany, hasImage);
+          fetchProducts(pagination.currentPage, searchTerm, selectedCategory, selectedCompany, hasImage, isShow, pageSize);
         }
       } catch (error) {
         console.error('상품 삭제 오류:', error);
@@ -224,7 +250,7 @@ export default function ProductsManagement() {
   // 페이지네이션 처리
   const handlePageChange = (page) => {
     if (page < 1 || page > pagination.totalPages) return;
-    updateUrlWithFilters(page, searchTerm, selectedCategory, selectedCompany, hasImage);
+    updateUrlWithFilters(page, searchTerm, selectedCategory, selectedCompany, hasImage, isShow);
   };
 
   // 링크 생성 - 현재 검색 필터 상태를 유지하는 링크 URL 생성
@@ -234,6 +260,8 @@ export default function ProductsManagement() {
     if (selectedCategory) query.category = selectedCategory;
     if (selectedCompany) query.company = selectedCompany;
     if (hasImage) query.hasImage = hasImage;
+    if (isShow) query.isShow = isShow;
+    if (pageSize !== 10) query.limit = pageSize;
     if (pagination.currentPage > 1) query.page = pagination.currentPage;
 
     // 쿼리 파라미터가 있는 경우 추가
@@ -280,7 +308,7 @@ export default function ProductsManagement() {
         </div>
 
         {/* 필터 옵션 */}
-        <div className="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">카테고리</label>
             <div className="relative">
@@ -340,6 +368,45 @@ export default function ProductsManagement() {
               </div>
             </div>
           </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">노출 상태</label>
+            <div className="relative">
+              <select
+                value={isShow}
+                onChange={handleIsShowFilterChange}
+                className="block w-full border border-gray-300 rounded-md py-2 pl-3 pr-10 text-base focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">모든 상품</option>
+                <option value="yes">노출 상품</option>
+                <option value="no">숨김 상품</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                <FiFilter className="h-5 w-5 text-gray-400"/>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">표시 개수</label>
+            <div className="relative">
+              <select
+                value={pageSize}
+                onChange={handlePageSizeChange}
+                className="block w-full border border-gray-300 rounded-md py-2 pl-3 pr-10 text-base focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="10">10개씩 보기</option>
+                <option value="30">30개씩 보기</option>
+                <option value="50">50개씩 보기</option>
+                <option value="100">100개씩 보기</option>
+                <option value="200">200개씩 보기</option>
+                <option value="500">500개씩 보기</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                <FiFilter className="h-5 w-5 text-gray-400"/>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* 상품 목록 테이블 */}
@@ -367,7 +434,11 @@ export default function ProductsManagement() {
                   products.map((product) => (
                     <tr key={product.id} className="hover:bg-gray-50">
                       <td className="py-3 px-4">{product.id}</td>
-                      <td className="py-3 px-4">{product.name}</td>
+                      <td className="py-3 px-4">
+                        <Link href="/products/[id]" as={`/products/${product.id}`} target="_blank">
+                          {product.name}
+                        </Link>
+                      </td>
                       <td className="py-3 px-4">{product.ProductCategory?.name || '-'}</td>
                       <td className="py-3 px-4">{product.Company?.name || '-'}</td>
                       <td className="py-3 px-4">
@@ -422,6 +493,11 @@ export default function ProductsManagement() {
                 )}
                 </tbody>
               </table>
+            </div>
+
+            {/* 페이지 및 표시 항목 정보 */}
+            <div className="mt-4 mb-2 text-sm text-gray-500 text-right">
+              총 {pagination.total}개 중 {(pagination.currentPage - 1) * pageSize + 1} ~ {Math.min(pagination.currentPage * pageSize, pagination.total)}개
             </div>
 
             {/* 페이지네이션 컴포넌트 */}
