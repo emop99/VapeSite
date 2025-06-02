@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import {useCallback, useState} from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
+import {useRouter} from 'next/router';
 import Pagination from './Pagination';
 import ProductCard from './ProductCard';
 
@@ -17,7 +17,7 @@ export default function ProductListPage({
 
   // 상태 관리
   const [products, setProducts] = useState(initialProducts);
-  const [loading, setLoading] = useState(!initialProducts.length);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   // 검색어 상태
@@ -89,6 +89,8 @@ export default function ProductListPage({
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     console.log('검색어:', inputSearchKeyword);
+
+    setSearchKeyword(inputSearchKeyword.trim());
 
     // URL 업데이트
     router.push({
