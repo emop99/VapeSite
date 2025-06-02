@@ -8,22 +8,25 @@ import ProductCard from './ProductCard';
 export default function ProductListPage({ 
   category, 
   title, 
-  emptyMessage 
+  emptyMessage,
+  initialProducts = [],
+  initialPagination = { page: 1, totalPages: 1 },
+  initialSearchKeyword = ''
 }) {
   const router = useRouter();
 
   // 상태 관리
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState(initialProducts);
+  const [loading, setLoading] = useState(!initialProducts.length);
   const [error, setError] = useState(null);
 
   // 검색어 상태
-  const [inputSearchKeyword, setInputSearchKeyword] = useState('');
-  const [searchKeyword, setSearchKeyword] = useState('');
+  const [inputSearchKeyword, setInputSearchKeyword] = useState(initialSearchKeyword);
+  const [searchKeyword, setSearchKeyword] = useState(initialSearchKeyword);
 
   // 페이지네이션 상태
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [page, setPage] = useState(initialPagination.page);
+  const [totalPages, setTotalPages] = useState(initialPagination.totalPages);
 
   // 검색어 변경 핸들러
   const handleSearchChange = (e) => {
@@ -96,23 +99,6 @@ export default function ProductListPage({
     // 검색어로 제품 가져오기
     fetchProducts(1, inputSearchKeyword);
   };
-
-  // 초기 데이터 로드 및 URL 파라미터 처리
-  useEffect(() => {
-    // URL에서 파라미터 읽기
-    const pageParam = router.query.page ? parseInt(router.query.page, 10) : 1;
-    const searchParam = router.query.search || '';
-
-    setInputSearchKeyword(router.query.search || '');
-    setSearchKeyword(router.query.search || '');
-
-    // 유효한 페이지 번호인지 확인
-    if (pageParam >= 1) {
-      fetchProducts(pageParam, searchParam);
-    } else {
-      fetchProducts(1, searchParam);
-    }
-  }, [fetchProducts, router.query.page, router.query.search, searchKeyword]);
 
   // 로딩 중 표시
   if (loading) {
