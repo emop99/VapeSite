@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { FiSave, FiUpload, FiX, FiAlertTriangle } from 'react-icons/fi';
+import {useRef, useState} from 'react';
+import {FiAlertTriangle, FiSave, FiUpload, FiX} from 'react-icons/fi';
 import Image from "next/image";
 import {normalizeImageUrl} from "../../utils/helper";
 
@@ -134,7 +134,7 @@ const ProductForm = ({
     e.preventDefault();
 
     // 필수 입력값 검증
-    if (!formData.name || !formData.categoryId) {
+    if (!formData.visibleName || !formData.categoryId) {
       alert('상품명과 카테고리는 필수 입력 항목입니다.');
       return;
     }
@@ -152,8 +152,25 @@ const ProductForm = ({
           </label>
           <input
             type="text"
-            name="name"
-            value={formData.name}
+            name="visibleName"
+            value={formData.visibleName}
+            onChange={handleChange}
+            className="block w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            required
+          />
+        </div>
+      </div>
+
+      {/* 그룹핑 상품명 */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            그룹핑 상품명 <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            name="productGroupingName"
+            value={formData.productGroupingName}
             onChange={handleChange}
             className="block w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             required

@@ -49,14 +49,12 @@ Product.hasMany(PriceComparisons, {
   constraints: true,
   foreignKeyConstraint: true,
   onDelete: 'CASCADE',
-  as: 'priceComparisons'
 });
 PriceComparisons.belongsTo(Product, {
   foreignKey: 'productId',
   constraints: true,
   foreignKeyConstraint: true,
   onDelete: 'CASCADE',
-  as: 'product'
 });
 
 // 관계 설정: 판매처와 가격 비교 (1:N)
@@ -65,14 +63,12 @@ SellerSite.hasMany(PriceComparisons, {
   constraints: true,
   foreignKeyConstraint: true,
   onDelete: 'CASCADE',
-  as: 'priceComparisons'
 });
 PriceComparisons.belongsTo(SellerSite, {
   foreignKey: 'sellerId',
   constraints: true,
   foreignKeyConstraint: true,
   onDelete: 'CASCADE',
-  as: 'seller'
 });
 
 module.exports = PriceComparisons;

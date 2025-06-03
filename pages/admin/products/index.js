@@ -436,7 +436,7 @@ export default function ProductsManagement() {
                       <td className="py-3 px-4">{product.id}</td>
                       <td className="py-3 px-4">
                         <Link href="/products/[id]" as={`/products/${product.id}`} target="_blank">
-                          {product.name}
+                          {product.visibleName}
                         </Link>
                       </td>
                       <td className="py-3 px-4">{product.ProductCategory?.name || '-'}</td>
@@ -512,4 +512,3 @@ export default function ProductsManagement() {
     </>
   );
 };
-

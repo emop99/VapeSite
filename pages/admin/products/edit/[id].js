@@ -13,9 +13,9 @@ export default function EditProduct() {
 
   // 폼 상태 관리
   const [formData, setFormData] = useState({
-    name: '',
+    visibleName: '',
+    productGroupingName: '',
     description: '',
-    price: '',
     categoryId: '',
     companyId: '',
     imageUrl: '',
@@ -55,9 +55,9 @@ export default function EditProduct() {
         if (result.success && result.data) {
           // 폼 데이터 초기화 - productCategoryId를 categoryId로 매핑
           setFormData({
-            name: result.data.name || '',
+            visibleName: result.data.visibleName || '',
+            productGroupingName: result.data.productGroupingName || '',
             description: result.data.description || '',
-            price: result.data.price ? String(result.data.price) : '',
             categoryId: result.data.productCategoryId || '',
             companyId: result.data.companyId || '',
             imageUrl: result.data.imageUrl || '',
@@ -100,9 +100,9 @@ export default function EditProduct() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: formData.name,
+          visibleName: formData.visibleName,
+          productGroupingName: formData.productGroupingName,
           description: formData.description,
-          price: formData.price ? parseInt(formData.price) : 0,
           categoryId: formData.categoryId,
           companyId: formData.companyId || null,
           imageUrl: formData.imageUrl,

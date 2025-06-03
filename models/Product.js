@@ -30,8 +30,13 @@ const Product = sequelize.define('Product', {
       key: 'id',
     },
   },
-  // 제품명
-  name: {
+  // 상품 그룹 처리 Key Name
+  productGroupingName: {
+    type: DataTypes.STRING(100),
+    allowNull: false,
+  },
+  // Front 노출 상품명
+  visibleName: {
     type: DataTypes.STRING(100),
     allowNull: false,
   },
@@ -51,12 +56,19 @@ const Product = sequelize.define('Product', {
   tableName: 'vape_products',
   // 타임스탬프 활성화 (createdAt, updatedAt)
   timestamps: true,
-  // 유니크 제약 조건
+  // 인덱스 설정
   indexes: [
     {
-      name: 'vape_products_unique_company_name_category',
-      unique: true,
-      fields: ['companyId', 'name', 'productCategoryId'],
+      name: 'vape_products_createdAt_index',
+      fields: ['createdAt'],
+    },
+    {
+      name: 'vape_products_productGroupingName_index',
+      fields: ['productGroupingName'],
+    },
+    {
+      name: 'vape_products_visibleName_index',
+      fields: ['visibleName'],
     },
   ],
 });

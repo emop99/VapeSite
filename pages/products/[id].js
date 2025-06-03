@@ -84,7 +84,7 @@ export default function ProductDetail({productData, error: serverError}) {
   }
 
   // 제품 설명 생성 (SEO용)
-  const productDescription = `${product.name} - ${product.Company.name} - 최저가 ${product.priceComparisons[0].price.toLocaleString()}원. ${reviews.length > 0 ? `평점 ${averageRating.toFixed(1)}/5 (${reviews.length}개의 리뷰)` : ''}`;
+  const productDescription = `${product.visibleName} - ${product.Company.name} - 최저가 ${product.priceComparisons[0].price.toLocaleString()}원. ${reviews.length > 0 ? `평점 ${averageRating.toFixed(1)}/5 (${reviews.length}개의 리뷰)` : ''}`;
 
   // 제품 이미지 URL (SEO용)
   const productImageUrl = product.imageUrl ? normalizeImageUrl(product.imageUrl) : `${process.env.NEXT_PUBLIC_SITE_URL}/image/juicegoblin_bi.png`;
@@ -93,14 +93,14 @@ export default function ProductDetail({productData, error: serverError}) {
     <div className="container mx-auto px-4 py-8">
       {/* 제품 SEO 메타 태그 */}
       <Head>
-        <title>{`${product.name} - ${product.Company.name} | 쥬스고블린 전자담배 액상 최저가 비교 가격 변동`}</title>
+        <title>{`${product.visibleName} - ${product.Company.name} | 쥬스고블린 전자담배 액상 최저가 비교 가격 변동`}</title>
         <meta name="description" content={productDescription}/>
         <meta name="keywords"
-              content={`${product.name}, ${product.Company.name}, 쥬스고블린, 베이핑, 전자담배, 입호흡, 폐호흡, 액상, 액상최저가, 최저가, 최저가검색, 액상 추천, 액상추천, 전자담배 추천, 전자담배추천, 가격비교, 액상가격비교, 액상 가격비교, 최저가 찾기, 최저가찾기`}/>
+              content={`${product.visibleName}, ${product.Company.name}, 쥬스고블린, 베이핑, 전자담배, 입호흡, 폐호흡, 액상, 액상최저가, 최저가, 최저가검색, 액상 추천, 액상추천, 전자담배 추천, 전자담배추천, 가격비교, 액상가격비교, 액상 가격비교, 최저가 찾기, 최저가찾기`}/>
 
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="product"/>
-        <meta property="og:title" content={`${product.name} - ${product.Company.name} | 쥬스고블린`}/>
+        <meta property="og:title" content={`${product.visibleName} - ${product.Company.name} | 쥬스고블린`}/>
         <meta property="og:description" content={productDescription}/>
         <meta property="og:image" content={productImageUrl}/>
         <meta property="og:site_name" content="쥬스고블린"/>
@@ -110,7 +110,7 @@ export default function ProductDetail({productData, error: serverError}) {
 
         {/* Twitter */}
         <meta property="twitter:card" content="summary_large_image"/>
-        <meta property="twitter:title" content={`${product.name} - ${product.Company.name} | 쥬스고블린`}/>
+        <meta property="twitter:title" content={`${product.visibleName} - ${product.Company.name} | 쥬스고블린`}/>
         <meta property="twitter:description" content={productDescription}/>
         <meta property="twitter:image" content={productImageUrl}/>
 
@@ -121,7 +121,7 @@ export default function ProductDetail({productData, error: serverError}) {
             __html: JSON.stringify({
               '@context': 'https://schema.org/',
               '@type': 'Product',
-              name: product.name,
+              name: product.visibleName,
               image: productImageUrl,
               description: productDescription,
               brand: {
@@ -155,7 +155,7 @@ export default function ProductDetail({productData, error: serverError}) {
             {product.imageUrl ? (
               <Image
                 src={normalizeImageUrl(product.imageUrl)}
-                alt={product.name}
+                alt={product.visibleName}
                 width={500}
                 height={500}
                 className="max-w-full max-h-96 object-contain"
@@ -169,7 +169,7 @@ export default function ProductDetail({productData, error: serverError}) {
 
           {/* 제품 정보 */}
           <div className="md:w-1/2 p-8">
-            <h1 className="text-3xl font-bold text-text mb-2">{product.name}</h1>
+            <h1 className="text-3xl font-bold text-text mb-2">{product.visibleName}</h1>
             <p className="text-lg text-gray-600 mb-2">{product.Company.name}</p>
 
             {/* 평균 평점 표시 */}

@@ -28,7 +28,7 @@ async function getProducts(req, res) {
 
     // 검색어가 있는 경우
     if (search) {
-      whereClause.name = {
+      whereClause.visibleName = {
         [Op.like]: `%${search}%`
       };
     }
@@ -117,10 +117,10 @@ async function createProduct(req, res) {
     const productData = req.body;
 
     // 필수 필드 검증
-    if (!productData.name || !productData.categoryId) {
+    if (!productData.visibleName || !productData.categoryId || !productData.productGroupingName) {
       return res.status(400).json({
         success: false,
-        message: '필수 정보가 누락되었습니다. 상품명과 카테고리는 필수 항목입니다.'
+        message: '필수 정보가 누락되었습니다. 상품명, 상품그룹명과 카테고리는 필수 항목입니다.'
       });
     }
 

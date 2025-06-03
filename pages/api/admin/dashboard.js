@@ -1,4 +1,4 @@
-import { withAdminAuth } from '../../../utils/adminAuth';
+import {withAdminAuth} from '../../../utils/adminAuth';
 import User from '../../../models/User';
 import Product from '../../../models/Product';
 import Company from '../../../models/Company';
@@ -27,7 +27,7 @@ async function dashboardHandler(req, res) {
     const recentProducts = await Product.findAll({
       order: [['createdAt', 'DESC']],
       limit: 5,
-      attributes: ['id', 'name', 'createdAt'], // 필요한 필드만 선택
+      attributes: ['id', 'visibleName', 'createdAt'], // 필요한 필드만 선택
     });
 
     // 전체 통계 (사용자 수, 제품 수, 제조사 수)
@@ -51,7 +51,7 @@ async function dashboardHandler(req, res) {
 
     dashboardData.recentProducts = recentProducts.map(product => ({
       id: product.id,
-      name: product.name,
+      visibleName: product.visibleName,
       createdAt: product.createdAt,
     }));
 

@@ -77,14 +77,12 @@ Product.hasMany(PriceHistory, {
   constraints: true,
   foreignKeyConstraint: true,
   onDelete: 'CASCADE',
-  as: 'priceHistories'
 });
 PriceHistory.belongsTo(Product, {
   foreignKey: 'productId',
   constraints: true,
   foreignKeyConstraint: true,
   onDelete: 'CASCADE',
-  as: 'product'
 });
 
 // 관계 설정: 판매처와 가격 이력 (1:N)
@@ -93,14 +91,12 @@ SellerSite.hasMany(PriceHistory, {
   constraints: true,
   foreignKeyConstraint: true,
   onDelete: 'CASCADE',
-  as: 'priceHistories'
 });
 PriceHistory.belongsTo(SellerSite, {
   foreignKey: 'sellerId',
   constraints: true,
   foreignKeyConstraint: true,
   onDelete: 'CASCADE',
-  as: 'seller'
 });
 
 module.exports = PriceHistory;

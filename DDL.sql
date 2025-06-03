@@ -20,23 +20,31 @@ create table vapesite.vape_product_category
 
 create table vapesite.vape_products
 (
-    id                int auto_increment
+    id                  int auto_increment
         primary key,
-    companyId         int                                    not null,
-    productCategoryId int                                    not null,
-    name              varchar(100)                           not null comment '상품명',
-    isShow            tinyint(1) default 1                   not null comment '상품 노출 여부',
-    imageUrl          varchar(255)                           null,
-    createdAt         datetime   default current_timestamp() not null,
-    updatedAt         datetime   default current_timestamp() null on update current_timestamp(),
-    constraint vape_products_unique_company_name_category
-        unique (companyId, name, productCategoryId),
+    companyId           int                                    not null,
+    productCategoryId   int                                    not null,
+    productGroupingName varchar(100)                           not null comment '상품 그룹 처리 Key Name',
+    visibleName         varchar(100)                           not null comment 'Front 노출 상품명',
+    isShow              tinyint(1) default 1                   not null comment '상품 노출 여부',
+    imageUrl            varchar(255)                           null,
+    createdAt           datetime   default current_timestamp() not null,
+    updatedAt           datetime   default current_timestamp() null on update current_timestamp(),
     constraint vape_products_vape_company_id_fk
         foreign key (companyId) references vapesite.vape_company (id),
     constraint vape_products_vape_product_category_id_fk
         foreign key (productCategoryId) references vapesite.vape_product_category (id)
 )
     comment '상품 정보 테이블';
+
+create index vape_products_createdAt_index
+    on vapesite.vape_products (createdAt);
+
+create index vape_products_productGroupingName_index
+    on vapesite.vape_products (productGroupingName);
+
+create index vape_products_visibleName_index
+    on vapesite.vape_products (visibleName);
 
 create table vapesite.vape_seller_site
 (

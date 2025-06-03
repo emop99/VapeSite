@@ -15,7 +15,7 @@ export default function ProductCard({product}) {
             {product.imageUrl ? (
               <Image
                 src={normalizeImageUrl(product.imageUrl)}
-                alt={product.name}
+                alt={product.visibleName}
                 width={300}
                 height={300}
                 className="max-h-full max-w-full object-contain"
@@ -25,7 +25,7 @@ export default function ProductCard({product}) {
             )}
           </div>
 
-          <h3 className="text-lg font-semibold mb-2 text-gray-800">{product.name}</h3>
+          <h3 className="text-lg font-semibold mb-2 text-gray-800">{product.visibleName}</h3>
 
           {product.Company && (
             <p className="text-sm text-gray-600 mb-2">{product.Company.name}</p>

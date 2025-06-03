@@ -1,7 +1,7 @@
-import {useState, useEffect} from 'react';
+import {useEffect, useState} from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
-import {FiUsers, FiBox, FiShoppingBag, FiUser} from 'react-icons/fi';
+import {FiBox, FiShoppingBag, FiUser, FiUsers} from 'react-icons/fi';
 
 // 대시보드 페이지
 export default function AdminDashboard() {
@@ -117,7 +117,7 @@ export default function AdminDashboard() {
                           <FiBox className="h-6 w-6 text-gray-500"/>
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{product.name}</div>
+                          <div className="text-sm font-medium text-gray-900">{product.visibleName}</div>
                           <div className="text-sm text-gray-500">{product.brand}</div>
                         </div>
                         <div className="ml-auto text-xs text-gray-500">

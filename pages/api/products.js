@@ -84,7 +84,7 @@ async function getProducts(req, res) {
         {'$ProductCategory.name$': category},
         {
           [Op.or]: [
-            {'name': {[Op.like]: `%${search}%`}},
+            {'visibleName': {[Op.like]: `%${search}%`}},
             {'$Company.name$': {[Op.like]: `%${search}%`}}
           ]
         }
@@ -103,7 +103,7 @@ async function getProducts(req, res) {
         priceCondition,
         {
           [Op.or]: [
-            {'name': {[Op.like]: `%${search}%`}},
+            {'visibleName': {[Op.like]: `%${search}%`}},
             {'$Company.name$': {[Op.like]: `%${search}%`}}
           ]
         }

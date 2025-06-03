@@ -1,8 +1,6 @@
-import {useState, useEffect} from 'react';
+import {useEffect, useState} from 'react';
 import {useRouter} from 'next/router';
 import Head from 'next/head';
-import Link from 'next/link';
-import {FiArrowLeft} from 'react-icons/fi';
 import ProductForm from '../../../components/admin/ProductForm';
 
 export default function AddProduct() {
@@ -16,8 +14,7 @@ export default function AddProduct() {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    price: '',
-    categoryId: '',
+    categoryIdn: '',
     companyId: '',
     imageUrl: '',
     stock: '',
@@ -66,9 +63,9 @@ export default function AddProduct() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: formData.name,
+          visibleName: formData.visibleName,
+          productGroupingName: formData.productGroupingName,
           description: formData.description,
-          price: formData.price ? parseInt(formData.price) : 0,
           categoryId: formData.categoryId,
           companyId: formData.companyId || null,
           imageUrl: formData.imageUrl,
