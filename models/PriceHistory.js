@@ -67,20 +67,40 @@ const PriceHistory = sequelize.define('PriceHistory', {
     {
       name: 'vape_price_history_productId_index',
       fields: ['productId'],
-    },
-    {
-      name: 'vape_price_history_vape_seller_site_id_fk',
-      fields: ['sellerId'],
-    },
+    }
   ],
 });
 
 // 관계 설정: 제품과 가격 이력 (1:N)
-Product.hasMany(PriceHistory, { foreignKey: 'productId' });
-PriceHistory.belongsTo(Product, { foreignKey: 'productId' });
+Product.hasMany(PriceHistory, {
+  foreignKey: 'productId',
+  constraints: true,
+  foreignKeyConstraint: true,
+  onDelete: 'CASCADE',
+  as: 'priceHistories'
+});
+PriceHistory.belongsTo(Product, {
+  foreignKey: 'productId',
+  constraints: true,
+  foreignKeyConstraint: true,
+  onDelete: 'CASCADE',
+  as: 'product'
+});
 
 // 관계 설정: 판매처와 가격 이력 (1:N)
-SellerSite.hasMany(PriceHistory, { foreignKey: 'sellerId' });
-PriceHistory.belongsTo(SellerSite, { foreignKey: 'sellerId' });
+SellerSite.hasMany(PriceHistory, {
+  foreignKey: 'sellerId',
+  constraints: true,
+  foreignKeyConstraint: true,
+  onDelete: 'CASCADE',
+  as: 'priceHistories'
+});
+PriceHistory.belongsTo(SellerSite, {
+  foreignKey: 'sellerId',
+  constraints: true,
+  foreignKeyConstraint: true,
+  onDelete: 'CASCADE',
+  as: 'seller'
+});
 
 module.exports = PriceHistory;

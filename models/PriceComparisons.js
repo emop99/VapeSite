@@ -6,30 +6,29 @@ const SellerSite = require('./SellerSite');
 
 // 가격 비교 모델 정의
 const PriceComparisons = sequelize.define('PriceComparisons', {
-  // 제품 ID (외래 키, 복합 기본 키의 일부)
+  // 판매처 URL (기본 키)
+  sellerUrl: {
+    type: DataTypes.STRING(500),
+    allowNull: false,
+    primaryKey: true,
+  },
+  // 제품 ID (외래 키)
   productId: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    primaryKey: true,
     references: {
       model: Product,
       key: 'id',
     },
   },
-  // 판매처 ID (외래 키, 복합 기본 키의 일부)
+  // 판매처 ID (외래 키)
   sellerId: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    primaryKey: true,
     references: {
       model: SellerSite,
       key: 'id',
     },
-  },
-  // 판매처 URL
-  sellerUrl: {
-    type: DataTypes.TEXT('tiny'),
-    allowNull: false,
   },
   // 가격
   price: {
@@ -39,16 +38,41 @@ const PriceComparisons = sequelize.define('PriceComparisons', {
 }, {
   // 테이블 이름 설정
   tableName: 'vape_price_comparisons',
-  // 타임스탬프 활성화 (createdAt, updatedAt)
-  timestamps: true,
+  // 타임스탬프 설정
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
 });
 
 // 관계 설정: 제품과 가격 비교 (1:N)
-Product.hasMany(PriceComparisons, { foreignKey: 'productId' });
-PriceComparisons.belongsTo(Product, { foreignKey: 'productId' });
+Product.hasMany(PriceComparisons, {
+  foreignKey: 'productId',
+  constraints: true,
+  foreignKeyConstraint: true,
+  onDelete: 'CASCADE',
+  as: 'priceComparisons'
+});
+PriceComparisons.belongsTo(Product, {
+  foreignKey: 'productId',
+  constraints: true,
+  foreignKeyConstraint: true,
+  onDelete: 'CASCADE',
+  as: 'product'
+});
 
 // 관계 설정: 판매처와 가격 비교 (1:N)
-SellerSite.hasMany(PriceComparisons, { foreignKey: 'sellerId' });
-PriceComparisons.belongsTo(SellerSite, { foreignKey: 'sellerId' });
+SellerSite.hasMany(PriceComparisons, {
+  foreignKey: 'sellerId',
+  constraints: true,
+  foreignKeyConstraint: true,
+  onDelete: 'CASCADE',
+  as: 'priceComparisons'
+});
+PriceComparisons.belongsTo(SellerSite, {
+  foreignKey: 'sellerId',
+  constraints: true,
+  foreignKeyConstraint: true,
+  onDelete: 'CASCADE',
+  as: 'seller'
+});
 
 module.exports = PriceComparisons;
