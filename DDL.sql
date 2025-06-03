@@ -69,23 +69,26 @@ create table vapesite.vape_price_comparisons
 
 create table vapesite.vape_price_history
 (
+    id        int auto_increment
+        primary key,
     productId        int                                  not null,
     sellerId         int                                  not null,
     newPrice         int                                  not null comment '변동된 가격',
     oldPrice         int                                  not null comment '이전 가격',
     priceDifference  int      default 0                   null comment '가격 차',
     percentageChange float    default 0                   null comment '백분율 변화 정보',
-    createdAt        datetime default current_timestamp() not null,
-    primary key (productId, sellerId, newPrice),
-    constraint vape_price_history_ibfk_1
-        foreign key (productId) references vapesite.vape_products (id),
-    constraint vape_price_history_vape_seller_site_id_fk
-        foreign key (sellerId) references vapesite.vape_seller_site (id)
+    createdAt datetime default current_timestamp() not null
 )
     comment '판매 사이트별 가격 변동 시 저장되는 테이블';
 
 create index vape_price_history_createdAt_index
     on vapesite.vape_price_history (createdAt);
+
+create index vape_price_history_productId_index
+    on vapesite.vape_price_history (productId);
+
+create index vape_price_history_vape_seller_site_id_fk
+    on vapesite.vape_price_history (sellerId);
 
 create table vapesite.vape_user
 (

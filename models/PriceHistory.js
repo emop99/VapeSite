@@ -6,31 +6,34 @@ const SellerSite = require('./SellerSite');
 
 // 가격 변동 이력 모델 정의
 const PriceHistory = sequelize.define('PriceHistory', {
-  // 제품 ID (외래 키, 복합 기본 키의 일부)
+  // 기본 키 ID (auto increment)
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  // 제품 ID (외래 키)
   productId: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    primaryKey: true,
     references: {
       model: Product,
       key: 'id',
     },
   },
-  // 판매처 ID (외래 키, 복합 기본 키의 일부)
+  // 판매처 ID (외래 키)
   sellerId: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    primaryKey: true,
     references: {
       model: SellerSite,
       key: 'id',
     },
   },
-  // 새 가격 (복합 기본 키의 일부)
+  // 새 가격
   newPrice: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    primaryKey: true,
   },
   // 이전 가격
   oldPrice: {
@@ -60,6 +63,14 @@ const PriceHistory = sequelize.define('PriceHistory', {
     {
       name: 'vape_price_history_createdAt_index',
       fields: ['createdAt'],
+    },
+    {
+      name: 'vape_price_history_productId_index',
+      fields: ['productId'],
+    },
+    {
+      name: 'vape_price_history_vape_seller_site_id_fk',
+      fields: ['sellerId'],
     },
   ],
 });
