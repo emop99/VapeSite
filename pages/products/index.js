@@ -19,17 +19,6 @@ export async function getServerSideProps(context) {
   const { page = 1, search = '' } = context.query;
 
   try {
-    // 검색어가 없는 경우 빈 결과 반환
-    if (!search) {
-      return {
-        props: {
-          products: [],
-          pagination: { page: parseInt(page), totalPages: 1 },
-          searchTerm: ''
-        }
-      };
-    }
-
     // 서버에서 API 직접 호출 (카테고리 없이 검색)
     const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/products?page=${page}&limit=12${search ? `&search=${search}` : ''}`;
     const response = await fetch(apiUrl);
