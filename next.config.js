@@ -32,6 +32,7 @@ const nextConfig = {
   env: {
     // 데이터베이스 연결 정보
     DATABASE_URL: envVars.DATABASE_URL || process.env.DATABASE_URL,
+    NEXT_PUBLIC_SITE_URL: envVars.NEXT_PUBLIC_SITE_URL || 'https://juicegoblin.com',
   },
 
   // 국제화 설정 (한국어 기본)
