@@ -55,6 +55,16 @@ const nextConfig = {
       }
     ],
   },
+
+  // 리디렉션 설정
+  async rewrites() {
+    return [
+      {
+        source: '/sitemap.xml',
+        destination: '/api/sitemap.xml',
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;
