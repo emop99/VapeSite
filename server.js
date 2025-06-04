@@ -4,7 +4,9 @@ const { parse } = require('url');
 const next = require('next');
 
 const dev = process.env.NODE_ENV !== 'production';
-const app = next({ dev });
+const hostname = process.env.HOSTNAME || '0.0.0.0';
+const port = process.env.PORT || 3000;
+const app = next({dev, hostname, port});
 const handle = app.getRequestHandler();
 
 app.prepare().then(() => {
@@ -13,9 +15,10 @@ app.prepare().then(() => {
     handle(req, res, parsedUrl);
   });
 
-  server.listen(process.env.PORT || 3000, (err) => {
+  server.listen(port, hostname, (err) => {
     if (err) throw err;
-    console.log(`> Ready on http://localhost:${process.env.PORT || 3000}`);
+    const displayHost = hostname === '0.0.0.0' ? 'localhost' : hostname;
+    console.log(`> Ready on http://${displayHost}:${port}`);
 
     // PM2에게 애플리케이션이 준비되었음을 알림
     if (process.send) {

@@ -27,7 +27,7 @@ export default function Layout({ children, title = '쥬스고블린 | 전자담�
           <meta property="og:type" content="website"/>
           <meta property="og:url" content={`${process.env.NEXT_PUBLIC_SITE_URL}${router.asPath}`}/>
           <meta property="og:title" content={title}/>
-          <meta property="og:description" content="쥬스고블린에서 최저가 액상을 검색해보세요."/>
+          <meta property="og:description" content="전자담배 액상 최저가 비교 가격 변동 확인 사이트"/>
           <meta property="og:image" content={`${process.env.NEXT_PUBLIC_SITE_URL}/image/juicegoblin_bi.png`}/>
           <meta property="og:site_name" content="쥬스고블린" />
 
@@ -35,7 +35,7 @@ export default function Layout({ children, title = '쥬스고블린 | 전자담�
           <meta property="twitter:card" content="summary_large_image"/>
           <meta property="twitter:url" content={`${process.env.NEXT_PUBLIC_SITE_URL}${router.asPath}`}/>
           <meta property="twitter:title" content={title}/>
-          <meta property="twitter:description" content="쥬스고블린에서 최저가 액상을 검색해보세요."/>
+          <meta property="twitter:description" content="전자담배 액상 최저가 비교 가격 변동 확인 사이트"/>
           <meta property="twitter:image" content={`${process.env.NEXT_PUBLIC_SITE_URL}/image/juicegoblin_bi.png`}/>
 
           {/* Additional SEO tags */}

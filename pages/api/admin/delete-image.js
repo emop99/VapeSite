@@ -1,4 +1,4 @@
-import { withAdminAuth } from '../../../utils/adminAuth';
+import {withAdminAuth} from '../../../utils/adminAuth';
 import fs from 'fs';
 import path from 'path';
 
@@ -16,12 +16,22 @@ async function deleteImageHandler(req, res) {
     }
 
     // URL 디코딩 및 경로 처리
-    const decodedPath = decodeURIComponent(imagePath);
+    let decodedPath = decodeURIComponent(imagePath);
 
     // 경로 조작 방지를 위한 기본 검증
     if (decodedPath.includes('..')) {
       return res.status(400).json({ success: false, message: '유효하지 않은 이미지 경로입니다.' });
     }
+
+    // 허용된 도메인 목록 확인
+    const allowedDomains = [process.env.NEXT_PUBLIC_SITE_URL, 'localhost']; // 허용된 도메인 목록
+    const url = new URL(decodedPath, process.env.NEXT_PUBLIC_SITE_URL); // 기본 도메인으로 URL 생성
+    if (!allowedDomains.includes(url.hostname)) {
+      return res.status(403).json({success: false, message: '허용되지 않은 도메인입니다.'});
+    }
+
+    // 경로에서 프로토콜 제거
+    decodedPath = decodedPath.replace(/^[a-zA-Z]+:\/\//, '').replace(/^[^/]+/, '');
 
     // /uploads/ 폴더 내 파일만 삭제 가능하도록 제한
     if (!decodedPath.startsWith('/uploads/')) {

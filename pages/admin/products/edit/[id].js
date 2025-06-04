@@ -1,7 +1,8 @@
 import {useEffect, useState} from 'react';
 import {useRouter} from 'next/router';
-import Head from 'next/head';
 import ProductForm from '../../../../components/admin/ProductForm';
+import PriceComparisonManager from '../../../../components/admin/PriceComparisonManager';
+import Head from "next/head";
 
 export default function EditProduct() {
   const router = useRouter();
@@ -161,6 +162,9 @@ export default function EditProduct() {
             onCancel={handleCancel}
           />
         )}
+
+        {/* 가격 비교 관리 컴포넌트 (로딩 중이 아닐 때만 표시) */}
+        {!loading && id && <PriceComparisonManager productId={id}/>}
       </div>
     </>
   );

@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import { getToken } from 'next-auth/jwt';
+import {NextResponse} from 'next/server';
+import {getToken} from 'next-auth/jwt';
 
 // 미들웨어 함수 정의
 export async function middleware(request) {
@@ -22,15 +22,15 @@ export async function middleware(request) {
 
   // 인증되지 않은 사용자라면 로그인 페이지로 리디렉션
   if (!token) {
-    const url = new URL('/auth/signin', request.url);
-    url.searchParams.set('callbackUrl', encodeURI(request.url));
+    const url = new URL('/auth/signin', request.nextUrl.href);
+    url.searchParams.set('callbackUrl', encodeURI(request.nextUrl.href));
     return NextResponse.redirect(url);
   }
 
   // 어드민 권한이 아니라면 (grade가 'ADMIN'이 아니라면) 메인 페이지로 리디렉션
   // grade 값은 실제 DB 구조에 따라 변경 필요
   if (token.grade !== 'ADMIN') {
-    return NextResponse.redirect(new URL('/', request.url));
+    return NextResponse.redirect(new URL('/', request.nextUrl.href));
   }
 
   // 어드민 권한이 확인되면 요청 허용

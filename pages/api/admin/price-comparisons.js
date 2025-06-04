@@ -1,0 +1,291 @@
+import {withAdminAuth} from '../../../utils/adminAuth';
+import PriceComparisons from '../../../models/PriceComparisons';
+import SellerSite from '../../../models/SellerSite';
+import Product from '../../../models/Product';
+
+async function priceComparisonsHandler(req, res) {
+  switch (req.method) {
+    case 'GET':
+      return getPriceComparisons(req, res);
+    case 'POST':
+      return createPriceComparison(req, res);
+    case 'PUT':
+      return updatePriceComparison(req, res);
+    case 'DELETE':
+      return deletePriceComparison(req, res);
+    default:
+      return res.status(405).json({
+        success: false,
+        message: '허용되지 않는 메소드입니다.'
+      });
+  }
+}
+
+// 가격 비교 목록 조회
+async function getPriceComparisons(req, res) {
+  try {
+    const {productId} = req.query;
+
+    if (!productId) {
+      return res.status(400).json({
+        success: false,
+        message: '상품 ID가 필요합니다.'
+      });
+    }
+
+    // 상품 존재 여부 확인
+    const product = await Product.findByPk(productId);
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: '존재하지 않는 상품입니다.'
+      });
+    }
+
+    const comparisons = await PriceComparisons.findAll({
+      where: {productId},
+      include: [
+        {
+          model: SellerSite,
+          attributes: ['id', 'name', 'siteUrl']
+        }
+      ],
+      order: [['price', 'ASC']]
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: comparisons
+    });
+  } catch (error) {
+    console.error('가격 비교 조회 오류:', error);
+    return res.status(500).json({
+      success: false,
+      message: '서버 오류가 발생했습니다.'
+    });
+  }
+}
+
+// 가격 비교 생성
+async function createPriceComparison(req, res) {
+  try {
+    const {productId, sellerSiteId, price, sellerUrl} = req.body;
+
+    // 필수 값 검증
+    if (!productId || !sellerSiteId || !sellerUrl || price === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: '상품 ID, 판매자 사이트 ID, URL, 가격은 필수 항목입니다.'
+      });
+    }
+
+    // 상품 존재 여부 확인
+    const product = await Product.findByPk(productId);
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: '존재하지 않는 상품입니다.'
+      });
+    }
+
+    // 판매자 사이트 존재 여부 확인
+    const sellerSite = await SellerSite.findByPk(sellerSiteId);
+    if (!sellerSite) {
+      return res.status(404).json({
+        success: false,
+        message: '존재하지 않는 판매자 사이트입니다.'
+      });
+    }
+
+    // 동일한 상품, 판매자 조합이 이미 존재하는지 확인
+    const existingComparison = await PriceComparisons.findOne({
+      where: {
+        productId,
+        sellerId: sellerSiteId
+      }
+    });
+
+    if (existingComparison) {
+      return res.status(409).json({
+        success: false,
+        message: '이미 동일한 판매자 사이트에 대한 가격 비교가 존재합니다.'
+      });
+    }
+
+    // 가격 비교 생성
+    const newComparison = await PriceComparisons.create({
+      productId,
+      sellerId: sellerSiteId,
+      price,
+      sellerUrl,
+    });
+
+    // 생성된 가격 비교 정보 조회
+    const comparison = await PriceComparisons.findByPk(newComparison.id, {
+      include: [
+        {
+          model: SellerSite,
+          attributes: ['id', 'name', 'sellerUrl']
+        }
+      ]
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: '가격 비교가 성공적으로 추가되었습니다.',
+      data: comparison
+    });
+  } catch (error) {
+    console.error('가격 비교 생성 오류:', error);
+
+    if (error.name === 'SequelizeValidationError') {
+      const validationErrors = error.errors.map(err => err.message).join(', ');
+      return res.status(400).json({
+        success: false,
+        message: `유효성 검사 오류: ${validationErrors}`
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: '서버 오류가 발생했습니다.'
+    });
+  }
+}
+
+// 가격 비교 수정
+async function updatePriceComparison(req, res) {
+  try {
+    const {sellerSiteId, price, sellerUrl, productId} = req.body;
+
+    // 필수 값 검증
+    if (!sellerSiteId || !sellerUrl || price === undefined || !productId) {
+      return res.status(400).json({
+        success: false,
+        message: '판매자 사이트 ID, URL, 가격, 상품 ID는 필수 항목입니다.'
+      });
+    }
+
+    // 상품 존재 여부 확인
+    const product = await Product.findByPk(productId);
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: '존재하지 않는 상품입니다.'
+      });
+    }
+
+    // 가격 비교 존재 여부 확인
+    const comparison = await PriceComparisons.findByPk(sellerUrl);
+    if (!comparison) {
+      return res.status(404).json({
+        success: false,
+        message: '가격 비교 정보를 찾을 수 없습니다.'
+      });
+    }
+
+    // 판매자 사이트 존재 여부 확인
+    const sellerSite = await SellerSite.findByPk(sellerSiteId);
+    if (!sellerSite) {
+      return res.status(404).json({
+        success: false,
+        message: '존재하지 않는 판매자 사이트입니다.'
+      });
+    }
+
+    // 동일한 판매자 사이트 ID로 변경하려는 경우, 다른 레코드와 중복되는지 확인
+    if (sellerSiteId !== comparison.sellerSiteId) {
+      const existingComparison = await PriceComparisons.findOne({
+        where: {
+          productId: comparison.productId,
+          sellerId: sellerSiteId
+        }
+      });
+
+      if (existingComparison && existingComparison.sellerUrl !== sellerUrl) {
+        return res.status(409).json({
+          success: false,
+          message: '이미 동일한 판매자 사이트에 대한 가격 비교가 존재합니다.'
+        });
+      }
+    }
+
+    // 가격 비교 수정
+    await comparison.update({
+      sellerId: sellerSiteId,
+      price,
+      sellerUrl,
+    });
+
+    // 수정된 가격 비교 정보 조회
+    const updatedComparison = await PriceComparisons.findByPk(sellerUrl, {
+      include: [
+        {
+          model: SellerSite,
+          attributes: ['id', 'name', 'siteUrl']
+        }
+      ]
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: '가격 비교가 성공적으로 수정되었습니다.',
+      data: updatedComparison
+    });
+  } catch (error) {
+    console.error('가격 비교 수정 오류:', error);
+
+    if (error.name === 'SequelizeValidationError') {
+      const validationErrors = error.errors.map(err => err.message).join(', ');
+      return res.status(400).json({
+        success: false,
+        message: `유효성 검사 오류: ${validationErrors}`
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: '서버 오류가 발생했습니다.'
+    });
+  }
+}
+
+// 가격 비교 삭제
+async function deletePriceComparison(req, res) {
+  try {
+    const {sellerUrl} = req.body;
+
+    // 필수 값 검증
+    if (!sellerUrl) {
+      return res.status(400).json({
+        success: false,
+        message: '판매자 사이트 URL은 필수 항목입니다.'
+      });
+    }
+
+    // 가격 비교 존재 여부 확인
+    const comparison = await PriceComparisons.findByPk(sellerUrl);
+    if (!comparison) {
+      return res.status(404).json({
+        success: false,
+        message: '가격 비교 정보를 찾을 수 없습니다.'
+      });
+    }
+
+    // 가격 비교 삭제
+    await comparison.destroy();
+
+    return res.status(200).json({
+      success: true,
+      message: '가격 비교가 성공적으로 삭제되었습니다.'
+    });
+  } catch (error) {
+    console.error('가격 비교 삭제 오류:', error);
+    return res.status(500).json({
+      success: false,
+      message: '서버 오류가 발생했습니다.'
+    });
+  }
+}
+
+export default withAdminAuth(priceComparisonsHandler);

@@ -81,10 +81,25 @@ const ProductForm = ({
 
   // 이미지 삭제 핸들러
   const handleRemoveImage = async () => {
+    // 내부 이미지 업로드 URL인 경우에만 삭제 처리
+    const isInternalImage = () => {
+      try {
+        // 절대 URL인 경우 (http://, https://)
+        if (formData.imageUrl.startsWith('http')) {
+          const url = new URL(formData.imageUrl);
+          return url.pathname.includes('/uploads/product/');
+        }
+        // 상대 경로인 경우
+        return formData.imageUrl.includes('/uploads/product/');
+      } catch (e) {
+        return formData.imageUrl.includes('/uploads/product/');
+      }
+    };
+
     if (!formData.imageUrl) return;
 
     // 내부 이미지 업로드 URL인 경우에만 삭제 처리
-    if (formData.imageUrl.startsWith('/uploads/product/')) {
+    if (isInternalImage()) {
       // 사용자에게 삭제 확인
       if (!confirm('이미지를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
         return;
