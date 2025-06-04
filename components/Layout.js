@@ -1,7 +1,7 @@
 import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/router';
+import {useRouter} from 'next/router';
 import AuthNav from './AuthNav';
 
 // 레이아웃 컴포넌트
@@ -94,7 +94,7 @@ export default function Layout({ children, title = '쥬스고블린 | 전자담�
             {/* 회사 정보 */}
             <div>
               <h3 className="text-xl font-bold mb-8 text-accent">쥬스고블린</h3>
-              <p className="mb-2 text-goblin-light">쥬스고블린 공식 사이트</p>
+              <p className="mb-2 text-goblin-light">전자담배 액상 최저가 비교 가격 변동 확인 사이트</p>
               <p className="text-sm text-goblin-light opacity-80">© 2025 쥬스고블린. All rights reserved.</p>
             </div>
 
