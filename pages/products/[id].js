@@ -413,7 +413,7 @@ export async function getServerSideProps(context) {
 
   try {
     // 서버에서 API 직접 호출
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/products/${id}`);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/${id}`);
 
     if (!response.ok) {
       if (response.status === 400) {
