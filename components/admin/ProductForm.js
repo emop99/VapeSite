@@ -1,5 +1,5 @@
 import {useRef, useState} from 'react';
-import {FiAlertTriangle, FiSave, FiUpload, FiX} from 'react-icons/fi';
+import {FiAlertTriangle, FiExternalLink, FiSave, FiUpload, FiX} from 'react-icons/fi';
 import Image from "next/image";
 import {normalizeImageUrl} from "../../utils/helper";
 
@@ -339,6 +339,18 @@ const ProductForm = ({
         >
           취소
         </button>
+        {/* 상품 보기 버튼 - 수정 모드일 때만 표시 */}
+        {!isAddMode && formData.productId && (
+          <a
+            href={`/products/${formData.productId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-green-600 text-white py-2 px-4 rounded-md mr-3 flex items-center hover:bg-green-700 transition-colors"
+          >
+            <FiExternalLink className="mr-1"/>
+            상품 보기
+          </a>
+        )}
         <button
           type="submit"
           className="bg-blue-600 text-white py-2 px-4 rounded-md flex items-center hover:bg-blue-700 transition-colors"

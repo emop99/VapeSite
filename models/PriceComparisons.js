@@ -6,11 +6,11 @@ const SellerSite = require('./SellerSite');
 
 // 가격 비교 모델 정의
 const PriceComparisons = sequelize.define('PriceComparisons', {
-  // 판매처 URL (기본 키)
-  sellerUrl: {
-    type: DataTypes.STRING(500),
-    allowNull: false,
+  // 기본 키 ID (auto increment)
+  id: {
+    type: DataTypes.INTEGER,
     primaryKey: true,
+    autoIncrement: true
   },
   // 제품 ID (외래 키)
   productId: {
@@ -29,6 +29,11 @@ const PriceComparisons = sequelize.define('PriceComparisons', {
       model: SellerSite,
       key: 'id',
     },
+  },
+  // 판매처 URL
+  sellerUrl: {
+    type: DataTypes.STRING(500),
+    allowNull: false,
   },
   // 가격
   price: {

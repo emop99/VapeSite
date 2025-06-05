@@ -10,10 +10,11 @@ const PriceComparisonManager = ({productId}) => {
   const [comparisons, setComparisons] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [sites, setSites] = useState([]);
-  const [editingSellerUrl, setEditingSellerUrl] = useState(null);
+  const [editingId, setEditingId] = useState(null);
 
   // 폼 상태 관리
   const [formData, setFormData] = useState({
+    id: '',
     sellerSiteId: '',
     price: '',
     sellerUrl: '',
@@ -79,8 +80,9 @@ const PriceComparisonManager = ({productId}) => {
   // 편집 시작 핸들러
   const handleEdit = (comparison) => {
     console.log('편집 시작:', comparison);
-    setEditingSellerUrl(comparison.sellerUrl);
+    setEditingId(comparison.id);
     setFormData({
+      id: comparison.id,
       sellerSiteId: comparison.sellerId,
       price: comparison.price.toString(),
       sellerUrl: comparison.sellerUrl,
@@ -112,8 +114,9 @@ const PriceComparisonManager = ({productId}) => {
 
       if (result.success) {
         loadComparisons().then();
-        setEditingSellerUrl(null);
+        setEditingId(null);
         setFormData({
+          id: '',
           sellerSiteId: '',
           price: '',
           sellerUrl: '',
@@ -130,8 +133,9 @@ const PriceComparisonManager = ({productId}) => {
 
   // 취소 핸들러
   const handleCancel = () => {
-    setEditingSellerUrl(null);
+    setEditingId(null);
     setFormData({
+      id: '',
       sellerSiteId: '',
       price: '',
       sellerUrl: '',
@@ -144,7 +148,6 @@ const PriceComparisonManager = ({productId}) => {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">가격 비교 관리</h2>
       </div>
-
       {/* 가격 비교 목록 */}
       {isLoading ? (
         <div className="flex justify-center items-center h-32">
@@ -164,11 +167,12 @@ const PriceComparisonManager = ({productId}) => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
             {comparisons.map((comparison) => (
-              <tr key={comparison.sellerUrl}>
-                {editingSellerUrl === comparison.sellerUrl ? (
+              <tr key={comparison.id}>
+                {editingId === comparison.id ? (
                   // 편집 모드
                   <>
                     <td className="px-6 py-2">
+                      <input type="hidden" name="id" value={formData.id}/>
                       <input type="hidden" name="productId" value={comparison.productId}/>
                       <input type="hidden" name="sellerSiteId" value={formData.sellerSiteId}/>
                       <span>{sites.find(site => site.id === Number(formData.sellerSiteId))?.name || '-'}</span>

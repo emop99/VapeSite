@@ -14,6 +14,7 @@ export default function EditProduct() {
 
   // 폼 상태 관리
   const [formData, setFormData] = useState({
+    productId: id || '',
     visibleName: '',
     productGroupingName: '',
     description: '',
@@ -56,6 +57,7 @@ export default function EditProduct() {
         if (result.success && result.data) {
           // 폼 데이터 초기화 - productCategoryId를 categoryId로 매핑
           setFormData({
+            productId: result.data.id || id,
             visibleName: result.data.visibleName || '',
             productGroupingName: result.data.productGroupingName || '',
             description: result.data.description || '',

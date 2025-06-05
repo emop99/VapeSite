@@ -2,6 +2,7 @@ import {withAdminAuth} from '../../../utils/adminAuth';
 import PriceComparisons from '../../../models/PriceComparisons';
 import SellerSite from '../../../models/SellerSite';
 import Product from '../../../models/Product';
+import {PriceHistory} from "../../../models";
 
 async function priceComparisonsHandler(req, res) {
   switch (req.method) {
@@ -156,13 +157,13 @@ async function createPriceComparison(req, res) {
 // 가격 비교 수정
 async function updatePriceComparison(req, res) {
   try {
-    const {sellerSiteId, price, sellerUrl, productId} = req.body;
+    const {id, sellerSiteId, price, sellerUrl, productId} = req.body;
 
     // 필수 값 검증
-    if (!sellerSiteId || !sellerUrl || price === undefined || !productId) {
+    if (!id || !sellerSiteId || !sellerUrl || price === undefined || !productId) {
       return res.status(400).json({
         success: false,
-        message: '판매자 사이트 ID, URL, 가격, 상품 ID는 필수 항목입니다.'
+        message: 'ID, 판매자 사이트 ID, URL, 가격, 상품 ID는 필수 항목입니다.'
       });
     }
 
@@ -176,7 +177,7 @@ async function updatePriceComparison(req, res) {
     }
 
     // 가격 비교 존재 여부 확인
-    const comparison = await PriceComparisons.findByPk(sellerUrl);
+    const comparison = await PriceComparisons.findByPk(id);
     if (!comparison) {
       return res.status(404).json({
         success: false,
@@ -202,7 +203,7 @@ async function updatePriceComparison(req, res) {
         }
       });
 
-      if (existingComparison && existingComparison.sellerUrl !== sellerUrl) {
+      if (existingComparison && existingComparison.id !== id) {
         return res.status(409).json({
           success: false,
           message: '이미 동일한 판매자 사이트에 대한 가격 비교가 존재합니다.'
@@ -217,8 +218,19 @@ async function updatePriceComparison(req, res) {
       sellerUrl,
     });
 
+    // 가격 변동 이력 등록
+    await PriceHistory.create({
+      newPrice: price,
+      oldPrice: comparison.price,
+      productId: product.id,
+      sellerId: sellerSiteId,
+      priceDifference: price - comparison.price,
+      percentageChange: ((price - comparison.price) / comparison.price) * 100
+    });
+
+
     // 수정된 가격 비교 정보 조회
-    const updatedComparison = await PriceComparisons.findByPk(sellerUrl, {
+    const updatedComparison = await PriceComparisons.findByPk(id, {
       include: [
         {
           model: SellerSite,
@@ -253,18 +265,18 @@ async function updatePriceComparison(req, res) {
 // 가격 비교 삭제
 async function deletePriceComparison(req, res) {
   try {
-    const {sellerUrl} = req.body;
+    const {id} = req.body;
 
     // 필수 값 검증
-    if (!sellerUrl) {
+    if (!id) {
       return res.status(400).json({
         success: false,
-        message: '판매자 사이트 URL은 필수 항목입니다.'
+        message: '가격 비교 ID는 필수 항목입니다.'
       });
     }
 
     // 가격 비교 존재 여부 확인
-    const comparison = await PriceComparisons.findByPk(sellerUrl);
+    const comparison = await PriceComparisons.findByPk(id);
     if (!comparison) {
       return res.status(404).json({
         success: false,

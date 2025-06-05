@@ -61,10 +61,11 @@ create table vapesite.vape_seller_site
 
 create table vapesite.vape_price_comparisons
 (
-    sellerUrl varchar(500) not null
+    id        int auto_increment
         primary key,
     productId int                                  not null,
     sellerId  int                                  not null,
+    sellerUrl varchar(500) not null,
     price     int                                  not null,
     createdAt datetime default current_timestamp() not null,
     updatedAt datetime default current_timestamp() null on update current_timestamp(),
