@@ -2,6 +2,7 @@ import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import User from '../../../models/User';
 import crypto from 'crypto';
+import {UserLoginLog} from "../../../models";
 
 // SHA-256 해시 함수
 const hashPassword = (password) => {
@@ -17,7 +18,7 @@ export default NextAuth({
         email: { label: "이메일", type: "email", placeholder: "이메일을 입력하세요" },
         password: { label: "비밀번호", type: "password", placeholder: "비밀번호를 입력하세요" }
       },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         try {
           // 이메일로 사용자 찾기
           const user = await User.findOne({ 
@@ -33,6 +34,12 @@ export default NextAuth({
           if (!user || hashedInputPassword !== user.password) {
             return null;
           }
+
+          // 로그인 로그 기록
+          await UserLoginLog.create({
+            userId: user.id,
+            ip: req.headers['x-forwarded-for']
+          });
 
           // 로그인 성공 시 사용자 정보 반환
           return {

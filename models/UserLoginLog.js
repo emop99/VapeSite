@@ -20,6 +20,11 @@ const UserLoginLog = sequelize.define('UserLoginLog', {
       key: 'id',
     },
   },
+  ip: {
+    type: DataTypes.STRING(50),
+    allowNull: false,
+    comment: '로그인 시도한 IP 주소',
+  }
 }, {
   // 테이블 이름 설정
   tableName: 'vape_user_login_log',
