@@ -58,7 +58,7 @@ export default function SellerSitesManagement() {
 
   // 페이지 로드시 판매 사이트 조회
   useEffect(() => {
-    fetchSellerSites(pagination.currentPage, searchTerm).then();
+    fetchSellerSites(pagination.currentPage).then();
   }, [pagination.currentPage]);
 
   // 페이지 변경 핸들러

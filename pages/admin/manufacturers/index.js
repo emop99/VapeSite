@@ -39,7 +39,7 @@ export default function ManufacturersPage() {
 
   // 페이지 로드시 데이터 가져오기
   useEffect(() => {
-    fetchManufacturers(currentPage, searchTerm).then();
+    fetchManufacturers(currentPage).then();
   }, [currentPage]);
 
   // 검색 처리

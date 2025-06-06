@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import {useRouter} from 'next/router';
 import {getSession} from 'next-auth/react';
 import AdminPagination from '../../../components/admin/AdminPagination';
@@ -29,7 +29,7 @@ export default function CrawlerLogsPage() {
   const [showFilters, setShowFilters] = useState(true);
 
   // 로그 데이터 불러오기
-  const fetchLogs = async (page = 1) => {
+  const fetchLogs = useCallback(async (page = 1) => {
     setIsLoading(true);
     try {
       // 필터를 쿼리 파라미터로 변환
@@ -53,11 +53,13 @@ export default function CrawlerLogsPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [filters]);
 
   // 페이지 변경 시 로그 불러오기
   useEffect(() => {
-    fetchLogs(pagination.currentPage).then();
+    // 로그 데이터 불러오기
+    fetchLogs(pagination.currentPage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pagination.currentPage]);
 
   // 페이지 변경 핸들러
