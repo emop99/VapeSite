@@ -193,6 +193,10 @@ export default function ProductDetail({productData, error: serverError}) {
                 priceCurrency: 'KRW',
                 price: product.priceComparisons[0].price,
                 availability: 'https://schema.org/InStock',
+                seller: {
+                  '@type': 'Organization',
+                  name: product.priceComparisons[0].SellerSite.name
+                },
                 priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 현재 날짜로부터 30일 후
               },
               // aggregateRating은 항상 포함
