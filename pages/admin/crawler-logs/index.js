@@ -106,19 +106,21 @@ export default function CrawlerLogsPage() {
   // 날짜 포맷팅 함수
   const formatDate = (dateString) => {
     if (!dateString) return '-';
-    const date = new Date(dateString);
 
-    // 한국 시간대(KST)로 변환하여 표시 (UTC+9)
-    return new Intl.DateTimeFormat('ko-KR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false,
-      timeZone: 'Asia/Seoul'
-    }).format(date);
+    // 예시: "2025-06-06T12:49:56.404477" 형식 처리
+    // 타임스탬프를 수동으로 파싱
+    const [datePart, timePart] = dateString.split('T');
+    const [year, month, day] = datePart.split('-');
+    const [hourStr, minuteStr, secondStr] = timePart.split(':');
+    const [second] = secondStr.split('.');
+
+    // Date 객체는 월을 0-11로 사용하므로 월에서 1을 빼줍니다
+    const date = new Date(year, month - 1, day, hourStr, minuteStr, second);
+
+    // UTC 기준으로 Date 객체가 생성되므로, 한국 시간대(UTC+9)로 수동 변환
+    date.setHours(date.getHours() + 9);
+
+    return date.toLocaleString();
   };
 
   return (
