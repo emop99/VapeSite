@@ -39,14 +39,14 @@ export default function ManufacturersPage() {
 
   // 페이지 로드시 데이터 가져오기
   useEffect(() => {
-    fetchManufacturers(currentPage, searchTerm);
+    fetchManufacturers(currentPage, searchTerm).then();
   }, [currentPage]);
 
   // 검색 처리
   const handleSearch = (e) => {
     e.preventDefault();
     setCurrentPage(1); // 검색시 첫 페이지로 이동
-    fetchManufacturers(1, searchTerm);
+    fetchManufacturers(1, searchTerm).then();
   };
 
   // 제조사 추가
@@ -73,7 +73,7 @@ export default function ManufacturersPage() {
       setSuccess('제조사가 추가되었습니다.');
       setManufacturerName('');
       setFormOpen(false);
-      fetchManufacturers(currentPage, searchTerm);
+      fetchManufacturers(currentPage, searchTerm).then();
     } catch (err) {
       setError(err.message);
     }
@@ -113,7 +113,7 @@ export default function ManufacturersPage() {
       setFormOpen(false);
       setEditMode(false);
       setCurrentManufacturer(null);
-      fetchManufacturers(currentPage, searchTerm);
+      fetchManufacturers(currentPage, searchTerm).then();
     } catch (err) {
       setError(err.message);
     }
@@ -135,7 +135,7 @@ export default function ManufacturersPage() {
       if (!res.ok) throw new Error(data.message || '서버 오류가 발생했습니다.');
 
       setSuccess('제조사가 삭제되었습니다.');
-      fetchManufacturers(currentPage, searchTerm);
+      fetchManufacturers(currentPage, searchTerm).then();
     } catch (err) {
       setError(err.message);
     }
@@ -232,7 +232,7 @@ export default function ManufacturersPage() {
         {/* 제조사 목록 테이블 */}
         {isLoading ? (
           <div className="text-center py-4">로딩 중...</div>
-        ) : !manufacturers.length === 0 ? (
+        ) : manufacturers.length === 0 ? (
           <div className="text-center py-4">데이터가 없습니다.</div>
         ) : (
           <div className="overflow-x-auto">
