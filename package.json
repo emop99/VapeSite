@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@elastic/elasticsearch": "^9.0.2",
     "autoprefixer": "^10.4.16",
     "dotenv": "^16.3.1",
     "formidable": "^3.5.4",
