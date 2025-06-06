@@ -58,7 +58,7 @@ export default function CrawlerLogsPage() {
   // 페이지 변경 시 로그 불러오기
   useEffect(() => {
     // 로그 데이터 불러오기
-    fetchLogs(pagination.currentPage);
+    fetchLogs(pagination.currentPage).then();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pagination.currentPage]);
 
