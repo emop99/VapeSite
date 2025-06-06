@@ -52,12 +52,12 @@ const Review = sequelize.define('Review', {
   },
   // 장점
   pros: {
-    type: DataTypes.TEXT('tiny'),
+    type: DataTypes.STRING(500),
     allowNull: false,
   },
   // 단점
   cons: {
-    type: DataTypes.TEXT('tiny'),
+    type: DataTypes.STRING(500),
     allowNull: false,
   },
   // 추천 여부

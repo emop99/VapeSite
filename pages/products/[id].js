@@ -1,10 +1,12 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {useRouter} from 'next/router';
 import Link from 'next/link';
 import Head from 'next/head';
-import {FaArrowDown, FaArrowUp, FaRegStar, FaStar, FaStarHalfAlt} from 'react-icons/fa';
+import {FaArrowDown, FaArrowUp, FaEdit, FaRegStar, FaStar, FaStarHalfAlt} from 'react-icons/fa';
 import Image from 'next/image';
 import {normalizeImageUrl} from '../../utils/helper';
+import ReviewForm from '../../components/ReviewForm';
+import {useSession} from 'next-auth/react';
 
 // 제품 상세 페이지
 export default function ProductDetail({productData, error: serverError}) {
@@ -38,6 +40,7 @@ export default function ProductDetail({productData, error: serverError}) {
     );
   };
   const router = useRouter();
+  const {data: session} = useSession();
 
   // 제품 상태
   const [product, setProduct] = useState(productData || null);
@@ -51,6 +54,62 @@ export default function ProductDetail({productData, error: serverError}) {
   const [reviews, setReviews] = useState(productData?.reviews || []);
   // 평균 평점
   const [averageRating, setAverageRating] = useState(productData?.averageRating || 0);
+  // 수정 모드 상태
+  const [isEditing, setIsEditing] = useState(false);
+  // 수정할 리뷰 상태
+  const [editingReview, setEditingReview] = useState(null);
+  // 현재 사용자의 리뷰
+  const [userReview, setUserReview] = useState(null);
+
+  // 사용자의 리뷰가 있는지 확인
+  useEffect(() => {
+    if (session?.user?.email && reviews.length > 0) {
+      // 로그인한 사용자의 리뷰 찾기
+      const foundReview = reviews.find(review => {
+        // 이메일이나 ID로 사용자 식별
+        if (review.User && review.User.email === session.user.email) {
+          return true;
+        }
+        if (review.userId === session.user.id) {
+          return true;
+        }
+        // userName이 session의 name과 일치하는지 확인 (대체 방안)
+        return !!(review.userName && session.user.name &&
+          review.userName === session.user.name);
+
+      });
+
+      if (foundReview) {
+        setUserReview(foundReview);
+      }
+    }
+  }, [session, reviews]);
+
+  // 리뷰 수정 핸들러
+  const handleEditReview = (review) => {
+    // 현재 로그인한 사용자의 리뷰인지 확인
+    if (!session?.user) return;
+
+    const isUsersReview =
+      (review.User && review.User.email === session.user.email) ||
+      (review.userId === session.user.id) ||
+      (review.userName === session.user.name);
+
+    if (!isUsersReview) {
+      alert('자신이 작성한 리뷰만 수정할 수 있습니다.');
+      return;
+    }
+
+    // 수정할 리뷰 설정 및 수정 모드로 전환
+    setEditingReview(review);
+    setIsEditing(true);
+
+    // 리뷰 폼이 있는 위치로 스크롤
+    const reviewFormElement = document.getElementById('review-form-section');
+    if (reviewFormElement) {
+      reviewFormElement.scrollIntoView({behavior: 'smooth'});
+    }
+  };
 
   // 제품이 없을 때
   if (!product) {
@@ -134,14 +193,32 @@ export default function ProductDetail({productData, error: serverError}) {
                 priceCurrency: 'KRW',
                 price: product.priceComparisons[0].price,
                 availability: 'https://schema.org/InStock',
+                priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 현재 날짜로부터 30일 후
               },
-              ...(reviews.length > 0 && {
-                aggregateRating: {
-                  '@type': 'AggregateRating',
-                  ratingValue: averageRating.toFixed(1),
-                  reviewCount: reviews.length,
+              // aggregateRating은 항상 포함
+              aggregateRating: {
+                '@type': 'AggregateRating',
+                ratingValue: reviews.length > 0 ? averageRating.toFixed(1) : '0',
+                reviewCount: reviews.length,
+                bestRating: '5',
+                worstRating: '1',
+              },
+              // 리뷰 정보 추가
+              review: reviews.map(review => ({
+                '@type': 'Review',
+                reviewRating: {
+                  '@type': 'Rating',
+                  ratingValue: review.rating,
+                  bestRating: '5',
+                  worstRating: '1'
                 },
-              }),
+                author: {
+                  '@type': 'Person',
+                  name: review.User ? review.User.nickName : '익명'
+                },
+                datePublished: review.createdAt ? new Date(review.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                reviewBody: review.content || ''
+              })),
             })
           }}
         />
@@ -326,7 +403,7 @@ export default function ProductDetail({productData, error: serverError}) {
               <div key={index} className="border-b border-gray-200 pb-6 last:border-b-0 last:pb-0">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="font-bold text-lg">{review.title}</p>
+                    <p className="font-bold text-lg break-words">{review.title}</p>
                     <div className="flex items-center mt-1 mb-2">
                       {renderStarRating(review.rating)}
                     </div>
@@ -336,26 +413,23 @@ export default function ProductDetail({productData, error: serverError}) {
                   </div>
                 </div>
 
-                <p className="text-sm text-gray-500 mb-2">작성자: {review.userName}</p>
+                <p className="text-sm text-gray-500 mb-2">
+                  작성자: {review.userName || (review.User ? review.User.nickName : '익명')}
+                </p>
 
-                {review.usagePeriod && (
-                  <p className="text-sm text-gray-500 mb-2">사용 기간: {review.usagePeriod}</p>
-                )}
+                <p className="text-gray-700 mb-4 break-words whitespace-pre-wrap">{review.content}</p>
 
-                <p className="text-gray-700 mb-4">{review.content}</p>
-
-                <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className="flex flex-col space-y-4 mb-4">
                   {review.pros && (
                     <div>
                       <p className="font-semibold text-green-600 mb-1">장점</p>
-                      <p className="text-sm text-gray-700">{review.pros}</p>
+                      <p className="text-sm text-gray-700 break-words whitespace-pre-wrap">{review.pros}</p>
                     </div>
                   )}
 
                   {review.cons && (
                     <div>
                       <p className="font-semibold text-red-600 mb-1">단점</p>
-                      <p className="text-sm text-gray-700">{review.cons}</p>
                     </div>
                   )}
                 </div>
@@ -388,10 +462,16 @@ export default function ProductDetail({productData, error: serverError}) {
                     )}
                   </div>
 
-                  <button className="text-sm text-gray-500 flex items-center">
-                    <span className="mr-1">도움이 됐어요</span>
-                    <span className="font-medium">{review.helpfulCount}</span>
-                  </button>
+                  {/* 리뷰 수정 버튼 (로그인한 사용자에게만 표시) */}
+                  {session?.user && (
+                    <button
+                      onClick={() => handleEditReview(review)}
+                      className="text-sm text-gray-500 flex items-center"
+                    >
+                      <FaEdit className="mr-1"/>
+                      <span>수정하기</span>
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
@@ -402,6 +482,88 @@ export default function ProductDetail({productData, error: serverError}) {
             <p className="text-gray-500 mt-2">첫 번째 리뷰를 작성해보세요!</p>
           </div>
         )}
+
+        {/* 리뷰 작성 폼 */}
+        <div className="mt-8" id="review-form-section">
+          <h3 className="text-xl font-bold mb-4">{isEditing ? '리뷰 수정하기' : '리뷰 작성하기'}</h3>
+
+          {/* 일반 모드: 사용자 리뷰가 없거나 수정 모드일 때만 폼 표시 */}
+          {(!userReview || isEditing) ? (
+            <ReviewForm
+              productId={product.id}
+              existingReview={isEditing ? editingReview : null}
+              onReviewSubmit={(newReview, isEdit) => {
+                if (isEdit) {
+                  // 수정인 경우: 기존 리뷰 업데이트
+                  const updatedReviews = reviews.map(rev =>
+                    rev.id === newReview.id ? newReview : rev
+                  );
+                  setReviews(updatedReviews);
+
+                  // 평균 평점 다시 계산
+                  const totalRating = updatedReviews.reduce((sum, rev) => sum + rev.rating, 0);
+                  setAverageRating(totalRating / updatedReviews.length);
+
+                  // 수정 모드 종료
+                  setIsEditing(false);
+                  setEditingReview(null);
+                } else {
+                  // 새 리뷰 생성인 경우
+                  setReviews([...reviews, newReview]);
+                  setAverageRating(((averageRating * reviews.length) + newReview.rating) / (reviews.length + 1));
+                  setUserReview(newReview); // 작성한 리뷰 저장
+                }
+              }}
+              onCancel={() => {
+                setIsEditing(false);
+                setEditingReview(null);
+              }}
+            />
+          ) : (
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <p className="text-gray-700 mb-2">이미 작성한 리뷰가 있습니다.</p>
+              <div className="flex flex-col space-y-4">
+                <div>
+                  <p className="font-semibold">제목</p>
+                  <p className="text-gray-700 break-words">{userReview.title}</p>
+                </div>
+                <div>
+                  <p className="font-semibold">내용</p>
+                  <p className="text-gray-700 break-words whitespace-pre-wrap">{userReview.content}</p>
+                </div>
+                <div>
+                  <p className="font-semibold">평점</p>
+                  <div className="flex items-center">
+                    {renderStarRating(userReview.rating)}
+                  </div>
+                </div>
+                {userReview.pros && (
+                  <div>
+                    <p className="font-semibold">장점</p>
+                    <p className="text-gray-700 break-words whitespace-pre-wrap">{userReview.pros}</p>
+                  </div>
+                )}
+                {userReview.cons && (
+                  <div>
+                    <p className="font-semibold">단점</p>
+                    <p className="text-gray-700 break-words whitespace-pre-wrap">{userReview.cons}</p>
+                  </div>
+                )}
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => {
+                      setIsEditing(true);
+                      setEditingReview(userReview);
+                    }}
+                    className="bg-primary text-white py-2 px-4 rounded hover:bg-primary-dark transition-colors flex-1"
+                  >
+                    리뷰 수정하기
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </section>
     </div>
   );

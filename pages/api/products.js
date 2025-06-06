@@ -3,7 +3,9 @@ import Product from '../../models/Product';
 import ProductCategory from '../../models/ProductCategory';
 import Company from '../../models/Company';
 import PriceComparisons from '../../models/PriceComparisons';
+import Review from '../../models/Review';
 import {Op} from "sequelize";
+import {sequelize} from '../../lib/db';
 
 /**
  * 제품 API 핸들러
@@ -67,6 +69,11 @@ async function getProducts(req, res) {
         model: PriceComparisons,
         attributes: ['productId', 'sellerId', 'sellerUrl', 'price', 'createdAt', 'updatedAt'],
         required: true
+      },
+      {
+        model: Review,
+        attributes: ['id', 'rating', 'recommended'],
+        required: false
       }
     ];
 
@@ -132,7 +139,27 @@ async function getProducts(req, res) {
       limit: limitNum,
       offset: offset,
       subQuery: false,
-      group: ['Product.id']
+      group: ['Product.id'],
+      attributes: {
+        include: [
+          [
+            sequelize.literal(`(
+              SELECT AVG(rating) 
+              FROM vape_reviews 
+              WHERE vape_reviews.productId = Product.id
+            )`),
+            'averageRating'
+          ],
+          [
+            sequelize.literal(`(
+              SELECT COUNT(*) 
+              FROM vape_reviews 
+              WHERE vape_reviews.productId = Product.id
+            )`),
+            'reviewCount'
+          ]
+        ]
+      }
     });
 
     return res.status(200).json({
