@@ -4,7 +4,7 @@ import {useRouter} from 'next/router';
 import Link from 'next/link';
 import Head from 'next/head';
 import Image from 'next/image';
-import {FiActivity, FiBarChart2, FiBox, FiLogOut, FiMenu, FiShoppingBag, FiUser, FiUsers} from 'react-icons/fi';
+import {FiActivity, FiBarChart2, FiBox, FiGlobe, FiLogOut, FiMenu, FiShoppingBag, FiUser, FiUsers} from 'react-icons/fi';
 
 // 어드민 레이아웃 컴포넌트
 const AdminLayout = ({children, title = '관리자 페이지 - 쥬스고블린'}) => {
@@ -65,7 +65,7 @@ const AdminLayout = ({children, title = '관리자 페이지 - 쥬스고블린'}
           </div>
 
           <Link href="/admin"
-                className={`flex items-center px-4 py-3 ${isActive('/admin') && !isActive('/admin/users') && !isActive('/admin/products') && !isActive('/admin/manufacturers') && !isActive('/admin/crawler-logs') ? 'bg-goblin-light text-white font-bold' : 'text-gray-300 hover:bg-goblin-light'}`}>
+                className={`flex items-center px-4 py-3 ${router.pathname === '/admin' ? 'bg-goblin-light text-white font-bold' : 'text-gray-300 hover:bg-goblin-light'}`}>
             <FiBarChart2 className="h-5 w-5"/>
             {sidebarOpen && <span className="ml-3">대시보드</span>}
           </Link>
@@ -82,6 +82,12 @@ const AdminLayout = ({children, title = '관리자 페이지 - 쥬스고블린'}
             {sidebarOpen && <span className="ml-3">제조사 관리</span>}
           </Link>
 
+          <Link href="/admin/seller-sites"
+                className={`flex items-center px-4 py-3 ${isActive('/admin/seller-sites') ? 'bg-goblin-light text-white font-bold' : 'text-gray-300 hover:bg-goblin-light'}`}>
+            <FiGlobe className="h-5 w-5"/>
+            {sidebarOpen && <span className="ml-3">판매 사이트 관리</span>}
+          </Link>
+
           <Link href="/admin/users"
                 className={`flex items-center px-4 py-3 ${isActive('/admin/users') ? 'bg-goblin-light text-white font-bold' : 'text-gray-300 hover:bg-goblin-light'}`}>
             <FiUsers className="h-5 w-5"/>
@@ -93,15 +99,6 @@ const AdminLayout = ({children, title = '관리자 페이지 - 쥬스고블린'}
             <FiActivity className="h-5 w-5"/>
             {sidebarOpen && <span className="ml-3">크롤링 기록</span>}
           </Link>
-
-          {/*<div className="px-4 py-2 mt-6 text-xs text-gray-400 uppercase">*/}
-          {/*  {sidebarOpen && '설정'}*/}
-          {/*</div>*/}
-
-          {/*<Link href="/admin/settings" className={`flex items-center px-4 py-3 ${isActive('/admin/settings') ? 'bg-goblin-light text-white font-bold' : 'text-gray-300 hover:bg-goblin-light'}`}>*/}
-          {/*  <FiSettings className="h-5 w-5" />*/}
-          {/*  {sidebarOpen && <span className="ml-3">시스템 설정</span>}*/}
-          {/*</Link>*/}
         </nav>
 
         {/* 하단 사용자 정보 */}
