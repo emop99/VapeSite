@@ -323,7 +323,6 @@ export default function ProductDetail({productData, error: serverError}) {
               <tr>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">판매처</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">가격</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">최종 가격</th>
                 <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">링크</th>
               </tr>
               </thead>
@@ -331,7 +330,6 @@ export default function ProductDetail({productData, error: serverError}) {
               {priceComparisons.map((comparison, index) => (
                 <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{comparison.SellerSite.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{comparison.price.toLocaleString()}원</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-price">
                     {comparison.price.toLocaleString()}원
                   </td>
