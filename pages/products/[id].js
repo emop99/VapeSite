@@ -159,17 +159,17 @@ export default function ProductDetail({productData, error: serverError}) {
 
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="product"/>
-        <meta property="og:title" content={`${product.visibleName} - ${product.Company.name} | 쥬스고블린`}/>
+        <meta property="og:title" content={`${product.visibleName} - ${product.Company.name} | 쥬스고블린 전자담배 액상 최저가 비교 가격 변동`}/>
         <meta property="og:description" content={productDescription}/>
         <meta property="og:image" content={productImageUrl}/>
-        <meta property="og:site_name" content="쥬스고블린"/>
+        <meta property="og:site_name" content="쥬스고블린 전자담배 액상 최저가 비교 가격 변동"/>
         <meta property="product:price:amount" content={product.priceComparisons[0].price.toString()}/>
         <meta property="product:price:currency" content="KRW"/>
         <meta property="product:brand" content={product.Company.name}/>
 
         {/* Twitter */}
         <meta property="twitter:card" content="summary_large_image"/>
-        <meta property="twitter:title" content={`${product.visibleName} - ${product.Company.name} | 쥬스고블린`}/>
+        <meta property="twitter:title" content={`${product.visibleName} - ${product.Company.name} | 쥬스고블린 전자담배 액상 최저가 비교 가격 변동`}/>
         <meta property="twitter:description" content={productDescription}/>
         <meta property="twitter:image" content={productImageUrl}/>
 

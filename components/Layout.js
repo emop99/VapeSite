@@ -29,7 +29,7 @@ export default function Layout({ children, title = '쥬스고블린 | 전자담�
           <meta property="og:title" content={title}/>
           <meta property="og:description" content="전자담배 액상 최저가 비교 가격 변동 확인 사이트"/>
           <meta property="og:image" content={`${process.env.NEXT_PUBLIC_SITE_URL}/image/juicegoblin_bi.png`}/>
-          <meta property="og:site_name" content="쥬스고블린" />
+          <meta property="og:site_name" content={title}/>
 
           {/* Twitter */}
           <meta property="twitter:card" content="summary_large_image"/>
