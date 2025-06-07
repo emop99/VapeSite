@@ -30,12 +30,16 @@ create table vapesite.vape_products
     imageUrl            varchar(255)                           null,
     createdAt           datetime   default current_timestamp() not null,
     updatedAt           datetime   default current_timestamp() null on update current_timestamp(),
+    viewCount int default 0 not null comment '상품 조회수',
     constraint vape_products_vape_company_id_fk
         foreign key (companyId) references vapesite.vape_company (id),
     constraint vape_products_vape_product_category_id_fk
         foreign key (productCategoryId) references vapesite.vape_product_category (id)
 )
     comment '상품 정보 테이블';
+
+create fulltext index products_name_ft
+    on vapesite.vape_products (visibleName, productGroupingName);
 
 create index vape_products_createdAt_index
     on vapesite.vape_products (createdAt);
@@ -164,3 +168,38 @@ create table vapesite.vape_user_login_log
 )
     comment '회원 로그인 로그';
 
+create
+    definer = vapeuser@`%` procedure vapesite.get_similar_products(IN p_product_id int)
+BEGIN
+    -- 현재 상품 정보 가져오기
+    DECLARE product_name TEXT;
+    DECLARE category_id INT;
+
+    SELECT CONCAT(visibleName, ' ', productGroupingName),
+           productCategoryId
+    INTO
+        product_name,
+        category_id
+    FROM vape_products
+    WHERE id = p_product_id;
+
+    -- 유사 상품 찾기
+    SELECT p.id,
+           p.visibleName,
+           p.productGroupingName,
+           p.imageUrl,
+           MATCH (p.visibleName, p.productGroupingName)
+               AGAINST (product_name IN NATURAL LANGUAGE MODE) AS relevance,
+           (SELECT MIN(price)
+            FROM vape_price_comparisons vpc
+            WHERE vpc.productId = p.id)                        AS min_price
+    FROM vape_products p
+    WHERE p.id != p_product_id
+      AND p.productCategoryId = category_id
+      AND p.isShow = 1
+      AND MATCH (p.visibleName, p.productGroupingName)
+              AGAINST (product_name IN NATURAL LANGUAGE MODE) > 0
+    GROUP BY p.id
+    ORDER BY relevance DESC
+    LIMIT 10;
+END;

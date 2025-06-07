@@ -51,6 +51,12 @@ const Product = sequelize.define('Product', {
     type: DataTypes.STRING(255),
     allowNull: true,
   },
+  // 상품 조회수
+  viewCount: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0, // 기본값은 0으로 설정
+  },
 }, {
   // 테이블 이름 설정
   tableName: 'vape_products',
@@ -69,6 +75,12 @@ const Product = sequelize.define('Product', {
     {
       name: 'vape_products_visibleName_index',
       fields: ['visibleName'],
+    },
+    {
+      // 전문 검색(fulltext) 인덱스 추가
+      name: 'products_name_ft',
+      type: 'FULLTEXT',
+      fields: ['visibleName', 'productGroupingName'],
     },
   ],
 });

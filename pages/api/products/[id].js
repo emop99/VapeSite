@@ -6,6 +6,7 @@ import SellerSite from '../../../models/SellerSite';
 import PriceHistory from '../../../models/PriceHistory';
 import Review from '../../../models/Review';
 import User from '../../../models/User';
+import {sequelize} from '../../../lib/db';
 
 /**
  * 단일 제품 API 핸들러
@@ -72,6 +73,18 @@ async function getProduct(req, res, id) {
       order: [['createdAt', 'DESC']], // 최신순 정렬
     });
 
+    // 연관 상품 검색 - get_similar_products 프로시저 호출
+    const [similarProducts] = await sequelize.query(
+      'CALL vapesite.get_similar_products(:productId)',
+      {
+        replacements: {productId: id},
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    // 조회수 증가 처리
+    await product.increment('viewCount');
+
     // 평균 평점 계산
     const averageRating = reviews.length > 0
       ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
@@ -84,6 +97,7 @@ async function getProduct(req, res, id) {
       priceHistory,
       reviews,
       averageRating,
+      similarProducts,
     };
 
     return res.status(200).json(responseData);

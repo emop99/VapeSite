@@ -6,6 +6,7 @@ import {FaArrowDown, FaArrowUp, FaEdit, FaRegStar, FaStar, FaStarHalfAlt} from '
 import Image from 'next/image';
 import {normalizeImageUrl} from '../../utils/helper';
 import ReviewForm from '../../components/ReviewForm';
+import SimilarProducts from '../../components/SimilarProducts';
 import {useSession} from 'next-auth/react';
 
 // 제품 상세 페이지
@@ -296,7 +297,7 @@ export default function ProductDetail({productData, error: serverError}) {
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">판매처</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">가격</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">최종 가격</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">링크</th>
+                <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">링크</th>
               </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -307,13 +308,16 @@ export default function ProductDetail({productData, error: serverError}) {
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-price">
                     {comparison.price.toLocaleString()}원
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                     <a
                       href={comparison.sellerUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-primary hover:text-primary-dark"
+                      className="inline-flex items-center justify-center px-3 py-1.5 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded transition-colors duration-200 whitespace-nowrap"
                     >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 mr-1">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
+                      </svg>
                       구매하기
                     </a>
                   </td>
@@ -378,6 +382,11 @@ export default function ProductDetail({productData, error: serverError}) {
             </table>
           </div>
         </section>
+      )}
+
+      {/* 연관 상품 레이아웃 - 개선된 UI/UX 디자인 */}
+      {productData?.similarProducts && Object.keys(productData.similarProducts).length > 0 && (
+        <SimilarProducts products={productData.similarProducts}/>
       )}
 
       {/* 유저 리뷰 레이아웃 */}
