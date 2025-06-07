@@ -3,6 +3,7 @@ import PriceComparisons from '../../../models/PriceComparisons';
 import SellerSite from '../../../models/SellerSite';
 import Product from '../../../models/Product';
 import {PriceHistory} from "../../../models";
+import {sequelize} from '../../../lib/db'; // sequelize 인스턴스를 올바르게 가져옵니다.
 
 async function priceComparisonsHandler(req, res) {
   switch (req.method) {
@@ -69,6 +70,9 @@ async function getPriceComparisons(req, res) {
 
 // 가격 비교 생성
 async function createPriceComparison(req, res) {
+  // 트랜잭션 시작
+  const transaction = await sequelize.transaction();
+
   try {
     const {productId, sellerSiteId, price, sellerUrl} = req.body;
 
@@ -81,8 +85,9 @@ async function createPriceComparison(req, res) {
     }
 
     // 상품 존재 여부 확인
-    const product = await Product.findByPk(productId);
+    const product = await Product.findByPk(productId, {transaction});
     if (!product) {
+      await transaction.rollback();
       return res.status(404).json({
         success: false,
         message: '존재하지 않는 상품입니다.'
@@ -90,8 +95,9 @@ async function createPriceComparison(req, res) {
     }
 
     // 판매자 사이트 존재 여부 확인
-    const sellerSite = await SellerSite.findByPk(sellerSiteId);
+    const sellerSite = await SellerSite.findByPk(sellerSiteId, {transaction});
     if (!sellerSite) {
+      await transaction.rollback();
       return res.status(404).json({
         success: false,
         message: '존재하지 않는 판매자 사이트입니다.'
@@ -103,10 +109,12 @@ async function createPriceComparison(req, res) {
       where: {
         productId,
         sellerId: sellerSiteId
-      }
+      },
+      transaction
     });
 
     if (existingComparison) {
+      await transaction.rollback();
       return res.status(409).json({
         success: false,
         message: '이미 동일한 판매자 사이트에 대한 가격 비교가 존재합니다.'
@@ -119,17 +127,55 @@ async function createPriceComparison(req, res) {
       sellerId: sellerSiteId,
       price,
       sellerUrl,
+    }, {transaction});
+
+    // 이전 가격 이력 조회 (가장 최근 것)
+    const latestPriceHistory = await PriceHistory.findOne({
+      where: {
+        productId,
+      },
+      order: [['createdAt', 'DESC']],
+      transaction
     });
+
+    // 이전 가격 설정 및 계산
+    let oldPrice = 0;
+    let priceDifference = price;
+    let percentageChange = 0;
+
+    if (latestPriceHistory) {
+      // 이전 기록이 있으면 최신 가격을 이전 가격으로 설정
+      oldPrice = latestPriceHistory.newPrice;
+      priceDifference = price - oldPrice;
+      // 이전 가격이 0이 아닌 경우에만 백분율 변화 계산
+      if (oldPrice !== 0) {
+        percentageChange = (priceDifference / oldPrice) * 100;
+      }
+    }
+
+    // 가격 이력 추가
+    await PriceHistory.create({
+      newPrice: price,
+      oldPrice: oldPrice,
+      productId,
+      sellerId: sellerSiteId,
+      priceDifference: priceDifference,
+      percentageChange: percentageChange
+    }, {transaction});
 
     // 생성된 가격 비교 정보 조회
     const comparison = await PriceComparisons.findByPk(newComparison.id, {
       include: [
         {
           model: SellerSite,
-          attributes: ['id', 'name', 'sellerUrl']
+          attributes: ['id', 'name', 'siteUrl']
         }
-      ]
+      ],
+      transaction
     });
+
+    // 모든 작업이 성공적으로 완료되면 트랜잭션 커밋
+    await transaction.commit();
 
     return res.status(201).json({
       success: true,
@@ -137,6 +183,9 @@ async function createPriceComparison(req, res) {
       data: comparison
     });
   } catch (error) {
+    // 오류 발생 시 트랜잭션 롤백
+    await transaction.rollback();
+
     console.error('가격 비교 생성 오류:', error);
 
     if (error.name === 'SequelizeValidationError') {
