@@ -1,8 +1,8 @@
 import Layout from '../components/Layout';
 import '../styles/globals.css';
-import { useRouter } from 'next/router';
-import { useEffect } from 'react';
-import { SessionProvider } from 'next-auth/react';
+import {useRouter} from 'next/router';
+import {useEffect} from 'react';
+import {SessionProvider} from 'next-auth/react';
 import * as gtag from '../lib/gtag';
 import AdminLayout from "../components/admin/AdminLayout";
 import Script from "next/script";
@@ -35,7 +35,7 @@ function MyApp({ Component, pageProps }) {
   return (
     <>
       {/* Google Tag Manager - Global base code */}
-      {process.env.NODE_ENV !== 'development' ? (
+      {process.env.NODE_ENV !== 'development' && !router.pathname.startsWith('/admin') ? (
         <>
           <Script
             strategy="afterInteractive"
