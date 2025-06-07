@@ -1,5 +1,5 @@
 import {withAdminAuth} from '../../../../utils/adminAuth';
-import Product from '../../../../models/Product';
+import {PriceComparison, PriceHistory, Product, Review} from "../../../../models";
 
 async function bulkActionHandler(req, res) {
   // POST 요청만 처리
@@ -110,7 +110,10 @@ async function deleteProducts(req, res, productIds, result) {
   try {
     for (const id of productIds) {
       try {
-        await Product.destroy({where: {id}});
+        await PriceComparison.destroy({where: {productId: id}}); // 가격 정보 삭제
+        await PriceHistory.destroy({where: {productId: id}}); // 가격 이력 삭제
+        await Review.destroy({where: {productId: id}}); // 리뷰 삭제
+        await Product.destroy({where: {id}}); // 상품 삭제
         result.success++;
       } catch (error) {
         result.failed++;

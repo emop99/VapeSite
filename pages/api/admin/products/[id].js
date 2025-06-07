@@ -1,7 +1,5 @@
 import {withAdminAuth} from '../../../../utils/adminAuth';
-import Product from '../../../../models/Product';
-import ProductCategory from '../../../../models/ProductCategory';
-import Company from '../../../../models/Company';
+import {Company, PriceComparison, PriceHistory, Product, ProductCategory, Review} from "../../../../models";
 
 async function productDetailHandler(req, res) {
   const {id} = req.query;
@@ -114,7 +112,11 @@ async function deleteProduct(req, res, id) {
       return res.status(404).json({success: false, message: '상품을 찾을 수 없습니다.'});
     }
 
-    // 상품 삭제 (실제 삭제가 아닌 soft delete 사용 시 해당 로직으로 변경)
+    await PriceComparison.destroy({where: {productId: id}}); // 가격 비교 정보 삭제
+    await PriceHistory.destroy({where: {productId: id}}); // 가격 이력 삭제
+    await Review.destroy({where: {productId: id}}); // 리뷰 정보 삭제
+
+    // 상품 삭제
     await product.destroy();
 
     return res.status(200).json({
