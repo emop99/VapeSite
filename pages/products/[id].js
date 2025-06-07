@@ -199,30 +199,30 @@ export default function ProductDetail({productData, error: serverError}) {
                 },
                 priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 현재 날짜로부터 30일 후
               },
-              // aggregateRating은 항상 포함
-              aggregateRating: {
-                '@type': 'AggregateRating',
-                ratingValue: reviews.length > 0 ? averageRating.toFixed(1) : '0',
-                reviewCount: reviews.length,
-                bestRating: '5',
-                worstRating: '1',
-              },
-              // 리뷰 정보 추가
-              review: reviews.map(review => ({
-                '@type': 'Review',
-                reviewRating: {
-                  '@type': 'Rating',
-                  ratingValue: review.rating,
-                  bestRating: '5',
-                  worstRating: '1'
+              ...(reviews.length > 0 ? {
+                aggregateRating: {
+                  '@type': 'AggregateRating',
+                  ratingValue: Math.max(1, averageRating).toFixed(1),
+                  reviewCount: Math.max(1, reviews.length),
+                  bestRating: 5,
+                  worstRating: 1,
                 },
-                author: {
-                  '@type': 'Person',
-                  name: review.User ? review.User.nickName : '익명'
-                },
-                datePublished: review.createdAt ? new Date(review.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-                reviewBody: review.content || ''
-              })),
+                review: reviews.map(review => ({
+                  '@type': 'Review',
+                  reviewRating: {
+                    '@type': 'Rating',
+                    ratingValue: Math.max(1, review.rating),
+                    bestRating: 5,
+                    worstRating: 1
+                  },
+                  author: {
+                    '@type': 'Person',
+                    name: review.User ? review.User.nickName : '익명'
+                  },
+                  datePublished: review.createdAt ? new Date(review.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                  reviewBody: review.content || ''
+                })),
+              } : {}),
             })
           }}
         />
