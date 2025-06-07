@@ -28,6 +28,13 @@ export default function ProductsManagement() {
   const [isShow, setIsShow] = useState(''); // 노출 여부 필터링 ('yes', 'no', '')
   const [updatingVisibility, setUpdatingVisibility] = useState(null); // 노출 상태 업데이트 중인 상품 ID
   const [pageSize, setPageSize] = useState(10); // 페이지당 상품 개수 (기본값 10)
+  // 체크박스 및 일괄 작업 관련 상태 추가
+  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
+  const [bulkActionType, setBulkActionType] = useState('');
+  const [bulkCompany, setBulkCompany] = useState('');
+  const [processingBulkAction, setProcessingBulkAction] = useState(false);
+  const [bulkActionResult, setBulkActionResult] = useState({success: 0, failed: 0});
 
   // 상품 데이터 불러오기
   const fetchProducts = useCallback(
@@ -269,6 +276,93 @@ export default function ProductsManagement() {
     return queryString ? `${baseUrl}?${queryString}` : baseUrl;
   };
 
+  // 선택된 상품 ID 목록 업데이트
+  const updateSelectedProducts = (id) => {
+    setSelectedProducts(prevSelected =>
+      prevSelected.includes(id)
+        ? prevSelected.filter(pid => pid !== id) // 이미 선택된 상품이면 목록에서 제거
+        : [...prevSelected, id] // 새로 선택된 상품 ID 추가
+    );
+  };
+
+  // 전체 선택/해제 처리
+  const handleSelectAllChange = () => {
+    if (selectAll) {
+      // 전체 선택 해제
+      setSelectAll(false);
+      setSelectedProducts([]);
+    } else {
+      // 전체 선택
+      setSelectAll(true);
+      setSelectedProducts(products.map(product => product.id));
+    }
+  };
+
+  // 개별 상품 선택 처리
+  const handleProductSelect = (id) => {
+    updateSelectedProducts(id);
+  };
+
+  // 일괄 작업 유형 변경 처리
+  const handleBulkActionTypeChange = (e) => {
+    setBulkActionType(e.target.value);
+  };
+
+  // 일괄 작업 수행
+  const handleBulkAction = async () => {
+    if (selectedProducts.length === 0) {
+      alert('일괄 작업을 수행할 상품을 선택해주세요.');
+      return;
+    }
+
+    if (bulkActionType === 'delete') {
+      if (!window.confirm('선택한 상품을 정말로 삭제하시겠습니까?')) {
+        return;
+      }
+    }
+
+    setProcessingBulkAction(true);
+    setBulkActionResult({success: 0, failed: 0});
+
+    try {
+      // 선택한 상품 ID로 일괄 작업 수행
+      const response = await fetch('/api/admin/products/bulk-action', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: bulkActionType,
+          productIds: selectedProducts,
+          company: bulkCompany // 회사 정보 추가
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('일괄 작업에 실패했습니다');
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert('일괄 작업이 성공적으로 완료되었습니다.');
+        setBulkActionResult(result.data);
+        // 작업 성공/실패에 따라 상태 업데이트
+        setProducts(products.filter(product => !selectedProducts.includes(product.id)));
+        setSelectedProducts([]);
+        setSelectAll(false);
+        fetchProducts(pagination.currentPage, searchTerm, selectedCategory, selectedCompany, hasImage, isShow, pageSize).then();
+      } else {
+        alert('일괄 작업에 실패했습니다: ' + (result.message || '알 수 없는 오류'));
+      }
+    } catch (error) {
+      console.error('일괄 작업 오류:', error);
+      alert('일괄 작업 중 오류가 발생했습니다.');
+    } finally {
+      setProcessingBulkAction(false);
+    }
+  };
+
   return (
     <>
       <Head>
@@ -420,6 +514,17 @@ export default function ProductsManagement() {
               <table className="min-w-full bg-white rounded-lg overflow-hidden">
                 <thead className="bg-gray-100 text-gray-700">
                 <tr>
+                  <th className="py-3 px-4 text-left">
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={selectAll}
+                        onChange={handleSelectAllChange}
+                        className="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <span className="ml-2 text-sm font-medium text-gray-700">선택</span>
+                    </div>
+                  </th>
                   <th className="py-3 px-4 text-left">ID</th>
                   <th className="py-3 px-4 text-left">상품명</th>
                   <th className="py-3 px-4 text-left">카테고리</th>
@@ -433,6 +538,16 @@ export default function ProductsManagement() {
                 {products.length > 0 ? (
                   products.map((product) => (
                     <tr key={product.id} className="hover:bg-gray-50">
+                      <td className="py-3 px-4">
+                        <div className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={selectedProducts.includes(product.id)}
+                            onChange={() => handleProductSelect(product.id)}
+                            className="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          />
+                        </div>
+                      </td>
                       <td className="py-3 px-4">{product.id}</td>
                       <td className="py-3 px-4">
                         <Link href="/products/[id]" as={`/products/${product.id}`} target="_blank">
@@ -486,7 +601,7 @@ export default function ProductsManagement() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="7" className="py-10 px-4 text-center text-gray-500">
+                    <td colSpan="8" className="py-10 px-4 text-center text-gray-500">
                       상품이 없습니다. 새 상품을 추가해주세요.
                     </td>
                   </tr>
@@ -506,6 +621,75 @@ export default function ProductsManagement() {
               totalPages={pagination.totalPages}
               onPageChange={handlePageChange}
             />
+
+            {/* 일괄 작업 영역 */}
+            {selectedProducts.length > 0 && (
+              <div className="mt-4 p-4 bg-gray-50 rounded-lg shadow">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+                  <div className="text-sm text-gray-700 mb-2 sm:mb-0">
+                    선택한 상품: <span className="font-semibold">{selectedProducts.length}개</span>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <select
+                      value={bulkActionType}
+                      onChange={handleBulkActionTypeChange}
+                      className="border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">일괄 작업 선택</option>
+                      <option value="show">선택 노출</option>
+                      <option value="hide">선택 숨김</option>
+                      <option value="delete">선택 삭제</option>
+                      <option value="company">선택 제조사 변경</option>
+                    </select>
+
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="제조사 입력 (선택 사항)"
+                        value={bulkCompany}
+                        onChange={(e) => setBulkCompany(e.target.value)}
+                        list="bulk-company-options"
+                        className="border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <datalist id="bulk-company-options">
+                        {filters.companies?.map(company => (
+                          <option key={company.id} value={company.id.toString()} label={company.name}/>
+                        ))}
+                      </datalist>
+                    </div>
+
+                    <button
+                      onClick={handleBulkAction}
+                      disabled={processingBulkAction}
+                      className={`bg-blue-600 text-white px-4 py-2 rounded-md flex items-center justify-center gap-2 transition-colors ${
+                        processingBulkAction ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'
+                      }`}
+                    >
+                      {processingBulkAction ? (
+                        <>
+                          <div className="w-4 h-4 border-t-2 border-white rounded-full animate-spin"></div>
+                          처리 중...
+                        </>
+                      ) : (
+                        '일괄 작업 실행'
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {bulkActionResult.success > 0 && (
+                  <div className="text-sm text-green-600 mb-2">
+                    성공적으로 처리된 상품: {bulkActionResult.success}개
+                  </div>
+                )}
+                {bulkActionResult.failed > 0 && (
+                  <div className="text-sm text-red-600">
+                    처리 실패한 상품: {bulkActionResult.failed}개
+                  </div>
+                )}
+              </div>
+            )}
           </>
         )}
       </div>
