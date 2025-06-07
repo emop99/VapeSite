@@ -92,8 +92,8 @@ async function handlePostRequest(req, res) {
       rating,
       title: sanitizedTitle,
       content: sanitizedContent,
-      pros: sanitizedPros,
-      cons: sanitizedCons,
+      pros: sanitizedPros ? sanitizedPros : '',
+      cons: sanitizedCons ? sanitizedCons : '',
       recommended: recommended !== undefined ? recommended : true,
       helpfulCount: 0,
       userName: escapeHTML(user.nickname || user.name || user.email.split('@')[0])

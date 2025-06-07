@@ -62,6 +62,33 @@ export default function ProductDetail({productData, error: serverError}) {
   // 현재 사용자의 리뷰
   const [userReview, setUserReview] = useState(null);
 
+  // URL의 id 변경 감지 및 새 데이터 로드
+  useEffect(() => {
+    if (router.query.id) {
+      // 새 상품 정보 가져오기
+      fetch(`/api/products/${router.query.id}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('상품 정보를 가져오는데 실패했습니다');
+          }
+          return response.json();
+        })
+        .then(data => {
+          setProduct(data);
+          setPriceComparisons(data.priceComparisons || []);
+          setPriceHistory(data.priceHistory || []);
+          setReviews(data.reviews || []);
+          setAverageRating(data.averageRating || 0);
+          setIsEditing(false);
+          setEditingReview(null);
+          setUserReview(null);
+        })
+        .catch(err => {
+          setError(err.message);
+        });
+    }
+  }, [router.query.id]);
+
   // 사용자의 리뷰가 있는지 확인
   useEffect(() => {
     if (session?.user?.email && reviews.length > 0) {
