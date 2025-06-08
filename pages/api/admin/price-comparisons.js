@@ -121,6 +121,15 @@ async function createPriceComparison(req, res) {
       });
     }
 
+    // 현재 상품의 최저가 가격 조회
+    const lowestPriceComparison = await PriceComparisons.findOne({
+      where: {
+        productId: product.id,
+      },
+      order: [['price', 'ASC']],
+      transaction
+    });
+
     // 가격 비교 생성
     const newComparison = await PriceComparisons.create({
       productId,
@@ -129,39 +138,26 @@ async function createPriceComparison(req, res) {
       sellerUrl,
     }, {transaction});
 
-    // 이전 가격 이력 조회 (가장 최근 것)
-    const latestPriceHistory = await PriceHistory.findOne({
+    // 수정 후 상품의 최저가 가격 조회
+    const updatedLowestPriceComparison = await PriceComparisons.findOne({
       where: {
-        productId,
+        productId: product.id,
       },
-      order: [['createdAt', 'DESC']],
+      order: [['price', 'ASC']],
       transaction
     });
 
-    // 이전 가격 설정 및 계산
-    let oldPrice = 0;
-    let priceDifference = price;
-    let percentageChange = 0;
-
-    if (latestPriceHistory) {
-      // 이전 기록이 있으면 최신 가격을 이전 가격으로 설정
-      oldPrice = latestPriceHistory.newPrice;
-      priceDifference = price - oldPrice;
-      // 이전 가격이 0이 아닌 경우에만 백분율 변화 계산
-      if (oldPrice !== 0) {
-        percentageChange = (priceDifference / oldPrice) * 100;
-      }
+    if (lowestPriceComparison && updatedLowestPriceComparison && lowestPriceComparison.price !== updatedLowestPriceComparison.price) {
+      // 가격 변동 이력 등록
+      await PriceHistory.create({
+        newPrice: updatedLowestPriceComparison.price,
+        oldPrice: lowestPriceComparison.price,
+        productId: product.id,
+        sellerId: updatedLowestPriceComparison.sellerId,
+        priceDifference: updatedLowestPriceComparison.price - lowestPriceComparison.price,
+        percentageChange: ((updatedLowestPriceComparison.price - lowestPriceComparison.price) / lowestPriceComparison.price) * 100
+      }, {transaction});
     }
-
-    // 가격 이력 추가
-    await PriceHistory.create({
-      newPrice: price,
-      oldPrice: oldPrice,
-      productId,
-      sellerId: sellerSiteId,
-      priceDifference: priceDifference,
-      percentageChange: percentageChange
-    }, {transaction});
 
     // 생성된 가격 비교 정보 조회
     const comparison = await PriceComparisons.findByPk(newComparison.id, {
@@ -205,6 +201,9 @@ async function createPriceComparison(req, res) {
 
 // 가격 비교 수정
 async function updatePriceComparison(req, res) {
+  // 트랜잭션 시작
+  const transaction = await sequelize.transaction();
+
   try {
     const {id, sellerSiteId, price, sellerUrl, productId} = req.body;
 
@@ -217,8 +216,9 @@ async function updatePriceComparison(req, res) {
     }
 
     // 상품 존재 여부 확인
-    const product = await Product.findByPk(productId);
+    const product = await Product.findByPk(productId, {transaction});
     if (!product) {
+      await transaction.rollback();
       return res.status(404).json({
         success: false,
         message: '존재하지 않는 상품입니다.'
@@ -226,8 +226,9 @@ async function updatePriceComparison(req, res) {
     }
 
     // 가격 비교 존재 여부 확인
-    const comparison = await PriceComparisons.findByPk(id);
+    const comparison = await PriceComparisons.findByPk(id, {transaction});
     if (!comparison) {
+      await transaction.rollback();
       return res.status(404).json({
         success: false,
         message: '가격 비교 정보를 찾을 수 없습니다.'
@@ -235,8 +236,9 @@ async function updatePriceComparison(req, res) {
     }
 
     // 판매자 사이트 존재 여부 확인
-    const sellerSite = await SellerSite.findByPk(sellerSiteId);
+    const sellerSite = await SellerSite.findByPk(sellerSiteId, {transaction});
     if (!sellerSite) {
+      await transaction.rollback();
       return res.status(404).json({
         success: false,
         message: '존재하지 않는 판매자 사이트입니다.'
@@ -244,15 +246,17 @@ async function updatePriceComparison(req, res) {
     }
 
     // 동일한 판매자 사이트 ID로 변경하려는 경우, 다른 레코드와 중복되는지 확인
-    if (sellerSiteId !== comparison.sellerSiteId) {
+    if (sellerSiteId !== comparison.sellerId) {
       const existingComparison = await PriceComparisons.findOne({
         where: {
           productId: comparison.productId,
           sellerId: sellerSiteId
-        }
+        },
+        transaction
       });
 
       if (existingComparison && existingComparison.id !== id) {
+        await transaction.rollback();
         return res.status(409).json({
           success: false,
           message: '이미 동일한 판매자 사이트에 대한 가격 비교가 존재합니다.'
@@ -260,23 +264,42 @@ async function updatePriceComparison(req, res) {
       }
     }
 
+    // 현재 상품의 최저가 가격 조회
+    const lowestPriceComparison = await PriceComparisons.findOne({
+      where: {
+        productId: product.id,
+      },
+      order: [['price', 'ASC']],
+      transaction
+    });
+
     // 가격 비교 수정
     await comparison.update({
       sellerId: sellerSiteId,
       price,
       sellerUrl,
+    }, {transaction});
+
+    // 수정 후 상품의 최저가 가격 조회
+    const updatedLowestPriceComparison = await PriceComparisons.findOne({
+      where: {
+        productId: product.id,
+      },
+      order: [['price', 'ASC']],
+      transaction
     });
 
-    // 가격 변동 이력 등록
-    await PriceHistory.create({
-      newPrice: price,
-      oldPrice: comparison.price,
-      productId: product.id,
-      sellerId: sellerSiteId,
-      priceDifference: price - comparison.price,
-      percentageChange: ((price - comparison.price) / comparison.price) * 100
-    });
-
+    if (lowestPriceComparison && updatedLowestPriceComparison && lowestPriceComparison.price !== updatedLowestPriceComparison.price) {
+      // 가격 변동 이력 등록
+      await PriceHistory.create({
+        newPrice: updatedLowestPriceComparison.price,
+        oldPrice: lowestPriceComparison.price,
+        productId: product.id,
+        sellerId: updatedLowestPriceComparison.sellerId,
+        priceDifference: updatedLowestPriceComparison.price - lowestPriceComparison.price,
+        percentageChange: ((updatedLowestPriceComparison.price - lowestPriceComparison.price) / lowestPriceComparison.price) * 100
+      }, {transaction});
+    }
 
     // 수정된 가격 비교 정보 조회
     const updatedComparison = await PriceComparisons.findByPk(id, {
@@ -285,8 +308,12 @@ async function updatePriceComparison(req, res) {
           model: SellerSite,
           attributes: ['id', 'name', 'siteUrl']
         }
-      ]
+      ],
+      transaction
     });
+
+    // 트랜잭션 커밋
+    await transaction.commit();
 
     return res.status(200).json({
       success: true,
@@ -294,6 +321,9 @@ async function updatePriceComparison(req, res) {
       data: updatedComparison
     });
   } catch (error) {
+    // 오류 발생 시 트랜잭션 롤백
+    await transaction.rollback();
+
     console.error('가격 비교 수정 오류:', error);
 
     if (error.name === 'SequelizeValidationError') {
@@ -333,14 +363,56 @@ async function deletePriceComparison(req, res) {
       });
     }
 
+    // 트랜잭션 시작
+    const transaction = await sequelize.transaction();
+    const productId = comparison.productId;
+
+    // 현재 상품의 최저가 가격 조회
+    const lowestPriceComparison = await PriceComparisons.findOne({
+      where: {
+        productId: productId,
+      },
+      order: [['price', 'ASC']],
+      transaction
+    });
+
     // 가격 비교 삭제
-    await comparison.destroy();
+    await comparison.destroy({
+      transaction
+    });
+
+    // 수정 후 상품의 최저가 가격 조회
+    const updatedLowestPriceComparison = await PriceComparisons.findOne({
+      where: {
+        productId: productId,
+      },
+      order: [['price', 'ASC']],
+      transaction
+    });
+
+    if (lowestPriceComparison && updatedLowestPriceComparison && lowestPriceComparison.price !== updatedLowestPriceComparison.price) {
+      // 가격 변동 이력 등록
+      await PriceHistory.create({
+        newPrice: updatedLowestPriceComparison.price,
+        oldPrice: lowestPriceComparison.price,
+        productId: productId,
+        sellerId: updatedLowestPriceComparison.sellerId,
+        priceDifference: updatedLowestPriceComparison.price - lowestPriceComparison.price,
+        percentageChange: ((updatedLowestPriceComparison.price - lowestPriceComparison.price) / lowestPriceComparison.price) * 100
+      }, {transaction});
+    }
+
+    // 트랜잭션 커밋
+    await transaction.commit();
 
     return res.status(200).json({
       success: true,
       message: '가격 비교가 성공적으로 삭제되었습니다.'
     });
   } catch (error) {
+    // 오류 발생 시 트랜잭션 롤백
+    await transaction.rollback();
+
     console.error('가격 비교 삭제 오류:', error);
     return res.status(500).json({
       success: false,
