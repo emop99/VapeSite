@@ -1,5 +1,6 @@
 import {useEffect, useState} from 'react';
 import Link from 'next/link';
+import Image from "next/image";
 
 export default function SimilarProductsManager({productId}) {
   const [similarProducts, setSimilarProducts] = useState([]);
@@ -83,9 +84,11 @@ export default function SimilarProductsManager({productId}) {
               <tr key={product.id} className="hover:bg-gray-50">
                 <td className="py-2 px-3 border-b">
                   {product.imageUrl ? (
-                    <img
+                    <Image
                       src={product.imageUrl}
                       alt={product.visibleName}
+                      width={48}
+                      height={48}
                       className="w-12 h-12 object-contain"
                     />
                   ) : (

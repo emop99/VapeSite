@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import {useRouter} from 'next/router';
 import AdminPagination from '../../../components/admin/AdminPagination';
 import {getSession} from 'next-auth/react';
@@ -18,7 +18,7 @@ export default function ManufacturersPage() {
   const [success, setSuccess] = useState('');
 
   // 제조사 목록 불러오기
-  const fetchManufacturers = async (page = 1, search = '') => {
+  const fetchManufacturers = useCallback(async (page = 1, search = '') => {
     setIsLoading(true);
     try {
       const res = await fetch(
@@ -35,12 +35,21 @@ export default function ManufacturersPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   // 페이지 로드시 데이터 가져오기
   useEffect(() => {
-    fetchManufacturers(currentPage).then();
-  }, [currentPage]);
+    if (router.isReady) {
+      fetchManufacturers(currentPage).then();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router.isReady, router.query, fetchManufacturers]);
+
+  // 페이지 변경 처리
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    fetchManufacturers(page, searchTerm).then();
+  };
 
   // 검색 처리
   const handleSearch = (e) => {
@@ -280,7 +289,7 @@ export default function ManufacturersPage() {
             <AdminPagination
               currentPage={currentPage}
               totalPages={totalPages}
-              onPageChange={(page) => setCurrentPage(page)}
+              onPageChange={handlePageChange}
             />
           </div>
         )}
