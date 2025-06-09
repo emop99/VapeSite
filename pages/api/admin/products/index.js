@@ -17,7 +17,7 @@ async function productsHandler(req, res) {
 // 상품 목록 조회
 async function getProducts(req, res) {
   try {
-    const {page = 1, limit = 10, search = '', category = '', company = '', hasImage = '', isShow = ''} = req.query;
+    const {page = 1, limit = 10, search = '', category = '', company = '', hasImage = '', isShow = '', sortField = 'createdAt', sortOrder = 'DESC'} = req.query;
     const offset = (page - 1) * limit;
 
     // 검색 조건 설정
@@ -65,12 +65,17 @@ async function getProducts(req, res) {
       whereClause.isShow = false;
     }
 
+    // 정렬 설정 - 허용된 정렬 필드만 사용
+    const allowedSortFields = ['id', 'visibleName', 'createdAt'];
+    const actualSortField = allowedSortFields.includes(sortField) ? sortField : 'createdAt';
+    const actualSortOrder = ['ASC', 'DESC'].includes(sortOrder.toUpperCase()) ? sortOrder.toUpperCase() : 'DESC';
+
     // 상품 목록 조회
     const {count, rows: products} = await Product.findAndCountAll({
       where: whereClause,
       limit: parseInt(limit),
       offset: parseInt(offset),
-      order: [['createdAt', 'DESC']],
+      order: [[actualSortField, actualSortOrder]],
       include: [
         {model: ProductCategory, attributes: ['id', 'name']},
         {model: Company, attributes: ['id', 'name']}
@@ -100,6 +105,10 @@ async function getProducts(req, res) {
       filters: {
         categories,
         companies
+      },
+      sort: {
+        field: actualSortField,
+        order: actualSortOrder
       }
     };
 

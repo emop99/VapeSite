@@ -2,7 +2,7 @@ import {useCallback, useEffect, useState} from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
 import {useRouter} from 'next/router';
-import {FiEdit, FiEye, FiEyeOff, FiFilter, FiPlus, FiSearch, FiTrash2} from 'react-icons/fi';
+import {FiChevronDown, FiChevronUp, FiEdit, FiEye, FiEyeOff, FiFilter, FiPlus, FiSearch, FiTrash2} from 'react-icons/fi';
 import AdminPagination from '../../../components/admin/AdminPagination';
 
 // 상품 관리 페이지
@@ -35,10 +35,13 @@ export default function ProductsManagement() {
   const [bulkCompany, setBulkCompany] = useState('');
   const [processingBulkAction, setProcessingBulkAction] = useState(false);
   const [bulkActionResult, setBulkActionResult] = useState({success: 0, failed: 0});
+  // 정렬 관련 상태 추가
+  const [sortField, setSortField] = useState('createdAt');
+  const [sortOrder, setSortOrder] = useState('DESC');
 
   // 상품 데이터 불러오기
   const fetchProducts = useCallback(
-    async (page = 1, search = '', category = '', company = '', imageFilter = '', showFilter = '', limit = 10) => {
+    async (page = 1, search = '', category = '', company = '', imageFilter = '', showFilter = '', limit = 10, orderField = sortField, order = sortOrder) => {
       try {
         setLoading(true);
 
@@ -48,7 +51,9 @@ export default function ProductsManagement() {
           limit,
           search,
           category,
-          company
+          company,
+          sortField: orderField,
+          sortOrder: order
         });
 
         // 이미지 필터가 있는 경우 추가
@@ -74,6 +79,12 @@ export default function ProductsManagement() {
           setPagination(result.data.pagination);
           setFilters(result.data.filters);
 
+          // API 응답에서 정렬 정보 업데이트
+          if (result.data.sort) {
+            setSortField(result.data.sort.field);
+            setSortOrder(result.data.sort.order);
+          }
+
           // 회사 ID에 해당하는 이름을 찾아서 검색어에 설정
           if (company && result.data.filters.companies?.length > 0) {
             const companyObj = result.data.filters.companies.find(c => c.id === parseInt(company));
@@ -88,7 +99,7 @@ export default function ProductsManagement() {
         setLoading(false);
       }
     },
-    []
+    [sortField, sortOrder]
   );
 
   // URL 쿼리에서 초기 검색 조건 설정
@@ -123,7 +134,9 @@ export default function ProductsManagement() {
     company = selectedCompany,
     imageFilter = hasImage,
     showFilter = isShow,
-    limit = pageSize
+    limit = pageSize,
+    orderField = sortField,
+    order = sortOrder
   ) => {
     const query = {page: page.toString(), limit: limit.toString()};
     if (search) query.search = search;
@@ -131,11 +144,13 @@ export default function ProductsManagement() {
     if (company) query.company = company;
     if (imageFilter) query.hasImage = imageFilter;
     if (showFilter) query.isShow = showFilter;
+    if (orderField) query.sortField = orderField;
+    if (order) query.sortOrder = order;
 
     router.push({
       pathname: router.pathname,
       query
-    }, undefined, { shallow: true });
+    }, undefined, {shallow: true});
   };
 
   // 카테고리 변경 처리
@@ -363,6 +378,17 @@ export default function ProductsManagement() {
     }
   };
 
+  // 정렬 필드 변경 처리
+  const handleSortChange = (field) => {
+    let newOrder = 'ASC';
+    if (sortField === field && sortOrder === 'ASC') {
+      newOrder = 'DESC';
+    }
+    setSortField(field);
+    setSortOrder(newOrder);
+    updateUrlWithFilters(1, searchTerm, selectedCategory, selectedCompany, hasImage, isShow, pageSize, field, newOrder);
+  };
+
   return (
     <>
       <Head>
@@ -436,7 +462,7 @@ export default function ProductsManagement() {
               />
               <datalist id="company-options">
                 {filters.companies?.map(company => (
-                  <option key={company.id} value={company.name} />
+                  <option key={company.id} value={company.name}/>
                 ))}
               </datalist>
               <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
@@ -526,10 +552,50 @@ export default function ProductsManagement() {
                     </div>
                   </th>
                   <th className="py-3 px-4 text-left">ID</th>
-                  <th className="py-3 px-4 text-left">상품명</th>
-                  <th className="py-3 px-4 text-left">카테고리</th>
-                  <th className="py-3 px-4 text-left">제조사</th>
-                  <th className="py-3 px-4 text-left">등록일</th>
+                  <th className="py-3 px-4 text-left">
+                    상품명
+                    <button
+                      onClick={() => handleSortChange('visibleName')}
+                      className="ml-2 text-gray-500 hover:text-gray-700"
+                      type="button"
+                    >
+                      {sortField === 'visibleName' && sortOrder === 'ASC' ? (
+                        <FiChevronUp className="w-5 h-5"/>
+                      ) : (
+                        <FiChevronDown className="w-5 h-5"/>
+                      )}
+                    </button>
+                  </th>
+                  <th className="py-3 px-4 text-left">
+                    카테고리
+                    <button
+                      className="ml-2 text-gray-500 hover:text-gray-700"
+                      type="button"
+                    >
+                    </button>
+                  </th>
+                  <th className="py-3 px-4 text-left">
+                    제조사
+                    <button
+                      className="ml-2 text-gray-500 hover:text-gray-700"
+                      type="button"
+                    >
+                    </button>
+                  </th>
+                  <th className="py-3 px-4 text-left">
+                    등록일
+                    <button
+                      onClick={() => handleSortChange('createdAt')}
+                      className="ml-2 text-gray-500 hover:text-gray-700"
+                      type="button"
+                    >
+                      {sortField === 'createdAt' && sortOrder === 'ASC' ? (
+                        <FiChevronUp className="w-5 h-5"/>
+                      ) : (
+                        <FiChevronDown className="w-5 h-5"/>
+                      )}
+                    </button>
+                  </th>
                   <th className="py-3 px-4 text-center">노출</th>
                   <th className="py-3 px-4 text-center">관리</th>
                 </tr>
