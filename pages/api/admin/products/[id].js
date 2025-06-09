@@ -1,5 +1,6 @@
 import {withAdminAuth} from '../../../../utils/adminAuth';
 import {Company, PriceComparison, PriceHistory, Product, ProductCategory, Review} from "../../../../models";
+import {sequelize} from '../../../../lib/db';
 
 async function productDetailHandler(req, res) {
   const {id} = req.query;
@@ -104,20 +105,27 @@ async function updateVisibility(req, res, id) {
 
 // 상품 삭제
 async function deleteProduct(req, res, id) {
+  // 트랜잭션 시작
+  const transaction = await sequelize.transaction();
+
   try {
     // 상품 존재 여부 확인
     const product = await Product.findByPk(id);
 
     if (!product) {
+      await transaction.rollback();
       return res.status(404).json({success: false, message: '상품을 찾을 수 없습니다.'});
     }
 
-    await PriceComparison.destroy({where: {productId: id}}); // 가격 비교 정보 삭제
-    await PriceHistory.destroy({where: {productId: id}}); // 가격 이력 삭제
-    await Review.destroy({where: {productId: id}}); // 리뷰 정보 삭제
+    await PriceComparison.destroy({where: {productId: id}, transaction}); // 가격 비교 정보 삭제
+    await PriceHistory.destroy({where: {productId: id}, transaction}); // 가격 이력 삭제
+    await Review.destroy({where: {productId: id}, transaction}); // 리뷰 정보 삭제
 
     // 상품 삭제
-    await product.destroy();
+    await product.destroy({transaction});
+
+    // 트랜잭션 커밋
+    await transaction.commit();
 
     return res.status(200).json({
       success: true,
@@ -125,6 +133,8 @@ async function deleteProduct(req, res, id) {
     });
 
   } catch (error) {
+    // 오류 발생 시 트랜잭션 롤백
+    await transaction.rollback();
     console.error('상품 삭제 오류:', error);
     return res.status(500).json({success: false, message: '서버 오류가 발생했습니다.'});
   }
