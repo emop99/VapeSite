@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useState} from 'react';
-import {FiEdit, FiExternalLink, FiPlus, FiSave, FiSearch, FiTrash2, FiX} from 'react-icons/fi';
+import {FiArrowRight, FiEdit, FiExternalLink, FiPlus, FiSave, FiSearch, FiTrash2, FiX} from 'react-icons/fi';
 
 /**
  * 가격 비교 관리 컴포넌트
@@ -12,6 +12,13 @@ const PriceComparisonManager = ({productId}) => {
   const [sites, setSites] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
+  const [showTransferModal, setShowTransferModal] = useState(false);
+  const [selectedComparisons, setSelectedComparisons] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [selectedProductId, setSelectedProductId] = useState(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const [transferLoading, setTransferLoading] = useState(false);
 
   // 폼 상태 관리
   const [formData, setFormData] = useState({
@@ -240,17 +247,110 @@ const PriceComparisonManager = ({productId}) => {
     }
   };
 
+  // 가격 비교 이관 핸들러
+  const handleTransferComparisons = async () => {
+    if (!selectedProductId) {
+      alert('이관할 상품을 선택해주세요.');
+      return;
+    }
+
+    if (selectedComparisons.length === 0) {
+      alert('이관할 가격 비교를 선택해주세요.');
+      return;
+    }
+
+    if (!window.confirm('선택한 가격 비교 정보를 정말로 이관하시겠습니까?')) {
+      return;
+    }
+
+    setTransferLoading(true);
+
+    try {
+      const response = await fetch(`/api/admin/price-comparisons/transfer`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          targetProductId: selectedProductId,
+          comparisonIds: selectedComparisons,
+          sourceProductId: productId,
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        if (result.sourceComparisonCount === 0) {
+          alert('선택한 가격 비교 정보가 성공적으로 이관되었으며, 원본 상품이 숨김 상품으로 변경되었습니다.');
+        } else {
+          alert('가격 비교 정보가 성공적으로 이관되었습니다.');
+        }
+        setShowTransferModal(false);
+        setSelectedComparisons([]);
+        loadComparisons().then();
+      } else {
+        alert(`가격 비교 이관 실패: ${result.message}`);
+      }
+    } catch (error) {
+      console.error('가격 비교 이관 오류:', error);
+      alert('가격 비교 이관 중 오류가 발생했습니다.');
+    } finally {
+      setTransferLoading(false);
+    }
+  };
+
+  // 검색 핸들러
+  const handleSearch = async () => {
+    if (!searchQuery) {
+      alert('검색어를 입력하세요.');
+      return;
+    }
+
+    setIsSearching(true);
+
+    try {
+      const response = await fetch(`/api/admin/products?search=${encodeURIComponent(searchQuery)}`);
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          setSearchResults(result.data.products);
+        } else {
+          alert(`상품 검색 실패: ${result.message}`);
+        }
+      } else {
+        alert(`상품 검색 실패: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error('상품 검색 오류:', error);
+      alert('상품 검색 중 오류가 발생했습니다.');
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
   return (
     <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">가격 비교 관리</h2>
-        <button
-          onClick={handleShowAddForm}
-          className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded flex items-center"
-          disabled={isAdding}
-        >
-          <FiPlus className="mr-1"/> 가격 비교 추가
-        </button>
+        <div className="flex space-x-2">
+          {selectedComparisons.length > 0 && (
+            <button
+              onClick={() => setShowTransferModal(true)}
+              className="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded flex items-center"
+            >
+              <FiArrowRight className="mr-1"/> 선택 항목 이관 ({selectedComparisons.length})
+            </button>
+          )}
+          <button
+            onClick={handleShowAddForm}
+            className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded flex items-center"
+            disabled={isAdding}
+          >
+            <FiPlus className="mr-1"/> 가격 비교 추가
+          </button>
+        </div>
       </div>
 
       {/* 가격 비교 추가 폼 */}
@@ -327,6 +427,7 @@ const PriceComparisonManager = ({productId}) => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
             <tr>
+              <th className="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">선택</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">판매처</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">가격</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">URL</th>
@@ -340,6 +441,13 @@ const PriceComparisonManager = ({productId}) => {
                 {editingId === comparison.id ? (
                   // 편집 모드
                   <>
+                    <td className="px-2 py-2 text-center">
+                      <input
+                        type="checkbox"
+                        disabled
+                        className="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500"
+                      />
+                    </td>
                     <td className="px-6 py-2">
                       <input type="hidden" name="id" value={formData.id}/>
                       <input type="hidden" name="productId" value={comparison.productId}/>
@@ -391,6 +499,20 @@ const PriceComparisonManager = ({productId}) => {
                 ) : (
                   // 보기 모드
                   <>
+                    <td className="px-2 py-4 text-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedComparisons.includes(comparison.id)}
+                        onChange={() => {
+                          if (selectedComparisons.includes(comparison.id)) {
+                            setSelectedComparisons(selectedComparisons.filter(id => id !== comparison.id));
+                          } else {
+                            setSelectedComparisons([...selectedComparisons, comparison.id]);
+                          }
+                        }}
+                        className="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500"
+                      />
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {comparison.SellerSite?.name || '-'}
                     </td>
@@ -441,6 +563,75 @@ const PriceComparisonManager = ({productId}) => {
           <FiSearch className="mx-auto mb-2" size={24}/>
           <p>등록된 가격 비교 정보가 없습니다.</p>
           <p className="text-sm mt-1">새 가격 비교를 추가하려면 상단의 &apos;가격 비교 추가&apos; 버튼을 클릭하세요.</p>
+        </div>
+      )}
+
+      {/* 가격 비교 이관 모달 */}
+      {showTransferModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowTransferModal(false)}></div>
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-lg w-full relative z-10">
+            <h3 className="text-lg font-medium mb-4">가격 비교 이관</h3>
+            <p className="text-sm text-gray-500 mb-4">
+              선택한 가격 비교 정보를 다른 상품으로 이관합니다.
+            </p>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">이관할 상품</label>
+              <div className="flex">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleSearch().then();
+                    }
+                  }}
+                  className="flex-1 border border-gray-300 rounded-md py-2 px-3 text-sm"
+                  placeholder="상품명 검색"
+                />
+                <button
+                  onClick={handleSearch}
+                  className="ml-2 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
+                  disabled={isSearching}
+                >
+                  {isSearching ? '검색 중...' : '검색'}
+                </button>
+              </div>
+            </div>
+            {searchResults.length > 0 && (
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">검색 결과</label>
+                <div className="max-h-40 overflow-y-auto border border-gray-300 rounded-md">
+                  {searchResults.map((product) => (
+                    <div
+                      key={product.id}
+                      className={`px-4 py-2 cursor-pointer ${selectedProductId === product.id ? 'bg-blue-100' : 'hover:bg-gray-50'}`}
+                      onClick={() => setSelectedProductId(product.id)}
+                    >
+                      [{product.id}] - {product.visibleName}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={() => setShowTransferModal(false)}
+                className="bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded mr-2"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleTransferComparisons}
+                className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded"
+                disabled={transferLoading}
+              >
+                {transferLoading ? '이관 중...' : '이관하기'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

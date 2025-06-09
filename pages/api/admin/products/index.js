@@ -127,7 +127,8 @@ async function createProduct(req, res) {
     // productCategoryId로 변경 (API 요청에서는 categoryId로 받지만 DB 모델에서는 productCategoryId 사용)
     const formattedProductData = {
       ...productData,
-      productCategoryId: productData.categoryId
+      productCategoryId: productData.categoryId,
+      isShow: false, // 기본값은 false로 설정
     };
 
     // categoryId 필드 제거 (중복 방지)

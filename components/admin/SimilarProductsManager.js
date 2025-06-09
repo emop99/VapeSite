@@ -1,6 +1,7 @@
 import {useEffect, useState} from 'react';
 import Link from 'next/link';
 import Image from "next/image";
+import {normalizeImageUrl} from '../../utils/helper';
 
 export default function SimilarProductsManager({productId}) {
   const [similarProducts, setSimilarProducts] = useState([]);
@@ -85,7 +86,7 @@ export default function SimilarProductsManager({productId}) {
                 <td className="py-2 px-3 border-b">
                   {product.imageUrl ? (
                     <Image
-                      src={product.imageUrl}
+                      src={normalizeImageUrl(product.imageUrl)}
                       alt={product.visibleName}
                       width={48}
                       height={48}
