@@ -5,6 +5,7 @@ import WishList from '../../../models/WishList';
 import Company from '../../../models/Company';
 import PriceComparisons from '../../../models/PriceComparisons';
 import SellerSite from '../../../models/SellerSite';
+import ProductCategory from '../../../models/ProductCategory';
 
 // 찜목록 API 라우터
 export default async function handler(req, res) {
@@ -40,11 +41,13 @@ async function handleGetRequest(req, res) {
     // 찜 목록 조회 - 가격 비교 및 판매처 정보도 포함
     const wishList = await WishList.findAll({
       where: {userId: user.id},
+      order: [['createdAt', 'DESC']], // 최신 순으로 정렬
       include: [
         {
           model: Product,
           include: [
             {model: Company},
+            {model: ProductCategory},
             {
               model: PriceComparisons,
               separate: true, // 별도의 쿼리로 가져오기

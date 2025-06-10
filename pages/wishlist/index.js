@@ -4,7 +4,7 @@ import {useRouter} from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
-import {FaHeart} from 'react-icons/fa';
+import {FaHeart, FaTag} from 'react-icons/fa';
 import {normalizeImageUrl} from '../../utils/helper';
 import toast from 'react-hot-toast'; // 토스트 라이브러리 import
 
@@ -138,6 +138,13 @@ export default function WishList() {
                         <h2 className="text-lg font-semibold text-gray-800 hover:text-primary transition-colors mb-1">
                           {item.Product.visibleName}
                         </h2>
+                        {/* 카테고리 정보 추가 */}
+                        {item.Product.ProductCategory && (
+                          <div className="flex items-center text-xs text-gray-600 mb-1">
+                            <FaTag className="mr-1" size={12}/>
+                            <span>{item.Product.ProductCategory.name}</span>
+                          </div>
+                        )}
                         <p className="text-sm text-gray-500">{item.Product.Company.name}</p>
                       </div>
                     </div>
