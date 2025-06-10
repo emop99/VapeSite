@@ -1,9 +1,100 @@
 import Link from 'next/link';
 import Image from "next/image";
+import {useEffect, useState} from 'react';
+import {useSession} from 'next-auth/react';
+import {useRouter} from 'next/router';
+import {FaHeart, FaRegHeart} from 'react-icons/fa';
+import toast from 'react-hot-toast';
 import {normalizeImageUrl} from '../utils/helper';
 
 // 제품 카드 컴포넌트
 export default function ProductCard({product}) {
+  const {data: session} = useSession();
+  const router = useRouter();
+  const [isWished, setIsWished] = useState(false);
+  const [wishLoading, setWishLoading] = useState(false);
+
+  // 찜 상태 체크
+  useEffect(() => {
+    if (product && session?.user) {
+      checkWishStatus(product.id).then();
+    }
+  }, [product, session]);
+
+  // 찜 상태 확인 함수
+  const checkWishStatus = async (productId) => {
+    if (!session?.user) {
+      setIsWished(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/wishlist', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({productId}),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setIsWished(data.isWished);
+      }
+    } catch (error) {
+      console.error('찜 상태 확인 오류:', error);
+    }
+  };
+
+  // 찜하기/취소 토글 함수
+  const toggleWish = async (e) => {
+    // 이벤트 버블링 방지 (Link 클릭 방지)
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!session) {
+      // 로그인하지 않은 사용자는 로그인 페이지로 이동
+      router.push('/auth/signin?callbackUrl=' + encodeURIComponent(router.asPath));
+      return;
+    }
+
+    setWishLoading(true);
+    try {
+      if (isWished) {
+        // 찜 취소
+        const response = await fetch(`/api/wishlist/${product.id}`, {
+          method: 'DELETE',
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setIsWished(data.isWished);
+          toast.success('찜 목록에서 삭제되었습니다.');
+        }
+      } else {
+        // 찜하기
+        const response = await fetch('/api/wishlist', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({productId: product.id}),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setIsWished(data.isWished);
+          toast.success('찜 목록에 추가되었습니다.');
+        }
+      }
+    } catch (error) {
+      console.error('찜하기 오류:', error);
+      toast.error('찜하기 처리 중 오류가 발생했습니다.');
+    } finally {
+      setWishLoading(false);
+    }
+  };
+
   // 평균 평점 표시를 위한 별 아이콘 생성 함수
   const renderStars = (rating) => {
     if (!rating) return null;
@@ -34,9 +125,21 @@ export default function ProductCard({product}) {
   };
 
   return (
-    <div
-      className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
-    >
+    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow relative">
+      {/* 찜하기 버튼 (상단 우측에 위치) */}
+      <button
+        onClick={toggleWish}
+        disabled={wishLoading}
+        className={`absolute top-3 right-3 z-10 p-3 rounded-full border ${
+          isWished
+            ? 'bg-pink-100 text-pink-500'
+            : 'bg-gray-100 text-gray-400 hover:text-gray-600'
+        }`}
+        aria-label={isWished ? '찜 취소하기' : '찜하기'}
+      >
+        {isWished ? <FaHeart className="text-lg"/> : <FaRegHeart className="text-lg"/>}
+      </button>
+
       <Link href={`/products/${product.id}`}>
         <div className="p-4">
           <div className="h-48 bg-gray-100 flex items-center justify-center mb-4">
