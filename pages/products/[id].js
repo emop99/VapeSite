@@ -63,7 +63,7 @@ export default function ProductDetail({productData, error: serverError}) {
   // 현재 사용자의 리뷰
   const [userReview, setUserReview] = useState(null);
   // 찜 상태 추가
-  const [isWished, setIsWished] = useState(false);
+  const [isWished, setIsWished] = useState(productData?.isWished || false);
   // 찜하기 로딩 상태
   const [wishLoading, setWishLoading] = useState(false);
 
@@ -87,8 +87,7 @@ export default function ProductDetail({productData, error: serverError}) {
           setIsEditing(false);
           setEditingReview(null);
           setUserReview(null);
-          // 상품 정보가 변경되면 찜 상태 다시 체크
-          checkWishStatus(data.id).then();
+          setIsWished(data.isWished || false);
         })
         .catch(err => {
           setError(err.message);
@@ -96,31 +95,6 @@ export default function ProductDetail({productData, error: serverError}) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.query.id]);
-
-  // 찜 상태 체크
-  const checkWishStatus = async (productId) => {
-    if (!session?.user) {
-      setIsWished(false);
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/wishlist', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({productId}),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setIsWished(data.isWished);
-      }
-    } catch (error) {
-      console.error('찜 상태 확인 오류:', error);
-    }
-  };
 
   // 찜하기/취소 토글 함수
   const toggleWish = async () => {
@@ -142,6 +116,9 @@ export default function ProductDetail({productData, error: serverError}) {
           const data = await response.json();
           setIsWished(data.isWished);
           toast.success('찜 목록에서 삭제되었습니다.'); // 성공 메시지 추가
+        } else {
+          const errorData = await response.json();
+          toast.error(errorData.message || '찜 취소에 실패했습니다.'); // 오류 메시지 추가
         }
       } else {
         // 찜하기
@@ -157,6 +134,9 @@ export default function ProductDetail({productData, error: serverError}) {
           const data = await response.json();
           setIsWished(data.isWished);
           toast.success('찜 목록에 추가되었습니다.'); // 성공 메시지 추가
+        } else {
+          const errorData = await response.json();
+          toast.error(errorData.message || '찜하기에 실패했습니다.'); // 오류 메시지 추가
         }
       }
     } catch (error) {
@@ -166,14 +146,6 @@ export default function ProductDetail({productData, error: serverError}) {
       setWishLoading(false);
     }
   };
-
-  // 컴포넌트 마운트시 찜 상태 확인
-  useEffect(() => {
-    if (product?.id) {
-      checkWishStatus(product.id).then();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session, product]);
 
   // 사용자의 리뷰가 있는지 확인
   useEffect(() => {
@@ -714,8 +686,18 @@ export async function getServerSideProps(context) {
   const {id} = context.params;
 
   try {
-    // 서버에서 API 직접 호출
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/${id}`);
+    // API 호출을 위한 요청 옵션 설정
+    const requestOptions = {
+      headers: {}
+    };
+
+    // 로그인 상태인 경우 쿠키 추가
+    if (context.req.headers.cookie) {
+      requestOptions.headers['Cookie'] = context.req.headers.cookie;
+    }
+
+    // 서버에서 API 직접 호출 (인증 토큰 포함)
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/${id}`, requestOptions);
 
     if (!response.ok) {
       if (response.status === 400) {
@@ -739,6 +721,7 @@ export async function getServerSideProps(context) {
 
     const productData = await response.json();
 
+    // 세션 정보를 props로 전달 (클라이언트에서 사용 가능)
     return {
       props: {
         productData,

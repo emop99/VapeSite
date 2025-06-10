@@ -6,7 +6,9 @@ import SellerSite from '../../../models/SellerSite';
 import PriceHistory from '../../../models/PriceHistory';
 import Review from '../../../models/Review';
 import User from '../../../models/User';
+import WishList from '../../../models/WishList';
 import {sequelize} from '../../../lib/db';
+import {getSession} from 'next-auth/react'; // 세션 정보를 얻기 위해 추가
 
 /**
  * 단일 제품 API 핸들러
@@ -35,6 +37,10 @@ export default async function handler(req, res) {
  */
 async function getProduct(req, res, id) {
   try {
+    // 세션에서 사용자 ID 가져오기
+    const session = await getSession({req});
+    const userId = session?.user?.id;
+
     // 제품 조회 (제조사 정보 포함)
     const product = await Product.findOne({
       where: {
@@ -82,6 +88,18 @@ async function getProduct(req, res, id) {
       }
     );
 
+    // 찜 목록 여부 확인
+    let isWished = false;
+    if (userId) {
+      const wish = await WishList.findOne({
+        where: {
+          userId: userId,
+          productId: id
+        }
+      });
+      isWished = !!wish; // 찜 목록에 있으면 true, 없으면 false
+    }
+
     // 조회수 증가 처리
     await product.increment('viewCount');
 
@@ -98,6 +116,7 @@ async function getProduct(req, res, id) {
       reviews,
       averageRating,
       similarProducts,
+      isWished,
     };
 
     return res.status(200).json(responseData);

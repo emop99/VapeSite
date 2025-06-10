@@ -4,8 +4,10 @@ import ProductCategory from '../../models/ProductCategory';
 import Company from '../../models/Company';
 import PriceComparisons from '../../models/PriceComparisons';
 import Review from '../../models/Review';
+import WishList from '../../models/WishList';
 import {Op} from "sequelize";
 import {sequelize} from '../../lib/db';
+import {getSession} from 'next-auth/react';
 
 /**
  * 제품 API 핸들러
@@ -35,6 +37,10 @@ export default async function handler(req, res) {
  */
 async function getProducts(req, res) {
   try {
+    // 세션에서 사용자 ID 가져오기
+    const session = await getSession({req});
+    const userId = session?.user?.id;
+
     const {
       page = 1,
       limit = 12,
@@ -76,6 +82,15 @@ async function getProducts(req, res) {
         required: false
       }
     ];
+
+    // 로그인한 사용자의 경우 찜 목록 정보도 포함
+    if (userId) {
+      include.push({
+        model: WishList,
+        required: false,
+        where: {userId}
+      });
+    }
 
     // 기본 조건: PriceComparisons.price > 0
     const priceCondition = {'$PriceComparisons.price$': {[Op.gt]: 0}};
@@ -157,7 +172,18 @@ async function getProducts(req, res) {
               WHERE vape_reviews.productId = Product.id
             )`),
             'reviewCount'
-          ]
+          ],
+          // 로그인한 사용자의 경우 찜 여부 확인
+          ...(userId ? [
+            [
+              sequelize.literal(`(
+                SELECT COUNT(*) 
+                FROM vape_wish_list
+                WHERE vape_wish_list.productId = Product.id AND vape_wish_list.userId = ${userId}
+              )`),
+              'isWished'
+            ]
+          ] : [])
         ]
       }
     });

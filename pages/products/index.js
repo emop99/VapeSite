@@ -1,7 +1,7 @@
 import ProductListPage from "../../components/ProductListPage";
 
 // 제품 검색 결과 페이지
-export default function ProductsPage({ products, pagination, searchTerm }) {
+export default function ProductsPage({products, pagination, searchTerm}) {
   return (
     <ProductListPage
       category=""
@@ -16,12 +16,22 @@ export default function ProductsPage({ products, pagination, searchTerm }) {
 
 // 서버 사이드에서 데이터 가져오기
 export async function getServerSideProps(context) {
-  const { page = 1, search = '' } = context.query;
+  const {page = 1, search = ''} = context.query;
 
   try {
-    // 서버에서 API 직접 호출 (카테고리 없이 검색)
+    // API 호출을 위한 요청 옵션 설정
+    const requestOptions = {
+      headers: {}
+    };
+
+    // 로그인 상태인 경우 쿠키 추가
+    if (context.req.headers.cookie) {
+      requestOptions.headers['Cookie'] = context.req.headers.cookie;
+    }
+
+    // 서버에서 API 직접 호출 (카테고리 없이 검색, 인증 정보 포함)
     const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/products?page=${page}&limit=12${search ? `&search=${search}` : ''}`;
-    const response = await fetch(apiUrl);
+    const response = await fetch(apiUrl, requestOptions);
 
     if (!response.ok) {
       throw new Error('제품을 불러오는데 문제가 발생했습니다.');
@@ -32,7 +42,7 @@ export async function getServerSideProps(context) {
     return {
       props: {
         products: data.products || [],
-        pagination: data.pagination || { page: parseInt(page), totalPages: 1 },
+        pagination: data.pagination || {page: parseInt(page), totalPages: 1},
         searchTerm: search
       }
     };
@@ -43,10 +53,9 @@ export async function getServerSideProps(context) {
     return {
       props: {
         products: [],
-        pagination: { page: parseInt(page), totalPages: 1 },
+        pagination: {page: parseInt(page), totalPages: 1},
         searchTerm: search
       }
     };
   }
 }
-

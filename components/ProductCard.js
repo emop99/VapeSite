@@ -11,41 +11,15 @@ import {normalizeImageUrl} from '../utils/helper';
 export default function ProductCard({product}) {
   const {data: session} = useSession();
   const router = useRouter();
-  const [isWished, setIsWished] = useState(false);
+  const [isWished, setIsWished] = useState(product?.isWished || false);
   const [wishLoading, setWishLoading] = useState(false);
 
-  // 찜 상태 체크
+  // 상품 API에서 받아온 찜 상태 사용
   useEffect(() => {
-    if (product && session?.user) {
-      checkWishStatus(product.id).then();
+    if (product) {
+      setIsWished(product.isWished || false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [product, session]);
-
-  // 찜 상태 확인 함수
-  const checkWishStatus = async (productId) => {
-    if (!session?.user) {
-      setIsWished(false);
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/wishlist', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({productId}),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setIsWished(data.isWished);
-      }
-    } catch (error) {
-      console.error('찜 상태 확인 오류:', error);
-    }
-  };
+  }, [product]);
 
   // 찜하기/취소 토글 함수
   const toggleWish = async (e) => {
@@ -71,6 +45,9 @@ export default function ProductCard({product}) {
           const data = await response.json();
           setIsWished(data.isWished);
           toast.success('찜 목록에서 삭제되었습니다.');
+        } else {
+          const errorData = await response.json();
+          toast.error(errorData.message || '찜 취소에 실패했습니다.');
         }
       } else {
         // 찜하기
@@ -86,6 +63,9 @@ export default function ProductCard({product}) {
           const data = await response.json();
           setIsWished(data.isWished);
           toast.success('찜 목록에 추가되었습니다.');
+        } else {
+          const errorData = await response.json();
+          toast.error(errorData.message || '찜하기에 실패했습니다.');
         }
       }
     } catch (error) {

@@ -4,6 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3002",
+    "dev:debug": "NODE_OPTIONS='--inspect' next dev -p 3002",
+    "dev:debug:win": "cross-env NODE_OPTIONS=--inspect next dev -p 3002",
+    "dev:debug:verbose": "cross-env NODE_OPTIONS=\"--inspect --trace-warnings\" next dev -p 3002",
     "build": "next build",
     "start": "next start -p 3000",
     "lint": "next lint"
@@ -30,6 +33,7 @@
     "@types/node": "^20.8.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
+    "cross-env": "^7.0.3",
     "eslint": "^8.50.0",
     "eslint-config-next": "^15.3.2",
     "typescript": "^5.2.0"
