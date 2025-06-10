@@ -19,6 +19,7 @@ export default function ProductCard({product}) {
     if (product && session?.user) {
       checkWishStatus(product.id).then();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product, session]);
 
   // 찜 상태 확인 함수

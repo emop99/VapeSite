@@ -94,6 +94,7 @@ export default function ProductDetail({productData, error: serverError}) {
           setError(err.message);
         });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.query.id]);
 
   // 찜 상태 체크
@@ -171,6 +172,7 @@ export default function ProductDetail({productData, error: serverError}) {
     if (product?.id) {
       checkWishStatus(product.id).then();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, product]);
 
   // 사용자의 리뷰가 있는지 확인
