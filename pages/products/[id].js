@@ -67,34 +67,18 @@ export default function ProductDetail({productData, error: serverError}) {
   // 찜하기 로딩 상태
   const [wishLoading, setWishLoading] = useState(false);
 
-  // URL의 id 변경 감지 및 새 데이터 로드
+  // 상품 데이터 변경 감지 및 데이터 로드
   useEffect(() => {
-    if (router.query.id) {
-      // 새 상품 정보 가져오기
-      fetch(`/api/products/${router.query.id}`)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('상품 정보를 가져오는데 실패했습니다');
-          }
-          return response.json();
-        })
-        .then(data => {
-          setProduct(data);
-          setPriceComparisons(data.priceComparisons || []);
-          setPriceHistory(data.priceHistory || []);
-          setReviews(data.reviews || []);
-          setAverageRating(data.averageRating || 0);
-          setIsEditing(false);
-          setEditingReview(null);
-          setUserReview(null);
-          setIsWished(data.isWished || false);
-        })
-        .catch(err => {
-          setError(err.message);
-        });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router.query.id]);
+    setProduct(productData);
+    setPriceComparisons(productData.priceComparisons || []);
+    setPriceHistory(productData.priceHistory || []);
+    setReviews(productData.reviews || []);
+    setAverageRating(productData.averageRating || 0);
+    setIsEditing(false);
+    setEditingReview(null);
+    setUserReview(null);
+    setIsWished(productData.isWished || false);
+  }, [productData]);
 
   // 찜하기/취소 토글 함수
   const toggleWish = async () => {
