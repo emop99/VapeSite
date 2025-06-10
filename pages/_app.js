@@ -6,6 +6,7 @@ import {SessionProvider} from 'next-auth/react';
 import * as gtag from '../lib/gtag';
 import AdminLayout from "../components/admin/AdminLayout";
 import Script from "next/script";
+import {Toaster} from 'react-hot-toast'; // 토스트 컴포넌트 import
 
 // 앱 컴포넌트
 function MyApp({ Component, pageProps }) {
@@ -34,6 +35,28 @@ function MyApp({ Component, pageProps }) {
 
   return (
     <>
+      {/* Toast 알림 컴포넌트 */}
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: '#363636',
+            color: '#fff',
+          },
+          success: {
+            style: {
+              background: '#3b8132',
+            },
+          },
+          error: {
+            style: {
+              background: '#e53e3e',
+            },
+          }
+        }}
+      />
+
       {/* Google Tag Manager - Global base code */}
       {process.env.NODE_ENV !== 'development' && !router.pathname.startsWith('/admin') ? (
         <>

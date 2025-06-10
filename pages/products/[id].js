@@ -2,12 +2,13 @@ import {useEffect, useState} from 'react';
 import {useRouter} from 'next/router';
 import Link from 'next/link';
 import Head from 'next/head';
-import {FaArrowDown, FaArrowUp, FaEdit, FaRegStar, FaStar, FaStarHalfAlt} from 'react-icons/fa';
+import {FaArrowDown, FaArrowUp, FaEdit, FaHeart, FaRegHeart, FaRegStar, FaStar, FaStarHalfAlt} from 'react-icons/fa';
 import Image from 'next/image';
 import {normalizeImageUrl} from '../../utils/helper';
 import ReviewForm from '../../components/ReviewForm';
 import SimilarProducts from '../../components/SimilarProducts';
 import {useSession} from 'next-auth/react';
+import toast from 'react-hot-toast'; // 토스트 라이브러리 import 추가
 
 // 제품 상세 페이지
 export default function ProductDetail({productData, error: serverError}) {
@@ -61,6 +62,10 @@ export default function ProductDetail({productData, error: serverError}) {
   const [editingReview, setEditingReview] = useState(null);
   // 현재 사용자의 리뷰
   const [userReview, setUserReview] = useState(null);
+  // 찜 상태 추가
+  const [isWished, setIsWished] = useState(false);
+  // 찜하기 로딩 상태
+  const [wishLoading, setWishLoading] = useState(false);
 
   // URL의 id 변경 감지 및 새 데이터 로드
   useEffect(() => {
@@ -82,12 +87,91 @@ export default function ProductDetail({productData, error: serverError}) {
           setIsEditing(false);
           setEditingReview(null);
           setUserReview(null);
+          // 상품 정보가 변경되면 찜 상태 다시 체크
+          checkWishStatus(data.id).then();
         })
         .catch(err => {
           setError(err.message);
         });
     }
   }, [router.query.id]);
+
+  // 찜 상태 체크
+  const checkWishStatus = async (productId) => {
+    if (!session?.user) {
+      setIsWished(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/wishlist', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({productId}),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setIsWished(data.isWished);
+      }
+    } catch (error) {
+      console.error('찜 상태 확인 오류:', error);
+    }
+  };
+
+  // 찜하기/취소 토글 함수
+  const toggleWish = async () => {
+    if (!session) {
+      // 로그인하지 않은 사용자는 로그인 페이지로 이동
+      router.push('/auth/signin?callbackUrl=' + encodeURIComponent(router.asPath));
+      return;
+    }
+
+    setWishLoading(true);
+    try {
+      if (isWished) {
+        // 찜 취소
+        const response = await fetch(`/api/wishlist/${product.id}`, {
+          method: 'DELETE',
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setIsWished(data.isWished);
+          toast.success('찜 목록에서 삭제되었습니다.'); // 성공 메시지 추가
+        }
+      } else {
+        // 찜하기
+        const response = await fetch('/api/wishlist', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({productId: product.id}),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setIsWished(data.isWished);
+          toast.success('찜 목록에 추가되었습니다.'); // 성공 메시지 추가
+        }
+      }
+    } catch (error) {
+      console.error('찜하기 오류:', error);
+      toast.error('찜하기 처리 중 오류가 발생했습니다.'); // 오류 메시지 추가
+    } finally {
+      setWishLoading(false);
+    }
+  };
+
+  // 컴포넌트 마운트시 찜 상태 확인
+  useEffect(() => {
+    if (product?.id) {
+      checkWishStatus(product.id).then();
+    }
+  }, [session, product]);
 
   // 사용자의 리뷰가 있는지 확인
   useEffect(() => {
@@ -299,16 +383,32 @@ export default function ProductDetail({productData, error: serverError}) {
 
             <p className="text-2xl font-bold mb-4 text-price">{product.priceComparisons[0].price.toLocaleString()}원</p>
 
-            {product.priceComparisons[0].sellerUrl && (
-              <a
-                href={product.priceComparisons[0].sellerUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-primary w-full text-center"
+            <div className="flex space-x-3 mb-4">
+              {product.priceComparisons[0].sellerUrl && (
+                <a
+                  href={product.priceComparisons[0].sellerUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-primary flex-1 text-center"
+                >
+                  최저가로 구매하러 가기
+                </a>
+              )}
+
+              {/* 찜하기 버튼 추가 */}
+              <button
+                onClick={toggleWish}
+                disabled={wishLoading}
+                className={`flex items-center justify-center px-4 py-2 rounded transition-colors duration-200 ${
+                  isWished
+                    ? 'bg-pink-100 text-pink-500 hover:bg-pink-200'
+                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                }`}
+                aria-label={isWished ? '찜 취소하기' : '찜하기'}
               >
-                최저가로 구매하러 가기
-              </a>
-            )}
+                {isWished ? <FaHeart className="text-xl"/> : <FaRegHeart className="text-xl"/>}
+              </button>
+            </div>
           </div>
         </div>
       </div>

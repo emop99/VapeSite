@@ -168,6 +168,21 @@ create table vapesite.vape_user_login_log
 )
     comment '회원 로그인 로그';
 
+create table vapesite.vape_wish_list
+(
+    userId    int                                  not null,
+    productId int                                  not null,
+    createdAt datetime default current_timestamp() null,
+    primary key (productId, userId),
+    constraint vape_wish_list_vape_products_id_fk
+        foreign key (productId) references vapesite.vape_products (id),
+    constraint vape_wish_list_vape_user_id_fk
+        foreign key (userId) references vapesite.vape_user (id)
+)
+    comment '찜 목록 테이블';
+
+
+
 create
     definer = vapeuser@`%` procedure vapesite.get_similar_products(IN p_product_id int)
 BEGIN
