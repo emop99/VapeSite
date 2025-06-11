@@ -2,45 +2,33 @@ import {useEffect, useState} from 'react';
 import {useRouter} from 'next/router';
 import Link from 'next/link';
 import Head from 'next/head';
-import {FaArrowDown, FaArrowUp, FaEdit, FaHeart, FaRegHeart, FaRegStar, FaStar, FaStarHalfAlt} from 'react-icons/fa';
+import {FaArrowDown, FaArrowUp, FaEdit, FaHeart, FaRegHeart} from 'react-icons/fa';
 import Image from 'next/image';
 import {normalizeImageUrl} from '../../utils/helper';
 import ReviewForm from '../../components/ReviewForm';
 import SimilarProducts from '../../components/SimilarProducts';
 import {useSession} from 'next-auth/react';
-import toast from 'react-hot-toast'; // 토스트 라이브러리 import 추가
+import toast from 'react-hot-toast';
+import {renderStarRating} from '../../utils/renderStarRating';
+import Pagination from '../../components/Pagination'; // Pagination 컴포넌트 import
+
+// 리뷰가 현재 로그인한 사용자의 것인지 확인하는 함수
+function isUsersReview(review, session) {
+  if (!session?.user) return false;
+  return (
+    (review.User && review.User.email === session.user.email) ||
+    (review.userId === session.user.id) ||
+    (review.userName === session.user.name)
+  );
+}
+
+// 리뷰 작성자 이름 반환 함수
+function getReviewerName(review) {
+  return review.userName || (review.User ? review.User.nickName : '익명');
+}
 
 // 제품 상세 페이지
 export default function ProductDetail({productData, error: serverError}) {
-  // 별점 렌더링 헬퍼 함수
-  const renderStarRating = (rating) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 >= 0.5;
-
-    // 꽉 찬 별
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(<FaStar key={`star-${i}`} className="text-yellow-400"/>);
-    }
-
-    // 반 별
-    if (hasHalfStar) {
-      stars.push(<FaStarHalfAlt key="half-star" className="text-yellow-400"/>);
-    }
-
-    // 빈 별
-    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
-    for (let i = 0; i < emptyStars; i++) {
-      stars.push(<FaRegStar key={`empty-star-${i}`} className="text-yellow-400"/>);
-    }
-
-    return (
-      <div className="flex items-center">
-        {stars}
-        <span className="ml-1 text-gray-600">({rating.toFixed(1)})</span>
-      </div>
-    );
-  };
   const router = useRouter();
   const {data: session} = useSession();
 
@@ -66,6 +54,17 @@ export default function ProductDetail({productData, error: serverError}) {
   const [isWished, setIsWished] = useState(productData?.isWished || false);
   // 찜하기 로딩 상태
   const [wishLoading, setWishLoading] = useState(false);
+
+  // 페이지네이션 상태
+  const REVIEWS_PER_PAGE = 5;
+  const [currentReviewPage, setCurrentReviewPage] = useState(1);
+
+  // 페이지네이션에 따른 리뷰 슬라이스
+  const paginatedReviews = reviews.slice(
+    (currentReviewPage - 1) * REVIEWS_PER_PAGE,
+    currentReviewPage * REVIEWS_PER_PAGE
+  );
+  const totalReviewPages = Math.ceil(reviews.length / REVIEWS_PER_PAGE);
 
   // 상품 데이터 변경 감지 및 데이터 로드
   useEffect(() => {
@@ -135,20 +134,7 @@ export default function ProductDetail({productData, error: serverError}) {
   useEffect(() => {
     if (session?.user?.email && reviews.length > 0) {
       // 로그인한 사용자의 리뷰 찾기
-      const foundReview = reviews.find(review => {
-        // 이메일이나 ID로 사용자 식별
-        if (review.User && review.User.email === session.user.email) {
-          return true;
-        }
-        if (review.userId === session.user.id) {
-          return true;
-        }
-        // userName이 session의 name과 일치하는지 확인 (대체 방안)
-        return !!(review.userName && session.user.name &&
-          review.userName === session.user.name);
-
-      });
-
+      const foundReview = reviews.find(review => isUsersReview(review, session));
       if (foundReview) {
         setUserReview(foundReview);
       }
@@ -157,27 +143,25 @@ export default function ProductDetail({productData, error: serverError}) {
 
   // 리뷰 수정 핸들러
   const handleEditReview = (review) => {
-    // 현재 로그인한 사용자의 리뷰인지 확인
-    if (!session?.user) return;
-
-    const isUsersReview =
-      (review.User && review.User.email === session.user.email) ||
-      (review.userId === session.user.id) ||
-      (review.userName === session.user.name);
-
-    if (!isUsersReview) {
+    if (!isUsersReview(review, session)) {
       alert('자신이 작성한 리뷰만 수정할 수 있습니다.');
       return;
     }
-
-    // 수정할 리뷰 설정 및 수정 모드로 전환
     setEditingReview(review);
     setIsEditing(true);
-
-    // 리뷰 폼이 있는 위치로 스크롤
     const reviewFormElement = document.getElementById('review-form-section');
     if (reviewFormElement) {
       reviewFormElement.scrollIntoView({behavior: 'smooth'});
+    }
+  };
+
+  // 리뷰 페이지 변경 핸들러
+  const handleReviewPageChange = (page) => {
+    setCurrentReviewPage(page);
+    // 페이지 이동 시 스크롤 위치 조정 (선택)
+    const reviewSection = document.getElementById('review-section');
+    if (reviewSection) {
+      reviewSection.scrollIntoView({behavior: 'smooth'});
     }
   };
 
@@ -473,7 +457,7 @@ export default function ProductDetail({productData, error: serverError}) {
       )}
 
       {/* 유저 리뷰 레이아웃 */}
-      <section className="bg-white rounded-lg shadow-md p-6 mb-8">
+      <section className="bg-white rounded-lg shadow-md p-6 mb-8" id="review-section">
         <h2 className="text-2xl font-bold mb-4">사용자 리뷰</h2>
 
         {reviews.length > 0 ? (
@@ -494,8 +478,8 @@ export default function ProductDetail({productData, error: serverError}) {
               </div>
             </div>
 
-            {/* 개별 리뷰 */}
-            {reviews.map((review, index) => (
+            {/* 개별 리뷰 (페이지네이션 적용) */}
+            {paginatedReviews.map((review, index) => (
               <div key={index} className="border-b border-gray-200 pb-6 last:border-b-0 last:pb-0">
                 <div className="flex justify-between items-start">
                   <div>
@@ -510,7 +494,7 @@ export default function ProductDetail({productData, error: serverError}) {
                 </div>
 
                 <p className="text-sm text-gray-500 mb-2">
-                  작성자: {review.userName || (review.User ? review.User.nickName : '익명')}
+                  작성자: {getReviewerName(review)}
                 </p>
 
                 <p className="text-gray-700 mb-4 break-words whitespace-pre-wrap">{review.content}</p>
@@ -526,6 +510,7 @@ export default function ProductDetail({productData, error: serverError}) {
                   {review.cons && (
                     <div>
                       <p className="font-semibold text-red-600 mb-1">단점</p>
+                      <p className="text-sm text-gray-700 break-words whitespace-pre-wrap">{review.cons}</p>
                     </div>
                   )}
                 </div>
@@ -559,7 +544,7 @@ export default function ProductDetail({productData, error: serverError}) {
                   </div>
 
                   {/* 리뷰 수정 버튼 (로그인한 사용자에게만 표시) */}
-                  {session?.user && (
+                  {session?.user && isUsersReview(review, session) && (
                     <button
                       onClick={() => handleEditReview(review)}
                       className="text-sm text-gray-500 flex items-center"
@@ -571,6 +556,15 @@ export default function ProductDetail({productData, error: serverError}) {
                 </div>
               </div>
             ))}
+
+            {/* 페이지네이션 UI */}
+            {totalReviewPages > 1 && (
+              <Pagination
+                page={currentReviewPage}
+                totalPages={totalReviewPages}
+                onPageChange={handleReviewPageChange}
+              />
+            )}
           </div>
         ) : (
           <div className="text-center py-8">
@@ -684,21 +678,23 @@ export async function getServerSideProps(context) {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/${id}`, requestOptions);
 
     if (!response.ok) {
+      let errorMessage = '제품을 불러오는데 문제가 발생했습니다.';
       if (response.status === 400) {
         const data = await response.json();
         if (data.error) {
-          return {
-            props: {
-              productData: null,
-              error: data.error
-            }
-          };
+          errorMessage = data.error;
         }
+      } else if (response.status >= 500) {
+        errorMessage = '서버에 문제가 발생했습니다. 잠시 후 다시 시도해주세요.';
+      } else if (response.status === 404) {
+        errorMessage = '해당 제품을 찾을 수 없습니다.';
+      } else if (response.status === 401 || response.status === 403) {
+        errorMessage = '접근 권한이 없습니다. 로그인 후 다시 시도해주세요.';
       }
       return {
         props: {
           productData: null,
-          error: '제품을 불러오는데 문제가 발생했습니다.'
+          error: errorMessage
         }
       };
     }
@@ -713,11 +709,17 @@ export async function getServerSideProps(context) {
       }
     };
   } catch (err) {
+    let errorMessage = '제품을 불러오는데 문제가 발생했습니다.';
+    if (err.name === 'FetchError' || err.code === 'ECONNREFUSED') {
+      errorMessage = '서버에 연결할 수 없습니다. 네트워크 상태를 확인해주세요.';
+    } else if (err.message && err.message.includes('NetworkError')) {
+      errorMessage = '네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.';
+    }
     console.error('제품 로딩 오류:', err);
     return {
       props: {
         productData: null,
-        error: '제품을 불러오는데 문제가 발생했습니다.'
+        error: errorMessage
       }
     };
   }
