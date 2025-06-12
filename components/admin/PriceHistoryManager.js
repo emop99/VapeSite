@@ -468,7 +468,7 @@ const PriceHistoryManager = ({productId}) => {
         <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
           <FiSearch className="mx-auto mb-2" size={24}/>
           <p>등록된 가격 변동 이력이 없습니다.</p>
-          <p className="text-sm mt-1">새 가격 변동 이력을 추가하려면 상단의 '가격 변동 이력 추가' 버튼을 클릭하세요.</p>
+          <p className="text-sm mt-1">새 가격 변동 이력을 추가하려면 상단의 &apos;가격 변동 이력 추가&apos; 버튼을 클릭하세요.</p>
         </div>
       )}
     </div>
