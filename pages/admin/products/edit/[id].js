@@ -2,6 +2,7 @@ import {useEffect, useState} from 'react';
 import {useRouter} from 'next/router';
 import ProductForm from '../../../../components/admin/ProductForm';
 import PriceComparisonManager from '../../../../components/admin/PriceComparisonManager';
+import PriceHistoryManager from '../../../../components/admin/PriceHistoryManager';
 import SimilarProductsManager from '../../../../components/admin/SimilarProductsManager';
 import Head from "next/head";
 
@@ -168,6 +169,9 @@ export default function EditProduct() {
 
         {/* 가격 비교 관리 컴포넌트 (로딩 중이 아닐 때만 표시) */}
         {!loading && id && <PriceComparisonManager productId={id}/>}
+
+        {/* 가격 변동 이력 관리 컴포넌트 */}
+        {!loading && id && <PriceHistoryManager productId={id}/>}
 
         {/* 유사 상품 목록 관리 컴포넌트 */}
         {!loading && id && <SimilarProductsManager productId={id}/>}
