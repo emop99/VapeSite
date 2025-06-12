@@ -63,20 +63,21 @@ create table vapesite.vape_seller_site
 )
     comment '판매 사이트 정보 테이블';
 
-create table vapesite.vape_price_comparisons
+create table vape_price_comparisons
 (
-    id        int auto_increment
+    id          int auto_increment
         primary key,
-    productId int                                  not null,
-    sellerId  int                                  not null,
-    sellerUrl varchar(500) not null,
-    price     int                                  not null,
-    createdAt datetime default current_timestamp() not null,
-    updatedAt datetime default current_timestamp() null on update current_timestamp(),
+    productId   int                                  not null,
+    sellerId    int                                  not null,
+    sellerUrl   varchar(500)                         not null,
+    originTitle varchar(255)                         null comment '사이트 상품명',
+    price       int                                  not null,
+    createdAt   datetime default current_timestamp() not null,
+    updatedAt   datetime default current_timestamp() null on update current_timestamp(),
     constraint vape_price_comparisons_vape_products_id_fk
-        foreign key (productId) references vapesite.vape_products (id),
+        foreign key (productId) references vape_products (id),
     constraint vape_price_comparisons_vape_seller_site_id_fk
-        foreign key (sellerId) references vapesite.vape_seller_site (id)
+        foreign key (sellerId) references vape_seller_site (id)
 )
     comment '판매 사이트별 현재 가격 정보 테이블';
 

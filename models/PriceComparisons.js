@@ -35,6 +35,12 @@ const PriceComparisons = sequelize.define('PriceComparisons', {
     type: DataTypes.STRING(500),
     allowNull: false,
   },
+  // 사이트 상품명
+  originTitle: {
+    type: DataTypes.STRING(255),
+    allowNull: true,
+    comment: '사이트 상품명',
+  },
   // 가격
   price: {
     type: DataTypes.INTEGER,

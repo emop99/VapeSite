@@ -431,6 +431,7 @@ const PriceComparisonManager = ({productId}) => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">판매처</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">가격</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">URL</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">사이트 상품명</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">마지막 업데이트</th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">관리</th>
             </tr>
@@ -475,6 +476,9 @@ const PriceComparisonManager = ({productId}) => {
                         <span className="truncate">판매 페이지</span>
                         <FiExternalLink className="ml-1 flex-shrink-0" size={14}/>
                       </a>
+                    </td>
+                    <td className="px-6 py-2">
+                      {comparison.originTitle}
                     </td>
                     <td className="px-6 py-2">
                       {new Date(comparison.updatedAt).toLocaleString()}
@@ -531,6 +535,9 @@ const PriceComparisonManager = ({productId}) => {
                           <FiExternalLink className="ml-1 flex-shrink-0" size={14}/>
                         </a>
                       </div>
+                    </td>
+                    <td className="px-6 py-2">
+                      {comparison.originTitle ? comparison.originTitle : '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {new Date(comparison.updatedAt).toLocaleString()}
