@@ -182,7 +182,103 @@ create table vapesite.vape_wish_list
 )
     comment '찜 목록 테이블';
 
+CREATE TABLE vape_board
+(
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    name        VARCHAR(100)                         NOT NULL,
+    description TEXT,
+    slug        VARCHAR(100)                         NOT NULL,
+    isActive    BOOLEAN  DEFAULT TRUE                NOT NULL,
+    createdAt   DATETIME DEFAULT CURRENT_TIMESTAMP() NOT NULL,
+    updatedAt   DATETIME DEFAULT CURRENT_TIMESTAMP() NULL ON UPDATE CURRENT_TIMESTAMP(),
+    deletedAt   DATETIME                             NULL,
+    CONSTRAINT vape_board_slug_pk UNIQUE (slug)
+) COMMENT '커뮤니티 게시판 정보 테이블';
 
+CREATE INDEX vape_board_isActive_index ON vape_board (isActive);
+
+CREATE TABLE vape_post
+(
+    id        INT AUTO_INCREMENT PRIMARY KEY,
+    boardId   INT                                  NOT NULL,
+    userId    INT                                  NOT NULL,
+    title     VARCHAR(200)                         NOT NULL,
+    content   TEXT                                 NOT NULL,
+    viewCount INT      DEFAULT 0                   NOT NULL,
+    isNotice  BOOLEAN  DEFAULT FALSE               NOT NULL,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP() NOT NULL,
+    updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP() NULL ON UPDATE CURRENT_TIMESTAMP(),
+    deletedAt DATETIME                             NULL,
+    FOREIGN KEY (boardId) REFERENCES vape_board (id),
+    FOREIGN KEY (userId) REFERENCES vape_user (id)
+) COMMENT '커뮤니티 게시글 테이블';
+
+CREATE INDEX vape_post_boardId_index ON vape_post (boardId);
+CREATE INDEX vape_post_userId_index ON vape_post (userId);
+CREATE INDEX vape_post_isNotice_index ON vape_post (isNotice);
+CREATE INDEX vape_post_createdAt_index ON vape_post (createdAt);
+
+CREATE TABLE vape_comment
+(
+    id        INT AUTO_INCREMENT PRIMARY KEY,
+    postId    INT                                  NOT NULL,
+    userId    INT                                  NOT NULL,
+    parentId  INT                                  NULL,
+    content   TEXT                                 NOT NULL,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP() NOT NULL,
+    updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP() NULL ON UPDATE CURRENT_TIMESTAMP(),
+    deletedAt DATETIME                             NULL,
+    FOREIGN KEY (postId) REFERENCES vape_post (id),
+    FOREIGN KEY (userId) REFERENCES vape_user (id),
+    FOREIGN KEY (parentId) REFERENCES vape_comment (id)
+) COMMENT '게시글 댓글 테이블';
+
+CREATE INDEX vape_comment_postId_index ON vape_comment (postId);
+CREATE INDEX vape_comment_userId_index ON vape_comment (userId);
+CREATE INDEX vape_comment_parentId_index ON vape_comment (parentId);
+CREATE INDEX vape_comment_createdAt_index ON vape_comment (createdAt);
+
+CREATE TABLE vape_like
+(
+    id         INT AUTO_INCREMENT PRIMARY KEY,
+    userId     INT                                  NOT NULL,
+    targetType ENUM ('post', 'comment')             NOT NULL,
+    targetId   INT                                  NOT NULL,
+    createdAt  DATETIME DEFAULT CURRENT_TIMESTAMP() NOT NULL,
+    FOREIGN KEY (userId) REFERENCES vape_user (id),
+    CONSTRAINT vape_like_unique UNIQUE (userId, targetType, targetId)
+) COMMENT '게시글/댓글 좋아요 테이블';
+
+CREATE INDEX vape_like_target_index ON vape_like (targetType, targetId);
+
+CREATE TABLE vape_attachment
+(
+    id         INT AUTO_INCREMENT PRIMARY KEY,
+    userId     INT                                  NOT NULL,
+    targetType ENUM ('post', 'comment')             NOT NULL,
+    targetId   INT                                  NOT NULL,
+    fileName   VARCHAR(255)                         NOT NULL,
+    filePath   VARCHAR(255)                         NOT NULL,
+    fileSize   INT                                  NOT NULL,
+    fileType   VARCHAR(100)                         NOT NULL,
+    createdAt  DATETIME DEFAULT CURRENT_TIMESTAMP() NOT NULL,
+    FOREIGN KEY (userId) REFERENCES vape_user (id)
+) COMMENT '게시글/댓글 첨부파일 테이블';
+
+CREATE INDEX vape_attachment_target_index ON vape_attachment (targetType, targetId);
+
+CREATE TABLE vape_notification
+(
+    id        INT AUTO_INCREMENT PRIMARY KEY,
+    userId    INT                                  NOT NULL COMMENT '알림을 받을 유저',
+    type      ENUM ('comment', 'like', 'reply')    NOT NULL COMMENT '알림 유형',
+    targetId  INT                                  NOT NULL COMMENT '관련된 게시글/댓글 ID',
+    isRead    BOOLEAN  DEFAULT FALSE               NOT NULL COMMENT '읽음 여부',
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP() NOT NULL,
+    FOREIGN KEY (userId) REFERENCES vape_user (id)
+) COMMENT '유저 알림 테이블';
+
+CREATE INDEX vape_notification_userId_index ON vape_notification (userId);
 
 create
     definer = vapeuser@`%` procedure vapesite.get_similar_products(IN p_product_id int)

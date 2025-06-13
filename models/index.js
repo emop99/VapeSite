@@ -10,7 +10,12 @@ const PriceHistory = require('./PriceHistory');
 const User = require('./User');
 const UserLoginLog = require('./UserLoginLog');
 const Review = require('./Review');
-
+const Board = require('./Board');
+const Attachment = require('./Attachment');
+const Post = require('./Post');
+const Comment = require('./Comment');
+const Like = require('./Like');
+const Notification = require('./Notification');
 // 모델 간의 관계는 각 모델 파일에서 정의됨
 
 module.exports = {
@@ -23,4 +28,10 @@ module.exports = {
   User,
   UserLoginLog,
   Review,
+  Board,
+  Attachment,
+  Post,
+  Comment,
+  Like,
+  Notification,
 };
