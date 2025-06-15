@@ -1,6 +1,6 @@
 import {signOut, useSession} from 'next-auth/react';
 import Link from 'next/link';
-import {FaChevronDown, FaHeart, FaSignOutAlt, FaUser} from 'react-icons/fa';
+import {FaChevronDown, FaCog, FaHeart, FaSignOutAlt, FaUser} from 'react-icons/fa';
 import {useEffect, useRef, useState} from 'react';
 import {useRouter} from 'next/router';
 
@@ -64,6 +64,14 @@ export default function AuthNav() {
               {/*  <FaUserEdit className="mr-3 text-goblin-light" />*/}
               {/*  <span>내 정보 수정</span>*/}
               {/*</Link>*/}
+
+              {session.user.grade === 'ADMIN' && (
+                <Link href="/admin"
+                      className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 transition-colors duration-200">
+                  <FaCog className="mr-3 text-goblin-light"/>
+                  <span>어드민 페이지</span>
+                </Link>
+              )}
 
               <button
                 onClick={() => signOut({callbackUrl: '/'})}

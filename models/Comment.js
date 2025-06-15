@@ -44,6 +44,11 @@ const Comment = sequelize.define('Comment', {
     type: DataTypes.TEXT,
     allowNull: false,
   },
+  // 이미지 URL
+  imageUrl: {
+    type: DataTypes.STRING(500),
+    allowNull: true,
+  },
   // 삭제 일시
   deletedAt: {
     type: DataTypes.DATE,

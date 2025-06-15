@@ -96,7 +96,7 @@ async function handlePostRequest(req, res) {
       cons: sanitizedCons ? sanitizedCons : '',
       recommended: recommended !== undefined ? recommended : true,
       helpfulCount: 0,
-      userName: escapeHTML(user.nickname || user.name || user.email.split('@')[0])
+      nickName: escapeHTML(user.nickname || user.name || user.email.split('@')[0])
     });
 
     // 제품의 평균 평점 업데이트

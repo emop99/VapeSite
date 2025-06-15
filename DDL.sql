@@ -218,25 +218,38 @@ CREATE INDEX vape_post_userId_index ON vape_post (userId);
 CREATE INDEX vape_post_isNotice_index ON vape_post (isNotice);
 CREATE INDEX vape_post_createdAt_index ON vape_post (createdAt);
 
-CREATE TABLE vape_comment
+create table vape_comment
 (
-    id        INT AUTO_INCREMENT PRIMARY KEY,
-    postId    INT                                  NOT NULL,
-    userId    INT                                  NOT NULL,
-    parentId  INT                                  NULL,
-    content   TEXT                                 NOT NULL,
-    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP() NOT NULL,
-    updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP() NULL ON UPDATE CURRENT_TIMESTAMP(),
-    deletedAt DATETIME                             NULL,
-    FOREIGN KEY (postId) REFERENCES vape_post (id),
-    FOREIGN KEY (userId) REFERENCES vape_user (id),
-    FOREIGN KEY (parentId) REFERENCES vape_comment (id)
-) COMMENT '게시글 댓글 테이블';
+    id        int auto_increment
+        primary key,
+    postId    int                                  not null,
+    userId    int                                  not null,
+    parentId  int                                  null,
+    content   text                                 not null,
+    imageUrl  varchar(500)                         null,
+    createdAt datetime default current_timestamp() not null,
+    updatedAt datetime default current_timestamp() null on update current_timestamp(),
+    deletedAt datetime                             null,
+    constraint vape_comment_ibfk_1
+        foreign key (postId) references vape_post (id),
+    constraint vape_comment_ibfk_2
+        foreign key (userId) references vape_user (id),
+    constraint vape_comment_ibfk_3
+        foreign key (parentId) references vape_comment (id)
+)
+    comment '게시글 댓글 테이블';
 
-CREATE INDEX vape_comment_postId_index ON vape_comment (postId);
-CREATE INDEX vape_comment_userId_index ON vape_comment (userId);
-CREATE INDEX vape_comment_parentId_index ON vape_comment (parentId);
-CREATE INDEX vape_comment_createdAt_index ON vape_comment (createdAt);
+create index vape_comment_createdAt_index
+    on vape_comment (createdAt);
+
+create index vape_comment_parentId_index
+    on vape_comment (parentId);
+
+create index vape_comment_postId_index
+    on vape_comment (postId);
+
+create index vape_comment_userId_index
+    on vape_comment (userId);
 
 CREATE TABLE vape_like
 (

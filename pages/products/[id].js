@@ -18,13 +18,13 @@ function isUsersReview(review, session) {
   return (
     (review.User && review.User.email === session.user.email) ||
     (review.userId === session.user.id) ||
-    (review.userName === session.user.name)
+    (review.nickName === session.user.name)
   );
 }
 
 // 리뷰 작성자 이름 반환 함수
 function getReviewerName(review) {
-  return review.userName || (review.User ? review.User.nickName : '익명');
+  return review.nickName || (review.User ? review.User.nickName : '익명');
 }
 
 // 제품 상세 페이지

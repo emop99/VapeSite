@@ -3,6 +3,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 애니메이션 키프레임 정의 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* 전역 스타일 - 고블린 테마 적용 */
 @layer base {
   html {
@@ -58,6 +70,11 @@
   .text-price {
     @apply text-accent;
   }
+
+    /* 애니메이션 */
+    .animate-fadeIn {
+        animation: fadeIn 0.5s ease-in-out;
+    }
 
   .container {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
