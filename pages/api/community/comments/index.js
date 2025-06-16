@@ -1,6 +1,8 @@
 import {Comment, Post, User} from '../../../../models';
 import {getServerSession} from 'next-auth/next';
 import Like from '../../../../models/Like';
+import fs from 'fs';
+import path from 'path';
 
 export default async function handler(req, res) {
   // 요청 메소드에 따라 처리
@@ -171,13 +173,41 @@ async function createComment(req, res) {
       }
     }
 
+    let imagePath = null;
+
+    if (imageUrl) {
+      // 경로 설정
+      const tempFilePath = path.join(process.cwd(), 'public', imageUrl);
+      const targetDir = path.join(process.cwd(), 'public', 'uploads', 'comments');
+
+      // 대상 디렉토리 확인 및 생성
+      if (!fs.existsSync(targetDir)) {
+        fs.mkdirSync(targetDir, {recursive: true});
+      }
+      // 임시 파일이 존재하는지 확인
+      if (!fs.existsSync(tempFilePath)) {
+        return res.status(400).json({message: '임시 파일이 존재하지 않습니다.'});
+      }
+
+      // 새 파일 이름 생성 (중복 방지를 위해 타임스탬프 추가)
+      const fileExt = path.extname(imageUrl);
+      const newFileName = `${Date.now()}-${Math.random().toString(36).substring(2)}${fileExt}`;
+      const newFilePath = path.join(targetDir, newFileName);
+
+      // 파일 이동
+      fs.copyFileSync(tempFilePath, newFilePath);
+      fs.unlinkSync(tempFilePath); // 임시 파일 삭제
+
+      imagePath = `/uploads/comments/${newFileName}`;
+    }
+
     // 댓글 생성
     const comment = await Comment.create({
       postId,
       userId: user.id,
       parentId: parentId || null,
       content,
-      imageUrl: imageUrl || null
+      imageUrl: imagePath || null
     });
 
     // 생성된 댓글 조회 (사용자 정보 포함)
@@ -326,6 +356,14 @@ async function deleteComment(req, res) {
 
     // 댓글 삭제
     await comment.update({deletedAt: new Date()});
+
+    // 이미지 파일 삭제 (존재하는 경우)
+    if (comment.imageUrl) {
+      const imagePath = path.join(process.cwd(), 'public', comment.imageUrl);
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      }
+    }
 
     // 결과 반환
     return res.status(200).json({

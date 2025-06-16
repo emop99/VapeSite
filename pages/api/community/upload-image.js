@@ -32,7 +32,7 @@ async function uploadImageHandler(req, res) {
 
   try {
     // 이미지 저장 경로 설정 - '/uploads/comments'로 설정
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'comments');
+    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'comments', 'tmp');
 
     // 디렉토리 존재 여부 확인 및 생성
     if (!fs.existsSync(uploadDir)) {
@@ -63,7 +63,7 @@ async function uploadImageHandler(req, res) {
     }
 
     // 업로드된 파일 경로 생성
-    const relativePath = `/uploads/comments/${path.basename(uploadedFile[0].filepath)}`;
+    const relativePath = `/uploads/comments/tmp/${path.basename(uploadedFile[0].filepath)}`;
 
     // 성공 응답 반환
     return res.status(200).json({
