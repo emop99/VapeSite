@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import ImageUploader from './ImageUploader';
+import CommentImageUploader from './CommentImageUploader';
 
 export default function CommentForm({
                                       user,
@@ -70,7 +70,7 @@ export default function CommentForm({
 
             {/* 이미지 업로드 및 미리보기 */}
             <div className="flex flex-wrap items-center gap-3">
-              <ImageUploader
+              <CommentImageUploader
                 commentImage={commentImage}
                 setCommentImage={setCommentImage}
                 uploading={uploading}

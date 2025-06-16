@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   }
 }
 
-// 게시글 조회 (이미 구현됨)
+// 게시글 조회
 async function getPost(req, res) {
   const {id} = req.query;
 
@@ -127,10 +127,14 @@ async function updatePost(req, res) {
       return res.status(403).json({message: '공지사항 설정 권한이 없습니다.'});
     }
 
+    // 내용에 이미지 태그가 포함되어 있는지 확인
+    const hasImage = content.includes('<img');
+
     // 게시글 수정
     const updateData = {
       title,
-      content
+      content,
+      hasImage,
     };
 
     // 관리자인 경우에만 공지사항 상태 변경 가능

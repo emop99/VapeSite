@@ -52,6 +52,12 @@ const Post = sequelize.define('Post', {
     allowNull: false,
     defaultValue: false,
   },
+  // 이미지 포함 여부
+  hasImage: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  },
   // 삭제 일시
   deletedAt: {
     type: DataTypes.DATE,

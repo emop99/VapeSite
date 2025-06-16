@@ -66,7 +66,7 @@ async function getPosts(req, res) {
         ['createdAt', 'DESC']
       ],
       attributes: [
-        'id', 'title', 'viewCount', 'isNotice', 'createdAt', 'updatedAt'
+        'id', 'title', 'hasImage', 'viewCount', 'isNotice', 'createdAt', 'updatedAt'
       ]
     };
 
@@ -89,7 +89,7 @@ async function getPosts(req, res) {
       limit: limitNumber,
       offset: offset,
       attributes: [
-        'id', 'title', 'viewCount', 'isNotice', 'createdAt', 'updatedAt'
+        'id', 'title', 'hasImage', 'viewCount', 'isNotice', 'createdAt', 'updatedAt'
       ]
     };
 
@@ -185,9 +185,12 @@ async function createPost(req, res) {
     }
 
     // 공지사항 권한 확인 (관리자만 가능)
-    if (isNotice && session.user.role !== 'admin') {
+    if (isNotice && user.grade !== 'ADMIN') {
       return res.status(403).json({message: '공지사항 작성 권한이 없습니다.'});
     }
+
+    // 내용에 이미지 태그가 포함되어 있는지 확인
+    const hasImage = content.includes('<img');
 
     // 게시글 생성
     const post = await Post.create({
@@ -195,8 +198,9 @@ async function createPost(req, res) {
       userId: user.id,
       title,
       content,
-      isNotice: isNotice && session.user.role === 'admin',
-      viewCount: 0
+      isNotice: isNotice && user.grade === 'ADMIN',
+      viewCount: 0,
+      hasImage,
     });
 
     // 생성된 게시글 조회 (사용자 정보 포함)

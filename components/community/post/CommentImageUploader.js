@@ -1,7 +1,7 @@
 import {toast} from 'react-hot-toast';
 import Image from "next/image";
 
-export default function ImageUploader({
+export default function CommentImageUploader({
                                         commentImage,
                                         setCommentImage,
                                         uploading,
@@ -29,7 +29,7 @@ export default function ImageUploader({
       const formData = new FormData();
       formData.append('image', file);
 
-      const response = await fetch('/api/community/upload-image', {
+      const response = await fetch('/api/community/comments/upload-image', {
         method: 'POST',
         body: formData,
       });
