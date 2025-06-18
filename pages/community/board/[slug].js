@@ -138,7 +138,7 @@ export default function BoardPage({board, posts, totalPages, currentPage}) {
             {totalPages > 1 && (
               <div className="mt-8">
                 <Pagination
-                  currentPage={currentPage}
+                  page={currentPage}
                   totalPages={totalPages}
                   onPageChange={handlePageChange}
                 />
@@ -153,12 +153,13 @@ export default function BoardPage({board, posts, totalPages, currentPage}) {
 
 // 서버 사이드 렌더링을 위한 데이터 페칭
 export async function getServerSideProps(context) {
-  const {slug, page = 1} = context.query;
+  const {slug, page = 1, limit = 20} = context.query;
   const pageNumber = parseInt(page);
+  const limitNumber = parseInt(limit);
 
   try {
     // 게시판 정보 불러오기
-    const boardResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/community/boards/${slug}`);
+    const boardResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/community/boards/${slug}?page=${pageNumber}&limit=${limitNumber}`);
 
     if (!boardResponse.ok) {
       // 게시판이 없는 경우
@@ -173,23 +174,14 @@ export async function getServerSideProps(context) {
     }
 
     const boardData = await boardResponse.json();
-    const board = boardData.board;
-
-    // 게시글 목록 불러오기
-    const postsResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/community/posts?boardId=${board.id}&page=${pageNumber}&limit=10`);
-
-    if (!postsResponse.ok) {
-      throw new Error('게시글 목록을 불러오는데 실패했습니다.');
-    }
-
-    const postsData = await postsResponse.json();
+    const {board, posts, totalPages, currentPage} = boardData;
 
     return {
       props: {
-        board: board,
-        posts: postsData.posts || [],
-        totalPages: postsData.totalPages || 0,
-        currentPage: pageNumber
+        board,
+        posts,
+        totalPages,
+        currentPage,
       }
     };
   } catch (error) {

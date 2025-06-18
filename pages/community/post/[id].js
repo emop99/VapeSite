@@ -87,24 +87,7 @@ export default function PostDetailPage({post: initialPost, comments: initialComm
       // 댓글 목록 업데이트
       setComments([...comments, newComment]);
 
-      // 직접 상태를 관리하는 경우에만 초기화 (CommentSection에서는 자체적으로 처리)
-      if (!commentData) {
-        setCommentText('');
-        setCommentImage('');
-        setReplyToId(null);
-        setReplyToUser(null);
-      }
-
       toast.success(parentId ? '답글이 작성되었습니다.' : '댓글이 작성되었습니다.');
-
-      // 3초 후에 새 댓글 표시 제거
-      setTimeout(() => {
-        setComments(prevComments =>
-          prevComments.map(c =>
-            c.id === newComment.id ? {...c, isNew: false} : c
-          )
-        );
-      }, 3000);
 
       return result; // 결과 반환
     } catch (error) {
