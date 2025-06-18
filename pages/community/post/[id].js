@@ -1,6 +1,7 @@
 import {useEffect, useState} from 'react';
 import {useRouter} from 'next/router';
 import Link from 'next/link';
+import Head from 'next/head';
 import {toast} from 'react-hot-toast';
 
 // 컴포넌트 임포트
@@ -248,8 +249,64 @@ export default function PostDetailPage({post: initialPost, comments: initialComm
     }
   };
 
+  // 메타 설명 생성 함수
+  const generateMetaDescription = (post) => {
+    if (!post) return '전자담배 액상 최저가 비교 가격 변동 확인 사이트';
+
+    // HTML 태그 제거
+    const contentWithoutTags = post.content.replace(/<[^>]*>/g, '');
+
+    // 160자 이내로 제한하고 말줄임표 추가
+    return contentWithoutTags.length > 157
+      ? contentWithoutTags.substring(0, 157) + '...'
+      : contentWithoutTags;
+  };
+
+  const generateMataImageUrl = (post) => {
+    // 본문에서 img 태그 추출
+    const imgMatch = post.content.match(/<img[^>]+src="([^">]+)"/);
+    if (imgMatch && imgMatch[1]) {
+      // 이미지 URL이 상대 경로인 경우 절대 경로로 변환
+      const imageUrl = imgMatch[1];
+      return imageUrl.startsWith('http') ? imageUrl : `${process.env.NEXT_PUBLIC_SITE_URL}${imageUrl}`;
+    }
+
+    // 이미지가 없으면 기본 이미지 URL 반환
+    return `${process.env.NEXT_PUBLIC_SITE_URL}/image/juicegoblin_bi.png`;
+  }
+
   return (
     <>
+      {post && (
+        <Head>
+          <title>{post.title ? `${post.title} | 주스고블린 커뮤니티` : '주스고블린 커뮤니티'}</title>
+          <meta name="description" content={generateMetaDescription(post)}/>
+
+          {/* Open Graph 태그 */}
+          <meta property="og:title" content={post.title || '주스고블린 커뮤니티'}/>
+          <meta property="og:description" content={generateMetaDescription(post)}/>
+          <meta property="og:type" content="article"/>
+          <meta property="og:url" content={`${process.env.NEXT_PUBLIC_SITE_URL}/community/post/${id}`}/>
+          <meta property="og:image" content={generateMataImageUrl(post)}/>
+
+          {/* Twitter 카드 */}
+          <meta name="twitter:card" content="summary_large_image"/>
+          <meta name="twitter:title" content={post.title || '주스고블린 커뮤니티'}/>
+          <meta name="twitter:description" content={generateMetaDescription(post)}/>
+          <meta name="twitter:image" content={generateMataImageUrl(post)}/>
+
+          {/* 추가 메타 태그 */}
+          <meta name="article:published_time" content={post.createdAt}/>
+          <meta name="article:modified_time" content={post.updatedAt}/>
+          {post.Board?.name && <meta name="article:section" content={post.Board.name}/>}
+          <meta name="robots" content="index, follow"/>
+          <meta name="language" content="Korean"/>
+          <meta name="author" content="쥬스고블린"/>
+
+          {/* 캐노니컬 URL */}
+          <link rel="canonical" href={`${process.env.NEXT_PUBLIC_SITE_URL}/community/post/${id}`}/>
+        </Head>
+      )}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
         {loading ? (
           <div className="flex justify-center items-center h-64">

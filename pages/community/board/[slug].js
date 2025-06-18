@@ -1,5 +1,6 @@
 import {useRouter} from 'next/router';
 import Link from 'next/link';
+import Head from 'next/head';
 import Pagination from '../../../components/Pagination';
 
 export default function BoardPage({board, posts, totalPages, currentPage}) {
@@ -22,6 +23,32 @@ export default function BoardPage({board, posts, totalPages, currentPage}) {
 
   return (
     <>
+      {board && (
+        <Head>
+          <title>{board.name ? `${board.name} | 주스고블린 커뮤니티` : '주스고블린 커뮤니티'}</title>
+          <meta name="description" content={board.description || `주스고블린 커뮤니티의 ${board.name} 게시판입니다.`}/>
+
+          {/* Open Graph 태그 */}
+          <meta property="og:title" content={board.name ? `${board.name} | 주스고블린 커뮤니티` : '주스고블린 커뮤니티'}/>
+          <meta property="og:description" content={board.description || `주스고블린 커뮤니티의 ${board.name} 게시판입니다.`}/>
+          <meta property="og:type" content="website"/>
+          <meta property="og:url" content={`${process.env.NEXT_PUBLIC_SITE_URL}/community/board/${slug}`}/>
+          <meta property="og:image" content={`${process.env.NEXT_PUBLIC_SITE_URL}/image/juicegoblin_bi.png`}/>
+
+          {/* Twitter 카드 */}
+          <meta name="twitter:card" content="summary"/>
+          <meta name="twitter:title" content={board.name ? `${board.name} | 주스고블린 커뮤니티` : '주스고블린 커뮤니티'}/>
+          <meta name="twitter:description" content={board.description || `주스고블린 커뮤니티의 ${board.name} 게시판입니다.`}/>
+          <meta name="twitter:image" content={`${process.env.NEXT_PUBLIC_SITE_URL}/image/juicegoblin_bi.png`}/>
+
+          <meta name="robots" content="index, follow"/>
+          <meta name="language" content="Korean"/>
+          <meta name="author" content="쥬스고블린"/>
+
+          {/* 캐노니컬 URL */}
+          <link rel="canonical" href={`${process.env.NEXT_PUBLIC_SITE_URL}/community/board/${slug}`}/>
+        </Head>
+      )}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
         {!board ? (
           <div className="bg-white rounded-lg shadow-lg p-8 text-center border-t-4 border-red-500 animate-fade-in">

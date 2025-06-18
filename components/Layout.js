@@ -15,7 +15,7 @@ export default function Layout({ children, title = '쥬스고블린 | 전자담�
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      {!router.pathname.startsWith('/products/') ? (
+      {!router.pathname.startsWith('/products/') && !router.pathname.startsWith('/community/post/') ? (
         <Head>
           <title>{title}</title>
           <meta name="description" content="전자담배 액상 최저가 비교 가격 변동 확인 사이트"/>
