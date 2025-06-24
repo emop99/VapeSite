@@ -21,6 +21,7 @@ export default function ProductsManagement() {
     companies: []
   });
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchType, setSearchType] = useState('all'); // 'all', 'name', 'id'
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedCompany, setSelectedCompany] = useState('');
   const [companySearchTerm, setCompanySearchTerm] = useState('');
@@ -41,7 +42,7 @@ export default function ProductsManagement() {
 
   // 상품 데이터 불러오기
   const fetchProducts = useCallback(
-    async (page = 1, search = '', category = '', company = '', imageFilter = '', showFilter = '', limit = 10, orderField = sortField, order = sortOrder) => {
+    async (page = 1, search = '', category = '', company = '', imageFilter = '', showFilter = '', limit = 10, orderField = sortField, order = sortOrder, type = searchType) => {
       try {
         setLoading(true);
 
@@ -50,6 +51,7 @@ export default function ProductsManagement() {
           page,
           limit,
           search,
+          searchType: type,
           category,
           company,
           sortField: orderField,
@@ -105,8 +107,9 @@ export default function ProductsManagement() {
   // URL 쿼리에서 초기 검색 조건 설정
   useEffect(() => {
     if (router.isReady) {
-      const {search = '', category = '', company = '', page = '1', hasImage = '', isShow = '', limit = '10'} = router.query;
+      const {search = '', searchType = 'all', category = '', company = '', page = '1', hasImage = '', isShow = '', limit = '10'} = router.query;
       setSearchTerm(search);
+      setSearchType(searchType);
       setSelectedCategory(category);
       setSelectedCompany(company);
       setHasImage(hasImage);
@@ -121,7 +124,7 @@ export default function ProductsManagement() {
         }
       }
 
-      fetchProducts(parseInt(page), search, category, company, hasImage, isShow, parseInt(limit));
+      fetchProducts(parseInt(page), search, category, company, hasImage, isShow, parseInt(limit), sortField, sortOrder, searchType);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.isReady, router.query, fetchProducts]);
@@ -136,10 +139,12 @@ export default function ProductsManagement() {
     showFilter = isShow,
     limit = pageSize,
     orderField = sortField,
-    order = sortOrder
+    order = sortOrder,
+    type = searchType
   ) => {
     const query = {page: page.toString(), limit: limit.toString()};
     if (search) query.search = search;
+    if (type) query.searchType = type;
     if (category) query.category = category;
     if (company) query.company = company;
     if (imageFilter) query.hasImage = imageFilter;
@@ -204,10 +209,15 @@ export default function ProductsManagement() {
     updateUrlWithFilters(1, searchTerm, selectedCategory, selectedCompany, hasImage, isShow, newSize);
   }
 
+  // 검색 타입 변경 처리
+  const handleSearchTypeChange = (e) => {
+    setSearchType(e.target.value);
+  };
+
   // 검색 처리
   const handleSearch = (e) => {
     e.preventDefault();
-    updateUrlWithFilters(1, searchTerm, selectedCategory, selectedCompany, hasImage, isShow);
+    updateUrlWithFilters(1, searchTerm, selectedCategory, selectedCompany, hasImage, isShow, pageSize, sortField, sortOrder, searchType);
   };
 
   // 상품 삭제
@@ -279,6 +289,7 @@ export default function ProductsManagement() {
   const getLinkWithCurrentFilters = (baseUrl) => {
     const query = {};
     if (searchTerm) query.search = searchTerm;
+    if (searchType !== 'all') query.searchType = searchType;
     if (selectedCategory) query.category = selectedCategory;
     if (selectedCompany) query.company = selectedCompany;
     if (hasImage) query.hasImage = hasImage;
@@ -402,12 +413,21 @@ export default function ProductsManagement() {
 
           <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
             <form onSubmit={handleSearch} className="flex">
+              <select
+                value={searchType}
+                onChange={handleSearchTypeChange}
+                className="border border-gray-300 rounded-l-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">전체</option>
+                <option value="name">상품명</option>
+                <option value="id">상품 번호</option>
+              </select>
               <input
                 type="text"
-                placeholder="상품명 검색..."
+                placeholder={searchType === 'id' ? "상품 번호로 검색..." : searchType === 'name' ? "상품명으로 검색..." : "상품명 또는 상품 번호로 검색..."}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="border border-gray-300 rounded-l-md px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="border-y border-r border-gray-300 px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <button
                 type="submit"

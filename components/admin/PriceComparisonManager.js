@@ -15,6 +15,7 @@ const PriceComparisonManager = ({productId}) => {
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [selectedComparisons, setSelectedComparisons] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchType, setSearchType] = useState('all'); // 'all', 'name', 'id'
   const [searchResults, setSearchResults] = useState([]);
   const [selectedProductId, setSelectedProductId] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
@@ -310,7 +311,7 @@ const PriceComparisonManager = ({productId}) => {
     setIsSearching(true);
 
     try {
-      const response = await fetch(`/api/admin/products?search=${encodeURIComponent(searchQuery)}`);
+      const response = await fetch(`/api/admin/products?search=${encodeURIComponent(searchQuery)}&searchType=${searchType}`);
 
       if (response.ok) {
         const result = await response.json();
@@ -427,7 +428,23 @@ const PriceComparisonManager = ({productId}) => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
             <tr>
-              <th className="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">선택</th>
+              <th className="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <label className="inline-flex items-center">
+                  <input
+                    type="checkbox"
+                    className="w-6 h-6 rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500"
+                    checked={selectedComparisons.length === comparisons.length}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedComparisons(comparisons.map(c => c.id));
+                      } else {
+                        setSelectedComparisons([]);
+                      }
+                    }}
+                  />
+                  전체 선택
+                </label>
+              </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">판매처</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">가격</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">URL</th>
@@ -514,7 +531,7 @@ const PriceComparisonManager = ({productId}) => {
                             setSelectedComparisons([...selectedComparisons, comparison.id]);
                           }
                         }}
-                        className="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500"
+                        className="w-6 h-6 rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500"
                       />
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -584,27 +601,38 @@ const PriceComparisonManager = ({productId}) => {
             </p>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">이관할 상품</label>
-              <div className="flex">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      handleSearch().then();
-                    }
-                  }}
-                  className="flex-1 border border-gray-300 rounded-md py-2 px-3 text-sm"
-                  placeholder="상품명 검색"
-                />
-                <button
-                  onClick={handleSearch}
-                  className="ml-2 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
-                  disabled={isSearching}
-                >
-                  {isSearching ? '검색 중...' : '검색'}
-                </button>
+              <div className="flex flex-col space-y-2">
+                <div className="flex">
+                  <select
+                    value={searchType}
+                    onChange={(e) => setSearchType(e.target.value)}
+                    className="border border-gray-300 rounded-md py-2 px-3 text-sm mr-2"
+                  >
+                    <option value="all">전체</option>
+                    <option value="name">상품명</option>
+                    <option value="id">상품 번호</option>
+                  </select>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleSearch().then();
+                      }
+                    }}
+                    className="flex-1 border border-gray-300 rounded-md py-2 px-3 text-sm"
+                    placeholder={searchType === 'id' ? "상품 번호로 검색" : searchType === 'name' ? "상품명으로 검색" : "상품명 또는 상품 번호로 검색"}
+                  />
+                  <button
+                    onClick={handleSearch}
+                    className="ml-2 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
+                    disabled={isSearching}
+                  >
+                    {isSearching ? '검색 중...' : '검색'}
+                  </button>
+                </div>
               </div>
             </div>
             {searchResults.length > 0 && (

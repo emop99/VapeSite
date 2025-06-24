@@ -17,7 +17,7 @@ async function productsHandler(req, res) {
 // 상품 목록 조회
 async function getProducts(req, res) {
   try {
-    const {page = 1, limit = 10, search = '', category = '', company = '', hasImage = '', isShow = '', sortField = 'createdAt', sortOrder = 'DESC'} = req.query;
+    const {page = 1, limit = 10, search = '', searchType = 'all', category = '', company = '', hasImage = '', isShow = '', sortField = 'createdAt', sortOrder = 'DESC'} = req.query;
     const offset = (page - 1) * limit;
 
     // 검색 조건 설정
@@ -28,9 +28,36 @@ async function getProducts(req, res) {
 
     // 검색어가 있는 경우
     if (search) {
-      whereClause.visibleName = {
-        [Op.like]: `%${search}%`
-      };
+      // 검색 타입에 따라 다른 검색 조건 적용
+      if (searchType === 'id') {
+        // 상품 번호로만 검색
+        if (/^\d+$/.test(search)) {
+          whereClause.id = parseInt(search);
+        } else {
+          // 숫자가 아닌 경우 빈 결과 반환을 위한 조건
+          whereClause.id = -1; // 존재하지 않는 ID
+        }
+      } else if (searchType === 'name') {
+        // 상품명으로만 검색
+        whereClause.visibleName = {
+          [Op.like]: `%${search}%`
+        };
+      } else {
+        // 전체 검색 (기본값)
+        const isNumeric = /^\d+$/.test(search);
+        if (isNumeric) {
+          // 상품 번호로 검색하되 상품명도 포함
+          whereClause[Op.or] = [
+            {id: parseInt(search)},
+            {visibleName: {[Op.like]: `%${search}%`}}
+          ];
+        } else {
+          // 상품명으로만 검색
+          whereClause.visibleName = {
+            [Op.like]: `%${search}%`
+          };
+        }
+      }
     }
 
     // 카테고리 필터링
