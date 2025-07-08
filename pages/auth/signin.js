@@ -1,7 +1,8 @@
-import { useState } from 'react';
-import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/router';
+import {useState} from 'react';
+import {signIn} from 'next-auth/react';
+import {useRouter} from 'next/router';
 import Link from 'next/link';
+import {FcGoogle} from 'react-icons/fc';
 
 export default function SignIn() {
   const [email, setEmail] = useState('');
@@ -96,6 +97,26 @@ export default function SignIn() {
               className="group relative flex w-full justify-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-primary-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             >
               {isLoading ? '로그인 중...' : '로그인'}
+            </button>
+          </div>
+
+          <div className="relative mt-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="bg-white px-2 text-gray-500">또는</span>
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <button
+              type="button"
+              onClick={() => signIn('google', {callbackUrl: callbackUrl || '/'})}
+              className="flex w-full items-center justify-center gap-3 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            >
+              <FcGoogle className="h-5 w-5"/>
+              Google 계정으로 로그인
             </button>
           </div>
         </form>

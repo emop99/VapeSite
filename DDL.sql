@@ -115,6 +115,8 @@ create table vapesite.vape_user
     grade               enum ('NORMAL', 'PREMIUM', 'ADMIN') default 'NORMAL'            not null comment '회원 등급 설정',
     emailVerification   tinyint                             default 0                   not null comment '이메일 인증 여부',
     emailVerificationAt datetime                                                        null comment '이메일 인증 일시',
+    provider   enum ('google') null comment '소셜 로그인 제공자',
+    providerId varchar(255)    null comment '소셜 로그인 제공자 ID',
     createdAt           datetime                            default current_timestamp() not null,
     updatedAt           datetime                            default current_timestamp() null on update current_timestamp(),
     deletedAt           datetime                                                        null comment '회원 탈퇴 일시',

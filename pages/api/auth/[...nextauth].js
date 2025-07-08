@@ -1,5 +1,6 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import GoogleProvider from 'next-auth/providers/google';
 import User from '../../../models/User';
 import crypto from 'crypto';
 import {UserLoginLog} from "../../../models";
@@ -11,6 +12,10 @@ const hashPassword = (password) => {
 
 export default NextAuth({
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
     CredentialsProvider({
       debug: process.env.NODE_ENV === 'development',
       name: 'Credentials',
@@ -56,11 +61,67 @@ export default NextAuth({
     })
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async signIn({user, account, profile}) {
+      // Google 로그인 처리
+      if (account.provider === 'google') {
+        try {
+          // 이메일로 사용자 찾기
+          let dbUser = await User.findOne({
+            where: {
+              email: profile.email,
+              deletedAt: null
+            }
+          });
+
+          // 사용자가 없으면 새로 생성
+          if (!dbUser) {
+            dbUser = await User.create({
+              email: profile.email,
+              nickName: profile.name,
+              password: profile.at_hash,
+              grade: 'NORMAL',
+              provider: 'google',
+              providerId: profile.sub,
+              emailVerification: profile.email_verified ? 1 : 0,
+              emailVerificationAt: new Date(),
+            });
+          }
+
+          // 로그인 로그 기록
+          await UserLoginLog.create({
+            userId: dbUser.id,
+            ip: '0.0.0.0'
+          });
+
+          return true;
+        } catch (error) {
+          console.error('Google authentication error:', error);
+          return false;
+        }
+      }
+
+      return true; // 다른 provider는 기본적으로 허용
+    },
+    async jwt({token, user, account}) {
       // 초기 로그인 시 user 객체가 있으면 token에 추가 정보 저장
       if (user) {
         token.id = user.id;
         token.grade = user.grade;
+
+        // Google 로그인인 경우 DB에서 사용자 정보 가져오기
+        if (account && account.provider === 'google') {
+          const dbUser = await User.findOne({
+            where: {
+              email: user.email,
+              deletedAt: null
+            }
+          });
+
+          if (dbUser) {
+            token.id = dbUser.id;
+            token.grade = dbUser.grade;
+          }
+        }
       }
       return token;
     },

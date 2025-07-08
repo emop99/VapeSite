@@ -48,6 +48,16 @@ const User = sequelize.define('User', {
     type: DataTypes.DATE,
     allowNull: true,
   },
+  // 소셜 로그인 제공자
+  provider: {
+    type: DataTypes.ENUM('google'),
+    allowNull: true,
+  },
+  // 소셜 로그인 제공자 ID
+  providerId: {
+    type: DataTypes.STRING(255),
+    allowNull: true,
+  },
 }, {
   // 테이블 이름 설정
   tableName: 'vape_user',
