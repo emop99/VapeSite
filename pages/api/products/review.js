@@ -54,7 +54,7 @@ async function handlePostRequest(req, res) {
       return res.status(400).json({message: '리뷰 내용을 입력해주세요.'});
     }
 
-    // XSS 공격 방지를 위한 입력값 살균(sanitize)
+    // XSS 공격 방지 처리
     const sanitizedTitle = escapeHTML(title.trim());
     const sanitizedContent = escapeHTML(content.trim());
     const sanitizedPros = pros ? escapeHTML(pros.trim()) : null;
@@ -107,7 +107,7 @@ async function handlePostRequest(req, res) {
       message: '리뷰가 성공적으로 등록되었습니다.',
       review: {
         ...review.get({plain: true}),
-        createdAt: new Date()
+        nickName: user.nickName,
       }
     });
 
@@ -188,7 +188,8 @@ async function handlePutRequest(req, res) {
     return res.status(200).json({
       message: '리뷰가 성공적으로 수정되었습니다.',
       review: {
-        ...review.get({plain: true})
+        ...review.get({plain: true}),
+        nickName: user.nickName,
       }
     });
 
