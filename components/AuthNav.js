@@ -67,6 +67,7 @@ export default function AuthNav() {
 
               {session.user.grade === 'ADMIN' && (
                 <Link href="/admin"
+                      target="_blank"
                       className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 transition-colors duration-200">
                   <FaCog className="mr-3 text-goblin-light"/>
                   <span>어드민 페이지</span>
