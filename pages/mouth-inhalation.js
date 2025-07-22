@@ -1,7 +1,7 @@
 import ProductListPage from '../components/ProductListPage';
 
 // 입호흡 상품 페이지
-export default function MouthInhalationProducts({products, pagination, searchTerm}) {
+export default function MouthInhalationProducts({products, pagination, searchTerm, orKeywords}) {
   return (
     <ProductListPage
       category="입호흡"
@@ -10,13 +10,14 @@ export default function MouthInhalationProducts({products, pagination, searchTer
       initialProducts={products}
       initialPagination={pagination}
       initialSearchKeyword={searchTerm}
+      initialOrKeywords={orKeywords}
     />
   );
 }
 
 // 서버 사이드에서 데이터 가져오기
 export async function getServerSideProps(context) {
-  const {page = 1, search = ''} = context.query;
+  const {page = 1, search = '', orKeywords = []} = context.query;
 
   try {
     // API 호출을 위한 요청 옵션 설정
@@ -29,8 +30,19 @@ export async function getServerSideProps(context) {
       requestOptions.headers['Cookie'] = context.req.headers.cookie;
     }
 
+    let orKeywordsArray = [];
+    if (typeof orKeywords === 'string') {
+      if (orKeywords.includes(',')) {
+        orKeywordsArray = orKeywords.split(',');
+      } else {
+        orKeywordsArray = [orKeywords];
+      }
+    } else if (Array.isArray(orKeywords)) {
+      orKeywordsArray = orKeywords;
+    }
+
     // 서버에서 API 직접 호출
-    const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/products?page=${page}&limit=12&category=입호흡${search ? `&search=${search}` : ''}`;
+    const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/products?page=${page}&limit=12&category=입호흡${search ? `&search=${search}` : ''}${orKeywordsArray ? orKeywordsArray.map(keyword => `&orKeywords=${keyword}`).join('') : ''}`;
     const response = await fetch(apiUrl, requestOptions);
 
     if (!response.ok) {
@@ -43,7 +55,8 @@ export async function getServerSideProps(context) {
       props: {
         products: data.products || [],
         pagination: data.pagination || {page: parseInt(page), totalPages: 1},
-        searchTerm: search
+        searchTerm: search,
+        orKeywords: orKeywords || [],
       }
     };
   } catch (error) {
@@ -54,7 +67,8 @@ export async function getServerSideProps(context) {
       props: {
         products: [],
         pagination: {page: parseInt(page), totalPages: 1},
-        searchTerm: search
+        searchTerm: search,
+        orKeywords: orKeywords || [],
       }
     };
   }

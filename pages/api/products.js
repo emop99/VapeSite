@@ -55,21 +55,13 @@ async function getProducts(req, res) {
     const offset = (pageNum - 1) * limitNum;
 
     // OR 검색어 파싱
-    let orKeywordsArray = [];
-    if (orKeywords) {
-      try {
-        orKeywordsArray = JSON.parse(orKeywords);
-        // 배열이 아니면 빈 배열로 초기화
-        if (!Array.isArray(orKeywordsArray)) {
-          orKeywordsArray = JSON.parse(orKeywords);
-          if (!Array.isArray(orKeywordsArray)) {
-            orKeywordsArray = [];
-          }
-        }
-      } catch (e) {
-        console.error('OR 검색어 파싱 오류:', e);
-        orKeywordsArray = [];
-      }
+    let orKeywordsArray;
+    if (typeof orKeywords === 'string') {
+      orKeywordsArray = orKeywords.split(',');
+    } else if (Array.isArray(orKeywords)) {
+      orKeywordsArray = orKeywords;
+    } else {
+      orKeywordsArray = [];
     }
 
     // 필터 조건 구성

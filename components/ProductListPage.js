@@ -3,6 +3,7 @@ import Link from 'next/link';
 import {useRouter} from 'next/router';
 import Pagination from './Pagination';
 import ProductCard from './ProductCard';
+import ProductSearch from "./ProductSearch";
 
 // 제품 목록 페이지 컴포넌트
 export default function ProductListPage({ 
@@ -11,7 +12,8 @@ export default function ProductListPage({
   emptyMessage,
   initialProducts = [],
   initialPagination = { page: 1, totalPages: 1 },
-  initialSearchKeyword = ''
+                                          initialSearchKeyword = '',
+                                          initialOrKeywords = []
 }) {
   const router = useRouter();
 
@@ -23,6 +25,9 @@ export default function ProductListPage({
   // 검색어 상태
   const [inputSearchKeyword, setInputSearchKeyword] = useState(initialSearchKeyword);
   const [searchKeyword, setSearchKeyword] = useState(initialSearchKeyword);
+  // OR 검색어 상태
+  const [inputSearchOrKeyword, setInputSearchOrKeyword] = useState(initialOrKeywords);
+  const [searchOrKeywords, setSearchOrKeywords] = useState(initialOrKeywords);
 
   // 페이지네이션 상태
   const [page, setPage] = useState(initialPagination.page);
@@ -33,13 +38,67 @@ export default function ProductListPage({
     setInputSearchKeyword(e.target.value);
   };
 
+  // OR 검색어 추가 핸들러
+  const handleAddOrKeyword = (keyword) => {
+    if (keyword && !inputSearchOrKeyword.includes(keyword)) {
+      const arrayInputSearchOrKeyword = typeof inputSearchOrKeyword === 'string' ? [inputSearchOrKeyword] : inputSearchOrKeyword;
+      const updatedKeywords = [...arrayInputSearchOrKeyword, keyword];
+      setInputSearchOrKeyword(updatedKeywords);
+      // 검색에 사용되는 상태도 즉시 업데이트
+      setSearchOrKeywords(updatedKeywords);
+
+      // 상태 업데이트 후 URL과 검색 결과도 즉시 업데이트
+      setTimeout(() => {
+        // URL 업데이트
+        router.push({
+          pathname: router.pathname,
+          query: {
+            ...(inputSearchKeyword ? {search: inputSearchKeyword} : {}),
+            ...(updatedKeywords.length > 0 ? {orKeywords: updatedKeywords} : {})
+          }
+        }, undefined, {shallow: true});
+
+        // 검색어로 제품 가져오기
+        fetchProducts(1, inputSearchKeyword, updatedKeywords).then();
+      }, 0);
+    }
+  };
+
+  // OR 검색어 제거 핸들러
+  const handleRemoveOrKeyword = (keyword) => {
+    const updatedKeywords = typeof inputSearchOrKeyword === 'string' ? (keyword === inputSearchOrKeyword ? [] : [inputSearchOrKeyword]) : inputSearchOrKeyword.filter(kw => kw !== keyword);
+    setInputSearchOrKeyword(updatedKeywords);
+    // 검색에 사용되는 상태도 즉시 업데이트
+    setSearchOrKeywords(updatedKeywords);
+
+    // 상태 업데이트 후 URL과 검색 결과도 즉시 업데이트
+    setTimeout(() => {
+      // URL 업데이트
+      router.push({
+        pathname: router.pathname,
+        query: {
+          ...(inputSearchKeyword ? {search: inputSearchKeyword} : {}),
+          ...(updatedKeywords.length > 0 ? {orKeywords: updatedKeywords} : {})
+        }
+      }, undefined, {shallow: true});
+
+      // 검색어로 제품 가져오기
+      fetchProducts(1, inputSearchKeyword, updatedKeywords).then();
+    }, 0);
+  };
+
   // 제품 데이터 가져오기
-  const fetchProducts = useCallback(async (pageNum = 1, search = '') => {
+  const fetchProducts = useCallback(async (pageNum = 1, search = '', orKeywords = []) => {
     try {
       setLoading(true);
 
-      // API 호출 (카테고리로 필터링, 검색어 포함)
-      const response = await fetch(`/api/products?page=${pageNum}&limit=12&category=${category}${search ? `&search=${search}` : ''}`);
+      // OR 검색어 쿼리 파라미터 생성
+      const orKeywordsParam = orKeywords.length > 0
+        ? orKeywords.map(keyword => `&orKeywords=${keyword}`).join('')
+        : '';
+
+      // API 호출 (카테고리로 필터링, 검색어 포함, OR 검색어 포함)
+      const response = await fetch(`/api/products?page=${pageNum}&limit=12&category=${category}${search ? `&search=${search}` : ''}${orKeywordsParam}`);
 
       if (!response.ok) {
         throw new Error('제품을 불러오는데 문제가 발생했습니다.');
@@ -78,28 +137,37 @@ export default function ProductListPage({
       // URL 업데이트하여 히스토리에 기록
       router.push({
         pathname: router.pathname,
-        query: { page: newPage, ...(searchKeyword ? { search: searchKeyword } : {}) }
+        query: {
+          page: newPage,
+          ...(searchKeyword ? {search: searchKeyword} : {}),
+          ...(searchOrKeywords.length > 0 ? {orKeywords: searchOrKeywords} : {})
+        }
       }, undefined, { shallow: true });
 
-      fetchProducts(newPage, searchKeyword);
+      fetchProducts(newPage, searchKeyword, searchOrKeywords);
     }
-  }, [fetchProducts, totalPages, router, searchKeyword]);
+  }, [fetchProducts, totalPages, router, searchKeyword, searchOrKeywords]);
 
   // 검색 제출 핸들러
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    console.log('검색어:', inputSearchKeyword);
+    const trimmedKeyword = inputSearchKeyword.trim();
 
-    setSearchKeyword(inputSearchKeyword.trim());
+    // 상태 업데이트
+    setSearchKeyword(trimmedKeyword);
+    setSearchOrKeywords(inputSearchOrKeyword);
 
     // URL 업데이트
     router.push({
       pathname: router.pathname,
-      query: { ...(inputSearchKeyword ? { search: inputSearchKeyword } : {}) }
+      query: {
+        ...(trimmedKeyword ? {search: trimmedKeyword} : {}),
+        ...(inputSearchOrKeyword.length > 0 ? {orKeywords: inputSearchOrKeyword} : {})
+      }
     }, undefined, { shallow: true });
 
     // 검색어로 제품 가져오기
-    fetchProducts(1, inputSearchKeyword);
+    fetchProducts(1, trimmedKeyword, inputSearchOrKeyword).then();
   };
 
   // 로딩 중 표시
@@ -133,23 +201,14 @@ export default function ProductListPage({
         <h1 className="text-3xl font-bold mb-6">{title}</h1>
 
         {/* 검색 폼 */}
-        <div className="mb-6">
-          <form onSubmit={handleSearchSubmit} className="flex max-w-md">
-            <input
-              type="text"
-              value={inputSearchKeyword}
-              onChange={handleSearchChange}
-              placeholder="브랜드, 제품명 등을 검색해보세요."
-              className="w-full px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-            <button
-              type="submit"
-              className="bg-primary text-white px-4 py-2 rounded-r-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary whitespace-nowrap"
-            >
-              검색
-            </button>
-          </form>
-        </div>
+        <ProductSearch
+          inputSearchKeyword={inputSearchKeyword}
+          onInputChange={handleSearchChange}
+          onSubmit={handleSearchSubmit}
+          orKeywords={searchOrKeywords}
+          onAddOrKeyword={handleAddOrKeyword}
+          onRemoveOrKeyword={handleRemoveOrKeyword}
+        />
       </div>
 
       {/* 제품 목록 */}
