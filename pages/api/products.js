@@ -191,6 +191,9 @@ async function getProducts(req, res) {
     // 정렬 조건 구성
     let order = [];
 
+    // 판매점이 많은 상품순으로 정렬
+    order.push([sequelize.literal('(SELECT COUNT(*) FROM vape_price_comparisons WHERE vape_price_comparisons.productId = Product.id)'), 'DESC']);
+
     // 전체 제품 수 조회
     const count = await Product.count({
       where,
