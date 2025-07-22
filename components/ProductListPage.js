@@ -1,4 +1,4 @@
-import {useCallback, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import Link from 'next/link';
 import {useRouter} from 'next/router';
 import Pagination from './Pagination';
@@ -32,6 +32,29 @@ export default function ProductListPage({
   // 페이지네이션 상태
   const [page, setPage] = useState(initialPagination.page);
   const [totalPages, setTotalPages] = useState(initialPagination.totalPages);
+
+  // 페이지 뒤로가기/앞으로 가기 시 검색어와 OR 검색어를 유지하기 위해 URL 쿼리 파라미터를 사용
+  useEffect(() => {
+    const {page, search, orKeywords} = router.query;
+    let keywordsArray = [];
+
+    // URL 쿼리 파라미터에서 검색어와 OR 검색어를 가져옴
+    if (search) {
+      setInputSearchKeyword(search);
+      setSearchKeyword(search);
+    }
+    if (orKeywords) {
+      keywordsArray = Array.isArray(orKeywords) ? orKeywords : [orKeywords];
+      setInputSearchOrKeyword(keywordsArray);
+      setSearchOrKeywords(keywordsArray);
+    } else {
+      setInputSearchOrKeyword([]);
+      setSearchOrKeywords([]);
+    }
+
+    // 초기 제품 데이터 가져오기
+    fetchProducts(page || 1, search || '', keywordsArray).then();
+  }, [router.query]);
 
   // 검색어 변경 핸들러
   const handleSearchChange = (e) => {
