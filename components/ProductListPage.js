@@ -54,6 +54,8 @@ export default function ProductListPage({
 
     // 초기 제품 데이터 가져오기
     fetchProducts(page || 1, search || '', keywordsArray).then();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.query]);
 
   // 검색어 변경 핸들러

@@ -101,6 +101,7 @@ export default function ProductsManagement() {
         setLoading(false);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [sortField, sortOrder]
   );
 
