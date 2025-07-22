@@ -74,7 +74,7 @@ export default function ProductSearch({
             value={newKeyword}
             onChange={(e) => setNewKeyword(e.target.value)}
             placeholder="추가할 검색 키워드를 입력하세요"
-            className="flex-grow px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+            className="flex-grow w-1/2 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
             onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddKeyword())}
           />
           <button
