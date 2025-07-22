@@ -45,7 +45,8 @@ async function getProducts(req, res) {
       page = 1,
       limit = 12,
       category,
-      search
+      search,
+      orKeywords
     } = req.query;
 
     // 페이지네이션 파라미터 처리
@@ -53,11 +54,64 @@ async function getProducts(req, res) {
     const limitNum = parseInt(limit, 10);
     const offset = (pageNum - 1) * limitNum;
 
+    // OR 검색어 파싱
+    let orKeywordsArray = [];
+    if (orKeywords) {
+      try {
+        orKeywordsArray = JSON.parse(orKeywords);
+        // 배열이 아니면 빈 배열로 초기화
+        if (!Array.isArray(orKeywordsArray)) {
+          orKeywordsArray = JSON.parse(orKeywords);
+          if (!Array.isArray(orKeywordsArray)) {
+            orKeywordsArray = [];
+          }
+        }
+      } catch (e) {
+        console.error('OR 검색어 파싱 오류:', e);
+        orKeywordsArray = [];
+      }
+    }
+
     // 필터 조건 구성
     const where = {};
 
     // 조건 처리
     const {Op} = require('sequelize');
+
+    // 검색 조건 생성 헬퍼 함수
+    const buildSearchCondition = (mainSearch) => {
+      // 메인 검색어 조건
+      const mainSearchCondition = mainSearch ? {
+        [Op.or]: [
+          {'visibleName': {[Op.like]: `%${mainSearch}%`}},
+          {'$Company.name$': {[Op.like]: `%${mainSearch}%`}}
+        ]
+      } : {};
+
+      // OR 검색어 조건 추가
+      if (orKeywordsArray.length > 0) {
+        const orConditions = orKeywordsArray.map(keyword => {
+          if (keyword.trim()) {
+            return {
+              [Op.or]: [
+                {'visibleName': {[Op.like]: `%${keyword}%`}},
+                {'$Company.name$': {[Op.like]: `%${keyword}%`}}
+              ]
+            };
+          }
+        }).filter(Boolean);
+
+        // 메인 검색어와 OR 검색어 조건 결합
+        return {
+          [Op.and]: [
+            ...mainSearchCondition ? [mainSearchCondition] : [],
+            ...orConditions
+          ]
+        };
+      }
+
+      return mainSearchCondition;
+    };
 
     // 카테고리 필터링
     const include = [
@@ -104,35 +158,42 @@ async function getProducts(req, res) {
         isShowCondition,
         priceCondition,
         {'$ProductCategory.name$': category},
-        {
-          [Op.or]: [
-            {'visibleName': {[Op.like]: `%${search}%`}},
-            {'$Company.name$': {[Op.like]: `%${search}%`}}
-          ]
-        }
+        buildSearchCondition(search)
       ];
     } else if (category) {
       // 카테고리만 있는 경우
-      where[Op.and] = [
-        isShowCondition,
-        priceCondition,
-        {'$ProductCategory.name$': category}
-      ];
+      // OR 검색어가 있는 경우에도 검색 조건 추가
+      if (orKeywordsArray.length > 0) {
+        where[Op.and] = [
+          isShowCondition,
+          priceCondition,
+          {'$ProductCategory.name$': category},
+          buildSearchCondition('')
+        ];
+      } else {
+        where[Op.and] = [
+          isShowCondition,
+          priceCondition,
+          {'$ProductCategory.name$': category}
+        ];
+      }
     } else if (search) {
       // 검색어만 있는 경우
       where[Op.and] = [
         isShowCondition,
         priceCondition,
-        {
-          [Op.or]: [
-            {'visibleName': {[Op.like]: `%${search}%`}},
-            {'$Company.name$': {[Op.like]: `%${search}%`}}
-          ]
-        }
+        buildSearchCondition(search)
+      ];
+    } else if (orKeywordsArray.length > 0) {
+      // 메인 검색어는 없지만 OR 검색어가 있는 경우
+      where[Op.and] = [
+        isShowCondition,
+        priceCondition,
+        buildSearchCondition('')
       ];
     } else {
       // 필터가 없는 경우에 기본 조건만 적용
-      where[Op.and] = [priceCondition, priceCondition];
+      where[Op.and] = [isShowCondition, priceCondition];
     }
 
     // 정렬 조건 구성
