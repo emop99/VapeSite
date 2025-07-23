@@ -193,6 +193,9 @@ async function getProducts(req, res) {
 
     // 판매점이 많은 상품순으로 정렬
     order.push([sequelize.literal('(SELECT COUNT(*) FROM vape_price_comparisons WHERE vape_price_comparisons.productId = Product.id)'), 'DESC']);
+    // Product.id 순으로 정렬
+    order.push(['id', 'ASC']);
+
 
     // 전체 제품 수 조회
     const count = await Product.count({
@@ -213,6 +216,15 @@ async function getProducts(req, res) {
       group: ['Product.id'],
       attributes: {
         include: [
+          [
+            // 해당 제품의 최저가 조회
+            sequelize.literal(`(
+              SELECT MIN(price) 
+              FROM vape_price_comparisons 
+              WHERE vape_price_comparisons.productId = Product.id
+            )`),
+            'minPrice'
+          ],
           [
             sequelize.literal(`(
               SELECT AVG(rating) 

@@ -158,9 +158,9 @@ export default function ProductCard({product}) {
             <p className="text-lg font-bold text-primary">{product.price.toLocaleString()}원</p>
           )}
 
-          {product.PriceComparisons && product.PriceComparisons.length > 0 && (
+          {product.minPrice && (
             <p className="text-sm text-red-600 font-semibold">
-              최저가: {product.PriceComparisons[0].price.toLocaleString()}원
+              최저가: {product.minPrice.toLocaleString()}원
             </p>
           )}
 
