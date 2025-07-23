@@ -120,6 +120,7 @@ export default NextAuth({
           if (dbUser) {
             token.id = dbUser.id;
             token.grade = dbUser.grade;
+            token.name = dbUser.nickName;
           }
         }
       }
