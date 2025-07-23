@@ -60,10 +60,11 @@ export default function AuthNav() {
                 <p className="text-sm text-gray-500 truncate">{session.user.name} 님</p>
               </div>
 
-              {/*<Link href="/profile" className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 transition-colors duration-200">*/}
-              {/*  <FaUserEdit className="mr-3 text-goblin-light" />*/}
-              {/*  <span>내 정보 수정</span>*/}
-              {/*</Link>*/}
+              <Link href="/profile"
+                    className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 transition-colors duration-200">
+                <FaUser className="mr-3 text-goblin-light"/>
+                <span>회원 정보 수정</span>
+              </Link>
 
               {session.user.grade === 'ADMIN' && (
                 <Link href="/admin"
