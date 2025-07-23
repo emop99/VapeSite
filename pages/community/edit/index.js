@@ -1,6 +1,5 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {useRouter} from 'next/router';
-import Link from 'next/link';
 import {toast} from 'react-hot-toast';
 import {EditorContent, useEditor} from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -574,15 +573,16 @@ export default function PostEditPage() {
 
                 {/* 버튼 */}
                 <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 border-t border-gray-100 pt-6">
-                  <Link
-                    href={isEditMode ? `/community/post/${postId}` : `/community/board/${board?.slug}`}
+                  <button
+                    type="button"
+                    onClick={() => router.back()}
                     className="px-6 py-3 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-all duration-200 text-center flex items-center justify-center"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                     취소
-                  </Link>
+                  </button>
                   <button
                     type="submit"
                     className="px-6 py-3 bg-accent hover:bg-accent-dark text-white rounded-md transition-all duration-200 disabled:opacity-50 flex items-center justify-center"
