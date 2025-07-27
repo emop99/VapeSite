@@ -1,4 +1,4 @@
-import {Board, Post, User} from '../../../../models';
+import {Board, Like, Post, User} from '../../../../models';
 import {getServerSession} from 'next-auth/next';
 
 export default async function handler(req, res) {
@@ -23,6 +23,19 @@ async function getPost(req, res) {
   }
 
   try {
+    // 현재 로그인한 사용자 정보 가져오기
+    const session = await getServerSession(req, res);
+    let currentUser = null;
+
+    if (session && session.user) {
+      currentUser = await User.findOne({
+        where: {
+          email: session.user.email,
+          deletedAt: null
+        }
+      });
+    }
+
     // 게시글 조회
     const post = await Post.findOne({
       where: {
@@ -53,8 +66,35 @@ async function getPost(req, res) {
     // 조회수 증가
     await post.increment('viewCount', {by: 1});
 
+    // 좋아요 수 조회
+    const likeCount = await Like.count({
+      where: {
+        targetType: 'post',
+        targetId: id
+      }
+    });
+
+    // 현재 사용자의 좋아요 여부 확인
+    let likedByUser = false;
+    if (currentUser) {
+      likedByUser = !!(await Like.findOne({
+        where: {
+          userId: currentUser.id,
+          targetType: 'post',
+          targetId: id
+        }
+      }));
+    }
+
+    // 게시글 정보에 좋아요 정보 추가
+    const postWithLikes = {
+      ...post.toJSON(),
+      likeCount,
+      likedByUser
+    };
+
     // 게시글 정보 반환
-    return res.status(200).json({post});
+    return res.status(200).json({post: postWithLikes});
   } catch (error) {
     console.error('게시글 조회 중 오류 발생:', error);
     return res.status(500).json({message: '서버 오류가 발생했습니다.'});

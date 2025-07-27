@@ -134,6 +134,43 @@ export default function PostDetailPage({post: initialPost, comments: initialComm
     return rootComments;
   };
 
+  // 게시글 좋아요 토글 핸들러
+  const handlePostLike = async (postId, liked) => {
+    if (!user) {
+      toast.error('로그인이 필요합니다.');
+      router.push('/auth/signin?callbackUrl=' + encodeURIComponent(router.asPath)).then();
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/community/post-like', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          postId,
+          action: liked ? 'unlike' : 'like'
+        }),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || '좋아요 처리에 실패했습니다.');
+      }
+      // 서버에서 최신 좋아요 정보 반환
+      const result = await response.json();
+      setPost(prevPost => ({
+        ...prevPost,
+        likeCount: result.likeCount,
+        likedByUser: result.likedByUser
+      }));
+
+      return result;
+    } catch (error) {
+      console.error('Error toggling post like:', error);
+      toast.error(error.message);
+      throw error;
+    }
+  };
+
   // 댓글 좋아요 토글 핸들러
   const handleToggleLike = async (commentId, liked) => {
     if (!user) {
@@ -338,6 +375,35 @@ export default function PostDetailPage({post: initialPost, comments: initialComm
 
             {/* 게시글 내용 컴포넌트 */}
             <PostContent post={post}/>
+
+            {/* 좋아요 버튼 (본문 하단) */}
+            <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8 p-6 flex justify-center">
+              <button
+                onClick={() => {
+                  if (!user) {
+                    toast.error('로그인이 필요합니다.');
+                    router.push('/auth/signin?callbackUrl=' + encodeURIComponent(router.asPath));
+                    return;
+                  }
+                  handlePostLike(post.id, post.likedByUser);
+                }}
+                className="flex flex-col items-center focus:outline-none transition-transform duration-200 transform hover:scale-110"
+                aria-label={post.likedByUser ? '좋아요 취소' : '좋아요'}
+              >
+                {post.likedByUser ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mb-2 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path
+                      d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z"/>
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mb-2 text-gray-400 hover:text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                          d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/>
+                  </svg>
+                )}
+                <span className="text-lg font-medium">{post.likeCount || 0} 좋아요</span>
+              </button>
+            </div>
 
             {/* 댓글 섹션 컴포넌트 */}
             <CommentSection

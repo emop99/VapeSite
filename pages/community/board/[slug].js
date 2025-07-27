@@ -94,6 +94,9 @@ export default function BoardPage({board, posts, totalPages, currentPage}) {
                       <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
                         조회수
                       </th>
+                      <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
+                        좋아요
+                      </th>
                     </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
@@ -126,7 +129,14 @@ export default function BoardPage({board, posts, totalPages, currentPage}) {
                                 </span>
                               )}
                               <div className="text-xs text-gray-500 mt-1 sm:hidden">
-                                {post.User?.nickName || '알 수 없음'} • {formatDate(post.createdAt)} • 조회 {post.viewCount}
+                                {post.User?.nickName || '알 수 없음'} • {formatDate(post.createdAt)} • 조회 {post.viewCount} •
+                                <span className="inline-flex items-center ml-1">
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-0.5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                                    <path
+                                      d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z"/>
+                                  </svg>
+                                  {post.likeCount || 0}
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -139,6 +149,15 @@ export default function BoardPage({board, posts, totalPages, currentPage}) {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden sm:table-cell">
                           {post.viewCount}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden sm:table-cell">
+                          <div className="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                              <path
+                                d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z"/>
+                            </svg>
+                            {post.likeCount || 0}
+                          </div>
                         </td>
                       </tr>
                     ))}

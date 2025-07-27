@@ -1,4 +1,4 @@
-import {Board, Comment, Post, User} from '../../../../models';
+import {Board, Comment, Like, Post, User} from '../../../../models';
 
 export default async function handler(req, res) {
   // 요청 메소드 확인
@@ -108,18 +108,36 @@ export default async function handler(req, res) {
       raw: true
     });
 
-    // 댓글 수를 게시글 객체에 추가
-    const postsWithCommentCount = allPosts.map(post => {
+    // 각 게시글의 좋아요 수 조회
+    const likeCounts = await Like.findAll({
+      attributes: ['targetId', [Like.sequelize.fn('COUNT', Like.sequelize.col('id')), 'count']],
+      where: {
+        targetId: postIds,
+        targetType: 'post'
+      },
+      group: ['targetId'],
+      raw: true
+    });
+
+    // 댓글 수와 좋아요 수를 게시글 객체에 추가
+    const postsWithCounts = allPosts.map(post => {
       const postObject = post.toJSON();
+
+      // 댓글 수 추가
       const commentData = commentCounts.find(c => c.postId === post.id);
       postObject.commentCount = commentData ? parseInt(commentData.count) : 0;
+
+      // 좋아요 수 추가
+      const likeData = likeCounts.find(l => l.targetId === post.id);
+      postObject.likeCount = likeData ? parseInt(likeData.count) : 0;
+      
       return postObject;
     });
 
     // 게시판 정보와 게시글 목록 반환
     return res.status(200).json({
       board,
-      posts: postsWithCommentCount,
+      posts: postsWithCounts,
       totalPages,
       currentPage: pageNumber,
       totalPosts
