@@ -2,11 +2,14 @@ import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
 import {useRouter} from 'next/router';
+import {useSession} from 'next-auth/react';
 import AuthNav from './AuthNav';
+import BookmarkPrompt from './BookmarkPrompt';
 
 // 레이아웃 컴포넌트
 export default function Layout({ children, title = '쥬스고블린 | 전자담배 액상 최저가 비교 가격 변동' }) {
   const router = useRouter();
+  const {data: session} = useSession();
 
   // 현재 경로에 따라 네비게이션 링크 활성화 여부 결정
   const isActive = (path) => {
@@ -15,6 +18,8 @@ export default function Layout({ children, title = '쥬스고블린 | 전자담�
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      {!session && <BookmarkPrompt/>}
+      
       {!router.pathname.startsWith('/products/') && !router.pathname.startsWith('/community/post/') ? (
         <Head>
           <title>{title}</title>
