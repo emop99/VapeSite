@@ -6,6 +6,7 @@ import StarterKit from '@tiptap/starter-kit';
 import LinkExtension from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 import Youtube from '@tiptap/extension-youtube';
+import Video from '../../../lib/tiptap-extensions/video';
 
 export default function PostEditPage() {
   const [title, setTitle] = useState('');
@@ -19,6 +20,7 @@ export default function PostEditPage() {
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const fileInputRef = useRef(null);
+  const videoInputRef = useRef(null);
   const router = useRouter();
   const {boardId, postId} = router.query;
   const isEditMode = !!postId;
@@ -49,6 +51,15 @@ export default function PostEditPage() {
         nocookie: true,
         HTMLAttributes: {
           class: 'mx-auto my-4 rounded-lg overflow-hidden',
+        },
+      }),
+      Video.configure({
+        inline: false,
+        HTMLAttributes: {
+          class: 'rounded-lg max-w-full my-4',
+          controls: true,
+          controlsList: 'nodownload',
+          preload: 'metadata',
         },
       }),
     ],
@@ -133,6 +144,49 @@ export default function PostEditPage() {
     }
   }, [editor]);
 
+  // 비디오 업로드 함수
+  const handleVideoUpload = useCallback(async (file) => {
+    if (!editor || !file) return;
+
+    // 파일 유효성 검사
+    if (!file.type.includes('video/')) {
+      toast.error('비디오 파일만 업로드할 수 있습니다.');
+      return;
+    }
+
+    // 파일 크기 제한 (50MB)
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error('파일 크기는 50MB를 초과할 수 없습니다.');
+      return;
+    }
+
+    try {
+      setUploading(true);
+      const formData = new FormData();
+      formData.append('video', file);
+
+      const response = await fetch('/api/community/posts/upload-video', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // 비디오 URL을 에디터에 삽입
+        editor.chain().focus().setVideo({src: result.data.videoUrl}).run();
+        toast.success('비디오가 업로드되었습니다.');
+      } else {
+        toast.error('비디오 업로드 실패: ' + result.message);
+      }
+    } catch (error) {
+      console.error('비디오 업로드 오류:', error);
+      toast.error('비디오 업로드 중 오류가 발생했습니다.');
+    } finally {
+      setUploading(false);
+    }
+  }, [editor]);
+
   // 파일 선택 핸들러
   const handleFileSelect = useCallback((e) => {
     const file = e.target.files?.[0];
@@ -142,6 +196,16 @@ export default function PostEditPage() {
     // 같은 파일을 다시 선택할 수 있도록 input 값 초기화
     e.target.value = '';
   }, [handleImageUpload]);
+
+  // 비디오 파일 선택 핸들러
+  const handleVideoSelect = useCallback((e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleVideoUpload(file);
+    }
+    // 같은 파일을 다시 선택할 수 있도록 input 값 초기화
+    e.target.value = '';
+  }, [handleVideoUpload]);
 
   // YouTube 비디오 추가 함수
   const addYoutubeVideo = useCallback(() => {
@@ -545,6 +609,34 @@ export default function PostEditPage() {
                         className="hidden"
                         accept="image/*"
                         onChange={handleFileSelect}
+                        disabled={submitting || uploading}
+                      />
+                      <div className="relative">
+                        <button
+                          type="button"
+                          onClick={() => videoInputRef.current?.click()}
+                          className="p-1 rounded hover:bg-gray-200"
+                          title="비디오 업로드"
+                          disabled={submitting || uploading}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" className="w-5 h-5">
+                            <path fill="none" d="M0 0h24v24H0z"/>
+                            <path
+                              d="M3 3.993C3 3.445 3.445 3 3.993 3h16.014c.548 0 .993.445.993.993v16.014a.994.994 0 0 1-.993.993H3.993A.994.994 0 0 1 3 20.007V3.993zM5 5v14h14V5H5zm5.622 3.415l4.879 3.252a.4.4 0 0 1 0 .666l-4.88 3.252a.4.4 0 0 1-.621-.332V8.747a.4.4 0 0 1 .622-.332z"/>
+                          </svg>
+                        </button>
+                        {uploading && (
+                          <div className="absolute -top-1 -right-1 w-3 h-3">
+                            <div className="animate-spin w-3 h-3 border-2 border-accent border-t-transparent rounded-full"></div>
+                          </div>
+                        )}
+                      </div>
+                      <input
+                        type="file"
+                        ref={videoInputRef}
+                        className="hidden"
+                        accept="video/*"
+                        onChange={handleVideoSelect}
                         disabled={submitting || uploading}
                       />
                       <button
