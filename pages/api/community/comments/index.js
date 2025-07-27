@@ -134,8 +134,9 @@ async function createComment(req, res) {
     return res.status(400).json({message: '게시글 ID가 필요합니다.'});
   }
 
-  if (!content || content.trim() === '') {
-    return res.status(400).json({message: '댓글 내용이 필요합니다.'});
+  // 댓글 내용이나 이미지 중 하나는 있어야 함
+  if ((!content || content.trim() === '') && !imageUrl) {
+    return res.status(400).json({message: '댓글 내용을 입력하거나 이미지를 업로드해주세요.'});
   }
 
   try {
@@ -252,8 +253,9 @@ async function updateComment(req, res) {
     return res.status(400).json({message: '댓글 ID가 필요합니다.'});
   }
 
-  if (!content || content.trim() === '') {
-    return res.status(400).json({message: '댓글 내용이 필요합니다.'});
+  // 댓글 내용이나 이미지 중 하나는 있어야 함
+  if ((!content || content.trim() === '') && !imageUrl) {
+    return res.status(400).json({message: '댓글 내용을 입력하거나 이미지를 업로드해주세요.'});
   }
 
   try {

@@ -52,8 +52,9 @@ export default function PostDetailPage({post: initialPost, comments: initialComm
     const imageUrl = commentData?.imageUrl;
     const parentId = commentData?.parentId;
 
-    if (!content.trim()) {
-      toast.error('댓글 내용을 입력해주세요.');
+    // 댓글 내용이나 이미지 중 하나는 있어야 함
+    if (!content.trim() && !imageUrl) {
+      toast.error('댓글 내용을 입력하거나 이미지를 업로드해주세요.');
       return;
     }
 
