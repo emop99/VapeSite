@@ -374,7 +374,7 @@ export default function PostDetailPage({post: initialPost, comments: initialComm
             />
 
             {/* 게시글 내용 컴포넌트 */}
-            <PostContent post={post}/>
+            <PostContent post={post} className="overflow-hidden"/>
 
             {/* 좋아요 버튼 (본문 하단) */}
             <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8 p-6 flex justify-center">

@@ -19,6 +19,9 @@ export default function PostEditPage() {
   const [post, setPost] = useState(null);
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [linkModalOpen, setLinkModalOpen] = useState(false);
+  const [youtubeModalOpen, setYoutubeModalOpen] = useState(false);
+  const [inputUrl, setInputUrl] = useState('');
   const fileInputRef = useRef(null);
   const videoInputRef = useRef(null);
   const router = useRouter();
@@ -45,12 +48,12 @@ export default function PostEditPage() {
         },
       }),
       Youtube.configure({
-        width: 640,
-        height: 360,
+        width: '100%',
+        height: 'auto',
         controls: true,
         nocookie: true,
         HTMLAttributes: {
-          class: 'mx-auto my-4 rounded-lg overflow-hidden',
+          class: 'mx-auto my-4 rounded-lg overflow-hidden aspect-video w-full max-w-3xl',
         },
       }),
       Video.configure({
@@ -67,39 +70,43 @@ export default function PostEditPage() {
     onUpdate: ({editor}) => {
       setContent(editor.getHTML());
     },
+    editorProps: {
+      handlePaste(view, event, slice) {
+        // 이미지 붙여넣기 처리
+        const items = event.clipboardData?.items;
+        if (items) {
+          for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            if (item.kind === 'file' && item.type.startsWith('image/')) {
+              const file = item.getAsFile();
+              if (file) {
+                setTimeout(() => handleImageUpload(file), 0);
+                event.preventDefault();
+                return true;
+              }
+            }
+          }
+        }
+
+        const text = event.clipboardData?.getData('text/plain');
+        if (text && /^https?:\/\//i.test(text.trim())) {
+          const url = text.trim();
+
+          // YouTube URL 확인
+          const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/;
+          if (youtubeRegex.test(url)) {
+            // YouTube URL인 경우 YouTube Extension 사용
+            editor.commands.setYoutubeVideo({src: url});
+            editor.chain().focus().createParagraphNear().run(); // 줄바꿈 추가
+            toast.success('YouTube 비디오가 삽입되었습니다.');
+            event.preventDefault();
+            return true;
+          }
+        }
+        return false;
+      },
+    },
   });
-
-  // 링크 추가 함수
-  const setLink = useCallback(() => {
-    if (!editor) return;
-
-    const previousUrl = editor.getAttributes('link').href;
-    const url = window.prompt('URL을 입력하세요:', previousUrl);
-
-    // 취소하거나 빈 값인 경우
-    if (url === null) return;
-
-    // URL 유효성 검사
-    if (url && !/^https?:\/\//i.test(url) && !/^www\./i.test(url)) {
-      toast.error('유효한 URL을 입력해주세요. (예: http:// 또는 https://로 시작하는 URL)');
-      return;
-    }
-
-    // 링크 제거
-    if (url === '') {
-      editor.chain().focus().extendMarkRange('link').unsetLink().run();
-      return;
-    }
-
-    // 유효한 URL인지 확인 (http:// 또는 https://로 시작하는지)
-    let validUrl = url;
-    if (!/^https?:\/\//i.test(url)) {
-      validUrl = 'https://' + url;
-    }
-
-    // 링크 추가
-    editor.chain().focus().extendMarkRange('link').setLink({href: validUrl}).run();
-  }, [editor]);
 
   // 이미지 업로드 함수
   const handleImageUpload = useCallback(async (file) => {
@@ -132,6 +139,7 @@ export default function PostEditPage() {
       if (result.success) {
         // 이미지 URL을 에디터에 삽입
         editor.chain().focus().setImage({src: result.data.imageUrl}).run();
+        editor.chain().focus().createParagraphNear().run(); // 줄바꿈 추가
         toast.success('이미지가 업로드되었습니다.');
       } else {
         toast.error('이미지 업로드 실패: ' + result.message);
@@ -364,8 +372,151 @@ export default function PostEditPage() {
     }
   };
 
+  // 링크 모달 열기 함수
+  const openLinkModal = useCallback(() => {
+    if (!editor) return;
+    const previousUrl = editor.getAttributes('link').href || '';
+    setInputUrl(previousUrl);
+    setLinkModalOpen(true);
+  }, [editor]);
+
+  // 링크 추가 함수 수정
+  const handleLinkConfirm = useCallback(() => {
+    if (!editor) return;
+
+    // URL 유효성 검사
+    if (inputUrl && !/^https?:\/\//i.test(inputUrl) && !/^www\./i.test(inputUrl)) {
+      toast.error('유효한 URL을 입력해주세요. (예: http:// 또는 https://로 시작하는 URL)');
+      return;
+    }
+
+    // 링크 제거
+    if (inputUrl === '') {
+      editor.chain().focus().extendMarkRange('link').unsetLink().run();
+    } else {
+      // 유효한 URL 처리
+      let validUrl = inputUrl;
+      if (!/^https?:\/\//i.test(inputUrl)) {
+        validUrl = 'https://' + inputUrl;
+      }
+
+      // 링크 추가
+      editor.chain().focus().extendMarkRange('link').setLink({href: validUrl}).run();
+    }
+
+    // 모달 닫기 및 상태 초기화
+    setLinkModalOpen(false);
+    setInputUrl('');
+  }, [editor, inputUrl]);
+
+  // 유튜브 모달 열기 함수
+  const openYoutubeModal = useCallback(() => {
+    if (!editor) return;
+    setInputUrl('');
+    setYoutubeModalOpen(true);
+  }, [editor]);
+
+  // 유튜브 비디오 추가 함수 수정
+  const handleYoutubeConfirm = useCallback(() => {
+    if (!editor || !inputUrl) return;
+
+    // YouTube URL 검증
+    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/;
+    if (!youtubeRegex.test(inputUrl)) {
+      toast.error('유효한 YouTube URL이 아닙니다.');
+      return;
+    }
+
+    editor.chain().focus().setYoutubeVideo({src: inputUrl}).run();
+    editor.chain().focus().createParagraphNear().run(); // 줄바꿈 추가
+    toast.success('YouTube 비디오가 삽입되었습니다.');
+
+    // 모달 닫기 및 상태 초기화
+    setYoutubeModalOpen(false);
+    setInputUrl('');
+  }, [editor, inputUrl]);
+
   return (
     <>
+      {/* 링크 모달 */}
+      {linkModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div className="p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">링크 삽입</h3>
+              <div className="mb-4">
+                <label htmlFor="url-input" className="block text-sm font-medium text-gray-700 mb-1">URL</label>
+                <input
+                  id="url-input"
+                  type="text"
+                  value={inputUrl}
+                  onChange={(e) => setInputUrl(e.target.value)}
+                  placeholder="https://example.com"
+                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
+                  autoFocus
+                />
+                <p className="mt-1 text-xs text-gray-500">http:// 또는 https://로 시작하는 URL을 입력하세요</p>
+              </div>
+              <div className="flex justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={() => setLinkModalOpen(false)}
+                  className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
+                >
+                  취소
+                </button>
+                <button
+                  type="button"
+                  onClick={handleLinkConfirm}
+                  className="px-4 py-2 bg-accent text-white rounded hover:bg-accent-dark"
+                >
+                  확인
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 유튜브 모달 */}
+      {youtubeModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div className="p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">YouTube 비디오 삽입</h3>
+              <div className="mb-4">
+                <label htmlFor="youtube-url-input" className="block text-sm font-medium text-gray-700 mb-1">YouTube URL</label>
+                <input
+                  id="youtube-url-input"
+                  type="text"
+                  value={inputUrl}
+                  onChange={(e) => setInputUrl(e.target.value)}
+                  placeholder="https://www.youtube.com/watch?v=..."
+                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
+                  autoFocus
+                />
+              </div>
+              <div className="flex justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={() => setYoutubeModalOpen(false)}
+                  className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
+                >
+                  취소
+                </button>
+                <button
+                  type="button"
+                  onClick={handleYoutubeConfirm}
+                  className="px-4 py-2 bg-accent text-white rounded hover:bg-accent-dark"
+                >
+                  확인
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
         {loading ? (
           <div className="flex justify-center items-center h-64">
@@ -571,7 +722,7 @@ export default function PostEditPage() {
                       <div className="w-px h-6 bg-gray-300 mx-1"></div>
                       <button
                         type="button"
-                        onClick={setLink}
+                        onClick={openLinkModal}
                         className={`p-1 rounded ${editor?.isActive('link') ? 'bg-gray-200' : 'hover:bg-gray-200'}`}
                         title="링크"
                         disabled={submitting}
@@ -641,7 +792,7 @@ export default function PostEditPage() {
                       />
                       <button
                         type="button"
-                        onClick={addYoutubeVideo}
+                        onClick={openYoutubeModal}
                         className="p-1 rounded hover:bg-gray-200"
                         title="YouTube 비디오 삽입"
                         disabled={submitting}
