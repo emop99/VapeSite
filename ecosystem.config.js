@@ -16,11 +16,11 @@ module.exports = {
       // 실행 모드: "fork" 또는 "cluster"
       // fork: 단일 프로세스 실행
       // cluster: 멀티 코어를 활용하여 여러 프로세스 실행
-      exec_mode: "cluster",
+      exec_mode: "fork",
 
       // 실행할 인스턴스 수
       // cluster 모드에서만 유효하며, "max"로 설정하면 모든 CPU 코어를 사용합니다.
-      instances: "4",
+      instances: "1",
 
       // 애플리케이션에 전달할 인수
       // 실행 시 커맨드라인 인수로 전달됩니다.
