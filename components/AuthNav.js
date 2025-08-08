@@ -1,14 +1,18 @@
 import {signOut, useSession} from 'next-auth/react';
 import Link from 'next/link';
 import {FaChevronDown, FaCog, FaHeart, FaSignOutAlt, FaUser} from 'react-icons/fa';
+import NotificationBell from './notifications/NotificationBell';
 import {useEffect, useRef, useState} from 'react';
 import {useRouter} from 'next/router';
+import {useNotification} from '../contexts/NotificationContext';
+import {toast} from 'react-hot-toast';
 
 export default function AuthNav() {
   const {data: session, status} = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const dropdownRef = useRef(null);
   const router = useRouter();
+  const {requestNotificationPermission} = useNotification();
 
   // 드롭다운 외부 클릭 시 메뉴 닫기
   useEffect(() => {
@@ -24,9 +28,25 @@ export default function AuthNav() {
     };
   }, [dropdownRef]);
 
+  // 알림 권한 요청 처리 함수
+  const handleRequestPermission = async () => {
+    try {
+      const result = await requestNotificationPermission();
+
+      if (result.success && !result.alreadySubscribed) {
+        toast.success('알림 권한이 허용되었습니다.');
+      }
+    } catch (error) {
+      console.error('Error requesting notification permission:', error);
+      toast.error('알림 설정 중 오류가 발생했습니다.');
+    }
+  };
+
   if (session) {
+    handleRequestPermission();
+
     return (
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-3">
         {/* 찜 목록 버튼 */}
         <Link
           href="/wishlist"
@@ -35,6 +55,9 @@ export default function AuthNav() {
         >
           <FaHeart className="text-xl"/>
         </Link>
+
+        {/* 알림 벨 버튼 */}
+        <NotificationBell onClick={() => router.push('/notifications')}/>
 
         {/* 회원 드롭다운 메뉴 - 새롭게 디자인 개선 */}
         <div className="relative" ref={dropdownRef}>

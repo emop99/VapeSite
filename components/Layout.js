@@ -19,7 +19,7 @@ export default function Layout({ children, title = '쥬스고블린 | 전자담�
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {!session && <BookmarkPrompt/>}
-      
+
       {!router.pathname.startsWith('/products/') && !router.pathname.startsWith('/community/post/') ? (
         <Head>
           <title>{title}</title>
@@ -27,6 +27,22 @@ export default function Layout({ children, title = '쥬스고블린 | 전자담�
           <meta name="keywords" content="쥬스고블린, 베이핑, 전자담배, 입호흡, 폐호흡, 액상, 액상최저가, 최저가, 최저가검색, 액상 추천, 액상추천, 전자담배 추천, 전자담배추천, 가격비교, 액상가격비교, 액상 가격비교, 최저가 찾기, 최저가찾기"/>
           <link rel="icon" href="/favicon.ico" sizes="any"/>
           <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+          {/* PWA 관련 메타 태그 */}
+          <link rel="manifest" href="/manifest.json"/>
+          <meta name="theme-color" content="#4CAF50"/>
+          <meta name="application-name" content="쥬스고블린"/>
+          <meta name="apple-mobile-web-app-capable" content="yes"/>
+          <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+          <meta name="apple-mobile-web-app-title" content="쥬스고블린"/>
+          <link rel="apple-touch-icon" href="/icons/icon-152x152.png"/>
+          <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png"/>
+          <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png"/>
+          <link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-152x152.png"/>
+          <meta name="msapplication-TileColor" content="#4CAF50"/>
+          <meta name="msapplication-TileImage" content="/icons/icon-144x144.png"/>
+          <meta name="msapplication-tap-highlight" content="no"/>
+          <meta name="mobile-web-app-capable" content="yes"/>
 
           {/* Open Graph / Facebook */}
           <meta property="og:type" content="website"/>

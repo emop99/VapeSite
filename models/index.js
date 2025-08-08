@@ -16,6 +16,8 @@ const Post = require('./Post');
 const Comment = require('./Comment');
 const Like = require('./Like');
 const Notification = require('./Notification');
+const NotificationSettings = require('./NotificationSettings');
+const PushSubscription = require('./PushSubscription');
 // 모델 간의 관계는 각 모델 파일에서 정의됨
 
 module.exports = {
@@ -34,4 +36,6 @@ module.exports = {
   Comment,
   Like,
   Notification,
+  NotificationSettings,
+  PushSubscription,
 };

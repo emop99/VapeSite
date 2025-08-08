@@ -1,8 +1,9 @@
-import {Comment, Post, User} from '../../../../models';
+import {Comment, Notification, NotificationSettings, Post, User} from '../../../../models';
 import {getServerSession} from 'next-auth/next';
 import Like from '../../../../models/Like';
 import fs from 'fs';
 import path from 'path';
+import {sendRealTimeNotification} from "../../../../lib/notifications";
 
 export default async function handler(req, res) {
   // 요청 메소드에 따라 처리
@@ -226,6 +227,197 @@ async function createComment(req, res) {
         'id', 'postId', 'userId', 'parentId', 'content', 'imageUrl', 'createdAt', 'updatedAt'
       ]
     });
+
+    // 알림 생성
+    try {
+      // 댓글인 경우 게시글 작성자에게 알림
+      if (!parentId) {
+        // 게시글 작성자 정보 조회
+        const postAuthor = await User.findByPk(post.userId);
+
+        // 자신의 게시글에 댓글을 작성한 경우는 알림 생성하지 않음
+        if (postAuthor.id !== user.id) {
+          // 게시글 작성자의 알림 설정 확인
+          const authorSettings = await NotificationSettings.findOne({
+            where: {userId: postAuthor.id}
+          });
+
+          // 알림 설정이 없거나 댓글 알림이 활성화된 경우
+          if (!authorSettings || authorSettings.commentEnabled) {
+            // 알림 생성
+            const notificationContent = `${user.nickName}님이 회원님의 게시글에 댓글을 남겼습니다: "${content.substring(0, 30)}${content.length > 30 ? '...' : ''}"`;
+            await Notification.create({
+              userId: postAuthor.id,
+              senderId: user.id,
+              type: 'comment',
+              postId: post.id,
+              commentId: comment.id,
+              content: notificationContent,
+              url: `/community/post/${post.id}#comment-${comment.id}`,
+              isRead: false
+            });
+
+            // 실시간 소켓 알림 전송
+            try {
+              const sendResult = sendRealTimeNotification(postAuthor.id, {
+                type: 'comment',
+                content: notificationContent,
+                url: `/community/post/${post.id}#comment-${comment.id}`,
+              });
+
+              if (!sendResult) {
+                // WebPush 처리
+                try {
+                  const webPushResponse = await fetch(`${process.env.NEXTAUTH_URL}/api/notifications/push/send`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'x-api-key': process.env.INTERNAL_API_KEY
+                    },
+                    body: JSON.stringify({
+                      userId: postAuthor.id,
+                      notification: {
+                        title: '새 댓글 알림',
+                        body: notificationContent,
+                        url: `/community/post/${post.id}#comment-${comment.id}`,
+                        icon: '/icons/icon-192x192.png'
+                      }
+                    })
+                  });
+
+                  if (!webPushResponse.ok) {
+                    console.error('WebPush 알림 전송 실패:', await webPushResponse.text());
+                  }
+                } catch (webPushError) {
+                  console.error('WebPush 알림 전송 오류:', webPushError);
+                }
+              }
+            } catch (emitError) {
+              console.error('소켓 알림 전송 오류:', emitError);
+              // 소켓 알림 전송이 실패한 경우에도 WebPush 처리
+              try {
+                fetch(`${process.env.NEXTAUTH_URL}/api/notifications/push/send`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': process.env.INTERNAL_API_KEY
+                  },
+                  body: JSON.stringify({
+                    userId: postAuthor.id,
+                    notification: {
+                      title: '새 댓글 알림',
+                      body: notificationContent,
+                      url: `/community/post/${post.id}#comment-${comment.id}`,
+                      icon: '/icons/icon-192x192.png'
+                    }
+                  })
+                });
+              } catch (webPushError) {
+                console.error('WebPush 알림 전송 오류:', webPushError);
+              }
+            }
+          }
+        }
+      } else {
+        // 대댓글인 경우 원 댓글 작성자에게 알림
+
+        // 원 댓글 정보 조회
+        const parentComment = await Comment.findByPk(parentId, {
+          include: [{model: User}]
+        });
+
+        // 자신의 댓글에 답글을 작성한 경우는 알림 생성하지 않음
+        if (parentComment.userId !== user.id) {
+          // 원 댓글 작성자의 알림 설정 확인
+          const commentAuthorSettings = await NotificationSettings.findOne({
+            where: {userId: parentComment.userId}
+          });
+
+          // 알림 설정이 없거나 답글 알림이 활성화된 경우
+          if (!commentAuthorSettings || commentAuthorSettings.replyEnabled) {
+            // 알림 생성
+            const notificationContent = `${user.nickName}님이 회원님의 댓글에 답글을 남겼습니다: "${content.substring(0, 30)}${content.length > 30 ? '...' : ''}"`;
+            await Notification.create({
+              userId: parentComment.userId,
+              senderId: user.id,
+              type: 'reply',
+              postId: post.id,
+              commentId: comment.id,
+              content: notificationContent,
+              url: `/community/post/${post.id}#comment-${comment.id}`,
+              isRead: false
+            });
+
+            // 실시간 소켓 알림 전송
+            try {
+              const sendResult = sendRealTimeNotification(parentComment.userId, {
+                type: 'reply',
+                content: notificationContent,
+                url: `/community/post/${post.id}#comment-${comment.id}`,
+              });
+
+              if (!sendResult) {
+                // WebPush 처리
+                try {
+                  const webPushResponse = await fetch(`${process.env.NEXTAUTH_URL}/api/notifications/push/send`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'x-api-key': process.env.INTERNAL_API_KEY
+                    },
+                    body: JSON.stringify({
+                      userId: parentComment.userId,
+                      notification: {
+                        title: '새 답글 알림',
+                        body: notificationContent,
+                        url: `/community/post/${post.id}#comment-${comment.id}`,
+                        icon: '/icons/icon-192x192.png'
+                      }
+                    })
+                  });
+
+                  if (!webPushResponse.ok) {
+                    console.error('WebPush 알림 전송 실패:', await webPushResponse.text());
+                  }
+                } catch (webPushError) {
+                  console.error('WebPush 알림 전송 오류:', webPushError);
+                }
+              }
+            } catch (emitError) {
+              console.error('소켓 알림 전송 오류:', emitError);
+              // 소켓 알림 전송이 실패한 경우에도 WebPush 처리
+              try {
+                const webPushResponse = await fetch(`${process.env.NEXTAUTH_URL}/api/notifications/push/send`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': process.env.INTERNAL_API_KEY
+                  },
+                  body: JSON.stringify({
+                    userId: parentComment.userId,
+                    notification: {
+                      title: '새 답글 알림',
+                      body: notificationContent,
+                      url: `/community/post/${post.id}#comment-${comment.id}`,
+                      icon: '/icons/icon-192x192.png'
+                    }
+                  })
+                });
+
+                if (!webPushResponse.ok) {
+                  console.error('WebPush 알림 전송 실패:', await webPushResponse.text());
+                }
+              } catch (webPushError) {
+                console.error('WebPush 알림 전송 오류:', webPushError);
+              }
+            }
+          }
+        }
+      }
+    } catch (notificationError) {
+      // 알림 생성 실패해도 댓글 작성은 성공으로 처리
+      console.error('알림 생성 중 오류 발생:', notificationError);
+    }
 
     // 결과 반환
     return res.status(201).json({

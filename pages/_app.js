@@ -6,7 +6,8 @@ import {SessionProvider} from 'next-auth/react';
 import * as gtag from '../lib/gtag';
 import AdminLayout from "../components/admin/AdminLayout";
 import Script from "next/script";
-import {Toaster} from 'react-hot-toast'; // 토스트 컴포넌트 import
+import {Toaster} from 'react-hot-toast';
+import {NotificationProvider} from '../contexts/NotificationContext';
 
 // 앱 컴포넌트
 function MyApp({ Component, pageProps }) {
@@ -87,14 +88,16 @@ function MyApp({ Component, pageProps }) {
         </>
       ) : ``}
       <SessionProvider session={pageProps.session}>
-        {router.pathname.startsWith('/admin') ?
-          <AdminLayout>
-            <Component {...pageProps} />
-          </AdminLayout> :
-          <Layout>
-            <Component {...pageProps} />
-          </Layout>
-        }
+        <NotificationProvider>
+          {router.pathname.startsWith('/admin') ?
+            <AdminLayout>
+              <Component {...pageProps} />
+            </AdminLayout> :
+            <Layout>
+              <Component {...pageProps} />
+            </Layout>
+          }
+        </NotificationProvider>
       </SessionProvider>
     </>
   );
