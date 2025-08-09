@@ -63,6 +63,7 @@ const BoardNotificationButton = ({boardId, boardName}) => {
 
   useEffect(() => {
     fetchBoardPreference();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, boardId]);
 
   if (!session) {
