@@ -69,8 +69,8 @@ export default function Layout({ children, title = '쥬스고블린 | 전자담�
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             {/* 로고 및 브랜드명 */}
             <Link href="/" className="flex items-center space-x-2">
-              <Image 
-                src="/image/juicegoblin_bi.png" 
+              <Image
+                src={`${process.env.NEXT_PUBLIC_SITE_URL}/image/juicegoblin_bi.png`}
                 alt="쥬스고블린" 
                 width={80}
                 height={20}
