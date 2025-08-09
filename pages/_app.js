@@ -8,6 +8,7 @@ import AdminLayout from "../components/admin/AdminLayout";
 import Script from "next/script";
 import {Toaster} from 'react-hot-toast';
 import {NotificationProvider} from '../contexts/NotificationContext';
+import PWAInstallPrompt from "../components/PWAInstallPrompt";
 
 // 앱 컴포넌트
 function MyApp({ Component, pageProps }) {
@@ -87,6 +88,10 @@ function MyApp({ Component, pageProps }) {
           />
         </>
       ) : ``}
+
+      {/* PWA 설치 프롬프트 */}
+      <PWAInstallPrompt/>
+
       <SessionProvider session={pageProps.session}>
         <NotificationProvider>
           {router.pathname.startsWith('/admin') ?
