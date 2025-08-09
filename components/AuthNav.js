@@ -47,15 +47,6 @@ export default function AuthNav() {
 
     return (
       <div className="flex items-center space-x-3">
-        {/* 찜 목록 버튼 */}
-        <Link
-          href="/wishlist"
-          className="text-goblin-light hover:text-accent transition-colors"
-          aria-label="찜 목록 보기"
-        >
-          <FaHeart className="text-xl"/>
-        </Link>
-
         {/* 알림 벨 버튼 */}
         <NotificationBell onClick={() => router.push('/notifications')}/>
 
@@ -87,6 +78,16 @@ export default function AuthNav() {
                     className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 transition-colors duration-200">
                 <FaUser className="mr-3 text-goblin-light"/>
                 <span>회원 정보 수정</span>
+              </Link>
+
+              {/* 찜 목록 버튼 */}
+              <Link
+                href="/wishlist"
+                className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 transition-colors duration-200"
+                aria-label="찜 목록 보기"
+              >
+                <FaHeart className="mr-3 text-goblin-light"/>
+                <span>찜 목록 보기</span>
               </Link>
 
               {session.user.grade === 'ADMIN' && (
