@@ -32,7 +32,6 @@ export const NotificationProvider = ({children}) => {
 
       // 소켓 이벤트 핸들러 설정
       socketInstance.on('connect', () => {
-        console.log('Socket connected:', socketInstance.id);
         setIsConnected(true);
 
         // 사용자 인증
@@ -40,12 +39,10 @@ export const NotificationProvider = ({children}) => {
       });
 
       socketInstance.on('disconnect', () => {
-        console.log('Socket disconnected');
         setIsConnected(false);
       });
 
       socketInstance.on('notification', (notification) => {
-        console.log('New notification received:', notification);
 
         // 새 알림을 목록에 추가
         setNotifications(prev => [notification, ...prev]);
@@ -201,7 +198,6 @@ export const NotificationProvider = ({children}) => {
   const requestNotificationPermission = async () => {
     // 브라우저가 알림을 지원하는지 확인
     if (!('Notification' in window)) {
-      console.log('This browser does not support notifications');
       return {success: false, reason: 'browser-no-support'};
     }
 
@@ -235,25 +231,21 @@ export const NotificationProvider = ({children}) => {
     try {
       // 서비스 워커가 지원되는지 확인
       if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-        console.log('Push notifications are not supported in this browser');
         return {success: false, reason: 'push-not-supported'};
       }
 
       // 서비스 워커 등록
       const registration = await navigator.serviceWorker.register('/service-worker.js');
-      console.log('Service Worker registered:', registration);
 
       // 기존 구독 확인
       const existingSubscription = await registration.pushManager.getSubscription();
       if (existingSubscription) {
-        console.log('User is already subscribed to push notifications');
         return {success: true, subscription: existingSubscription, alreadySubscribed: true};
       }
 
       // 서버의 공개 키 가져오기 (환경 변수에서)
       const publicVapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
       if (!publicVapidKey) {
-        console.error('VAPID public key is missing');
         return {success: false, reason: 'missing-vapid-key'};
       }
 
@@ -262,7 +254,6 @@ export const NotificationProvider = ({children}) => {
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
       });
-      console.log('User subscribed to push notifications:', subscription);
 
       // 구독 정보를 서버에 전송
       const response = await fetch('/api/notifications/push/subscribe', {
