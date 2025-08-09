@@ -345,7 +345,7 @@ export default function PostDetailPage({post: initialPost, comments: initialComm
           <link rel="canonical" href={`${process.env.NEXT_PUBLIC_SITE_URL}/community/post/${id}`}/>
         </Head>
       )}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
+      <div className="max-w-5xl mx-auto sm:px-6 py-6">
         {loading ? (
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-accent"></div>

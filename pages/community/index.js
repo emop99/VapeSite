@@ -3,7 +3,7 @@ import Link from 'next/link';
 export default function CommunityIndex({boards}) {
   return (
     <>
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
+      <div className="max-w-5xl mx-auto sm:px-6 py-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 bg-white p-6 rounded-lg shadow-md border-l-4 border-accent">
           <div>
             <h1 className="text-3xl font-bold text-goblin-dark">커뮤니티</h1>

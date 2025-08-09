@@ -50,7 +50,7 @@ export default function BoardPage({board, posts, totalPages, currentPage}) {
           <link rel="canonical" href={`${process.env.NEXT_PUBLIC_SITE_URL}/community/board/${slug}`}/>
         </Head>
       )}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
+      <div className="max-w-5xl mx-auto sm:px-6 py-6">
         {!board ? (
           <div className="bg-white rounded-lg shadow-lg p-8 text-center border-t-4 border-red-500 animate-fade-in">
             <p className="text-red-500 font-bold text-lg">게시판을 찾을 수 없습니다.</p>
