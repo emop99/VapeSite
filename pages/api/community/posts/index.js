@@ -99,6 +99,32 @@ async function createPost(req, res) {
       ]
     });
 
+    // 게시글 작성 알림 발송
+    try {
+      const notificationPayload = {
+        title: '새로운 게시글',
+        body: `${board.name}에 새 글이 등록되었습니다: ${title}`,
+        url: `/community/post/${post.id}`,
+        type: 'new_post',
+      };
+
+      fetch(`${process.env.NEXTAUTH_URL}/api/notifications/board/broadcast`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': process.env.INTERNAL_API_KEY
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          notification: notificationPayload,
+          boardId: board.id,
+          postId: post.id
+        })
+      });
+    } catch (error) {
+      console.error('알림 발송 중 오류 발생:', error);
+    }
+
     // 결과 반환
     return res.status(201).json({
       message: '게시글이 작성되었습니다.',

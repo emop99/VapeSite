@@ -2,6 +2,7 @@ import {useRouter} from 'next/router';
 import Link from 'next/link';
 import Head from 'next/head';
 import Pagination from '../../../components/Pagination';
+import BoardNotificationButton from '../../../components/notifications/BoardNotificationButton';
 
 export default function BoardPage({board, posts, totalPages, currentPage}) {
   const router = useRouter();
@@ -64,16 +65,21 @@ export default function BoardPage({board, posts, totalPages, currentPage}) {
                 <h1 className="text-3xl font-bold text-goblin-dark">{board.name}</h1>
                 <p className="text-gray-600 mt-2">{board.description}</p>
               </div>
-              <Link
-                href={`/community/edit?boardId=${board.id}`}
-                className="mt-4 sm:mt-0 bg-accent hover:bg-accent-dark text-white font-bold py-2 px-6 rounded-md transition-all duration-200 transform hover:scale-105 flex items-center"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                </svg>
-                글쓰기
-              </Link>
+              <div className="flex flex-row justify-between sm:flex-row gap-2 mt-4 sm:mt-0 w-full sm:w-auto items-center sm:items-center">
+                <div className="flex-1 sm:flex-none">
+                  <BoardNotificationButton boardId={board.id} boardName={board.name}/>
+                </div>
+                <Link
+                  href={`/community/edit?boardId=${board.id}`}
+                  className="bg-accent hover:bg-accent-dark text-white font-bold py-2 px-6 rounded-md transition-all duration-200 transform hover:scale-105 flex items-center"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                  </svg>
+                  글쓰기
+                </Link>
+              </div>
             </div>
 
             {posts.length > 0 ? (

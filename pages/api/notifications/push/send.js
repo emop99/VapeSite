@@ -83,7 +83,7 @@ export default async function handler(req, res) {
         // 알림 페이로드
         const payload = JSON.stringify(notification);
 
-        // 푸시 알림 전송 (실제 구현 시 주석 해제)
+        // 푸시 알림 전송
         await webpush.sendNotification(pushSubscription, payload);
 
         // 전송 성공 처리

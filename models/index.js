@@ -18,6 +18,7 @@ const Like = require('./Like');
 const Notification = require('./Notification');
 const NotificationSettings = require('./NotificationSettings');
 const PushSubscription = require('./PushSubscription');
+const BoardNotificationPreference = require('./BoardNotificationPreference');
 // 모델 간의 관계는 각 모델 파일에서 정의됨
 
 module.exports = {
@@ -38,4 +39,5 @@ module.exports = {
   Notification,
   NotificationSettings,
   PushSubscription,
+  BoardNotificationPreference,
 };

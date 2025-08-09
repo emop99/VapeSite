@@ -322,6 +322,31 @@ create table vapesite.vape_push_subscription
 create index vape_push_subscription_userId_index
     on vapesite.vape_push_subscription (userId);
 
+create table vapesite.vape_board_notification_preferences
+(
+    id        int auto_increment
+        primary key,
+    userId    int                                    not null comment '사용자 ID',
+    boardId   int                                    not null comment '게시판 ID',
+    enabled   tinyint(1) default 1                   not null comment '해당 게시판 푸시 알림 활성화 여부',
+    createdAt datetime   default current_timestamp() not null,
+    updatedAt datetime   default current_timestamp() not null on update current_timestamp(),
+    constraint vape_board_notification_preferences_unique
+        unique (userId, boardId),
+    constraint fk_board_notification_user
+        foreign key (userId) references vapesite.vape_user (id)
+            on delete cascade,
+    constraint fk_board_notification_board
+        foreign key (boardId) references vapesite.vape_board (id)
+            on delete cascade
+) comment '게시판별 푸시 알림 설정 테이블' collate = utf8mb4_unicode_ci;
+
+create index vape_board_notification_preferences_userId_index
+    on vapesite.vape_board_notification_preferences (userId);
+
+create index vape_board_notification_preferences_boardId_index
+    on vapesite.vape_board_notification_preferences (boardId);
+
 create table vapesite.vape_reviews
 (
     id           int auto_increment
