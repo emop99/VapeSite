@@ -16,7 +16,7 @@ export default function Error({ statusCode }) {
       <div className="text-center px-4 py-8">
         <div className="mb-6">
           <Image
-            src={`${process.env.NEXT_PUBLIC_SITE_URL}/image/juicegoblin_bi.png`}
+            src={`/image/juicegoblin_bi.png`}
             alt="쥬스고블린"
             width={120}
             height={30}

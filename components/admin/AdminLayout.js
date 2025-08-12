@@ -42,7 +42,7 @@ const AdminLayout = ({children, title = '관리자 페이지 - 쥬스고블린'}
         <div className="p-4 flex items-center justify-between border-b border-gray-700">
           <div className={`${!sidebarOpen && 'hidden'} flex items-center space-x-2`}>
             <Image
-              src={`${process.env.NEXT_PUBLIC_SITE_URL}/image/juicegoblin_bi.png`}
+              src={`/image/juicegoblin_bi.png`}
               alt="쥬스고블린"
               width={40}
               height={40}
