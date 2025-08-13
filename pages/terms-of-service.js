@@ -289,7 +289,7 @@ const TermsOfService = () => {
               </ol>
             </Section>
 
-            <p className="text-sm text-gray-500 mt-8">이 약관은 2025년 1월 1일부터 적용됩니다.</p>
+            <p className="text-sm text-gray-500 mt-8">이 약관은 2025년 8월 13일부터 적용됩니다.</p>
           </div>
         </div>
       </div>
