@@ -2,9 +2,9 @@
 // 웹 푸시 알림 및 오프라인 기능 처리
 
 // 캐시 이름 설정
-const CACHE_NAME = 'juicegoblin-cache-v1';
-const STATIC_CACHE_NAME = 'juicegoblin-static-v1';
-const DYNAMIC_CACHE_NAME = 'juicegoblin-dynamic-v1';
+const CACHE_NAME = 'juicegoblin-cache-v2';
+const STATIC_CACHE_NAME = 'juicegoblin-static-v2';
+const DYNAMIC_CACHE_NAME = 'juicegoblin-dynamic-v2';
 
 // 오프라인 페이지 URL
 const OFFLINE_URL = '/offline.html';

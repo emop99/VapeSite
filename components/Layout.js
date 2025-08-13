@@ -27,7 +27,7 @@ export default function Layout({ children, title = '쥬스고블린 | 전자담�
 
           {/* PWA 관련 메타 태그 */}
           <link rel="manifest" href="/manifest.json"/>
-          <meta name="theme-color" content="#4CAF50"/>
+          <meta name="theme-color" content="#1A3A1A"/>
           <meta name="application-name" content="쥬스고블린"/>
           <meta name="apple-mobile-web-app-capable" content="yes"/>
           <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
@@ -36,10 +36,40 @@ export default function Layout({ children, title = '쥬스고블린 | 전자담�
           <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png"/>
           <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png"/>
           <link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-152x152.png"/>
-          <meta name="msapplication-TileColor" content="#4CAF50"/>
+          <meta name="msapplication-TileColor" content="#1A3A1A"/>
           <meta name="msapplication-TileImage" content="/icons/icon-144x144.png"/>
           <meta name="msapplication-tap-highlight" content="no"/>
           <meta name="mobile-web-app-capable" content="yes"/>
+          <link
+            href="/image/no_search_product.png"
+            media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)"
+            rel="apple-touch-startup-image"
+          />
+          <link
+            href="/image/no_search_product.png"
+            media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)"
+            rel="apple-touch-startup-image"
+          />
+          <link
+            href="/image/no_search_product.png"
+            media="(device-width: 621px) and (device-height: 1104px) and (-webkit-device-pixel-ratio: 3)"
+            rel="apple-touch-startup-image"
+          />
+          <link
+            href="/image/no_search_product.png"
+            media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)"
+            rel="apple-touch-startup-image"
+          />
+          <link
+            href="/image/no_search_product.png"
+            media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)"
+            rel="apple-touch-startup-image"
+          />
+          <link
+            href="/image/no_search_product.png"
+            media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)"
+            rel="apple-touch-startup-image"
+          />
 
           {/* Open Graph / Facebook */}
           <meta property="og:type" content="website"/>

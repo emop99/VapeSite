@@ -4,8 +4,8 @@
   "description": "전자담배 액상 최저가 비교 가격 변동 확인 사이트",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#4CAF50",
+  "background_color": "#1A3A1A",
+  "theme_color": "#1A3A1A",
   "orientation": "portrait",
   "icons": [
     {
