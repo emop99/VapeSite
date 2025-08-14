@@ -24,7 +24,7 @@ const GoogleOneTapLogin = () => {
       const script = document.createElement('script');
       script.id = scriptId;
       script.src = 'https://accounts.google.com/gsi/client';
-      script.login_uri = `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback/google`;
+      script.login_uri = `${process.env.NEXT_PUBLIC_SITE_URL}/profile`;
       script.async = true;
       script.defer = true;
       script.onload = () => {
