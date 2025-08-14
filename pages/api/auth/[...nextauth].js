@@ -4,17 +4,86 @@ import GoogleProvider from 'next-auth/providers/google';
 import User from '../../../models/User';
 import crypto from 'crypto';
 import {UserLoginLog} from "../../../models";
+import {OAuth2Client} from "google-auth-library";
 
 // SHA-256 해시 함수
 const hashPassword = (password) => {
   return crypto.createHash('sha256').update(password).digest('hex');
 };
 
+// 구글 토큰 검증을 위한 클라이언트 생성
+const googleAuthClient = new OAuth2Client(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
+
 export default NextAuth({
   providers: [
     GoogleProvider({
       clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
+    CredentialsProvider({
+      debug: process.env.NODE_ENV === 'development',
+      id: 'google-one-tap',
+      name: 'Google One Tap',
+      credentials: {
+        credential: {type: 'text'},
+      },
+      async authorize(credentials, req) {
+        if (!credentials?.credential) {
+          throw new Error("No credential");
+        }
+
+        try {
+          const ticket = await googleAuthClient.verifyIdToken({
+            idToken: credentials.credential,
+            audience: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+          });
+
+          const payload = ticket.getPayload();
+
+          if (!payload) {
+            throw new Error('Cannot extract payload from ticket');
+          }
+
+          // 이메일로 사용자 찾기
+          let dbUser = await User.findOne({
+            where: {
+              email: payload.email,
+              deletedAt: null // 탈퇴하지 않은 사용자만
+            }
+          });
+
+          // 사용자가 없으면 새로 생성
+          if (!dbUser) {
+            dbUser = await User.create({
+              email: payload.email,
+              nickName: payload.name,
+              password: payload.jti,
+              grade: 'NORMAL',
+              provider: 'google',
+              providerId: payload.sub,
+              emailVerification: payload.email_verified ? 1 : 0,
+              emailVerificationAt: new Date(),
+            });
+          }
+
+          // 로그인 로그 기록
+          await UserLoginLog.create({
+            userId: dbUser.id,
+            ip: req.headers['x-forwarded-for']
+          });
+
+          // 로그인 성공 시 사용자 정보 반환
+          return {
+            id: dbUser.id,
+            email: dbUser.email,
+            name: dbUser.nickName,
+            grade: dbUser.grade
+          };
+        } catch (error) {
+          console.error('Google One-Tap authorize error:', error);
+          return null; // 인증 실패 시 null 반환
+        }
+      }
     }),
     CredentialsProvider({
       debug: process.env.NODE_ENV === 'development',

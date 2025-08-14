@@ -7,7 +7,7 @@ const GoogleOneTapLogin = () => {
 
   const handleCredentialResponse = async (response) => {
     // Google에서 받은 credential(ID 토큰)을 NextAuth의 google provider로 전달합니다.
-    const result = await signIn('google', {
+    const result = await signIn('google-one-tap', {
       credential: response.credential,
       redirect: false, // 페이지 새로고침 방지
     });
