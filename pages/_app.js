@@ -9,7 +9,6 @@ import Script from "next/script";
 import {Toaster} from 'react-hot-toast';
 import {NotificationProvider} from '../contexts/NotificationContext';
 import PWAInstallPrompt from "../components/PWAInstallPrompt";
-import GoogleOneTapLogin from "../components/GoogleOneTapLogin";
 
 // 앱 컴포넌트
 function MyApp({ Component, pageProps }) {
@@ -94,7 +93,7 @@ function MyApp({ Component, pageProps }) {
       <PWAInstallPrompt/>
 
       <SessionProvider session={pageProps.session}>
-        <GoogleOneTapLogin/>
+        {/*<GoogleOneTapLogin/>*/}
         <NotificationProvider>
           {router.pathname.startsWith('/admin') ?
             <AdminLayout>
