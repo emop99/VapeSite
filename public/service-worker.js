@@ -20,7 +20,7 @@ if (workbox) {
 
   // 사전 캐싱 중 404 오류를 일으키는 문제가 있는 매니페스트를 필터링합니다.
   const precacheManifest = (self.__WB_MANIFEST || []).filter(
-    (entry) => !entry.url.includes('dynamic-css-manifest.json')
+    (entry) => !entry.url.includes('dynamic-css-manifest.json') || !entry.url.includes('/uploads/')
   );
   // next-pwa가 빌드 시 생성된 정적 파일들을 자동으로 캐싱하도록 하는 플레이스홀더
   precacheAndRoute(precacheManifest);
@@ -53,7 +53,7 @@ if (workbox) {
   // 이미지 요청: 캐시 우선, 30일간 캐시
   registerRoute(
     ({request, url}) =>
-      request.destination === 'image' && !url.pathname.startsWith('/uploads/'),
+      request.destination === 'image',
     new CacheFirst({
       cacheName: 'juicegoblin-image-cache',
       plugins: [
