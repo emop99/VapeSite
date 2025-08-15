@@ -2,7 +2,7 @@ import {useEffect, useState} from 'react';
 import {useRouter} from 'next/router';
 import Link from 'next/link';
 import Head from 'next/head';
-import {FaArrowDown, FaArrowUp, FaEdit, FaHeart, FaRegHeart} from 'react-icons/fa';
+import {FaEdit, FaHeart, FaRegHeart} from 'react-icons/fa';
 import Image from 'next/image';
 import {normalizeImageUrl} from '../../utils/helper';
 import ReviewForm from '../../components/ReviewForm';
@@ -397,59 +397,59 @@ export default function ProductDetail({productData, error: serverError}) {
       )}
 
       {/* 최근 가격 변동 레이아웃 */}
-      {priceHistory.length > 1 && (
-        <section className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-2xl font-bold mb-4">최근 가격 변동</h2>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-              <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">날짜</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">이전 가격</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">새 가격</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">변동</th>
-              </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-              {priceHistory.filter(history => history.oldPrice > 0).map((history, index) => (
-                <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(history.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {history.oldPrice.toLocaleString()}원
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {history.newPrice.toLocaleString()}원
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <div className="flex items-center">
-                      {history.priceDifference < 0 ? (
-                        <>
-                          <FaArrowDown className="text-green-500 mr-1"/>
-                          <span className="text-green-500 font-medium">
-                              {Math.abs(history.priceDifference).toLocaleString()}원 ({Math.abs(history.percentageChange).toFixed(1)}%)
-                            </span>
-                        </>
-                      ) : history.priceDifference > 0 ? (
-                        <>
-                          <FaArrowUp className="text-red-500 mr-1"/>
-                          <span className="text-red-500 font-medium">
-                              {history.priceDifference.toLocaleString()}원 ({history.percentageChange.toFixed(1)}%)
-                            </span>
-                        </>
-                      ) : (
-                        <span className="text-gray-500">변동 없음</span>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      )}
+      {/*{priceHistory.length > 1 && (*/}
+      {/*  <section className="bg-white rounded-lg shadow-md p-6 mb-8">*/}
+      {/*    <h2 className="text-2xl font-bold mb-4">최근 가격 변동</h2>*/}
+      {/*    <div className="overflow-x-auto">*/}
+      {/*      <table className="min-w-full divide-y divide-gray-200">*/}
+      {/*        <thead className="bg-gray-50">*/}
+      {/*        <tr>*/}
+      {/*          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">날짜</th>*/}
+      {/*          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">이전 가격</th>*/}
+      {/*          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">새 가격</th>*/}
+      {/*          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">변동</th>*/}
+      {/*        </tr>*/}
+      {/*        </thead>*/}
+      {/*        <tbody className="bg-white divide-y divide-gray-200">*/}
+      {/*        {priceHistory.filter(history => history.oldPrice > 0).map((history, index) => (*/}
+      {/*          <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>*/}
+      {/*            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">*/}
+      {/*              {new Date(history.createdAt).toLocaleDateString()}*/}
+      {/*            </td>*/}
+      {/*            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">*/}
+      {/*              {history.oldPrice.toLocaleString()}원*/}
+      {/*            </td>*/}
+      {/*            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">*/}
+      {/*              {history.newPrice.toLocaleString()}원*/}
+      {/*            </td>*/}
+      {/*            <td className="px-6 py-4 whitespace-nowrap text-sm">*/}
+      {/*              <div className="flex items-center">*/}
+      {/*                {history.priceDifference < 0 ? (*/}
+      {/*                  <>*/}
+      {/*                    <FaArrowDown className="text-green-500 mr-1"/>*/}
+      {/*                    <span className="text-green-500 font-medium">*/}
+      {/*                        {Math.abs(history.priceDifference).toLocaleString()}원 ({Math.abs(history.percentageChange).toFixed(1)}%)*/}
+      {/*                      </span>*/}
+      {/*                  </>*/}
+      {/*                ) : history.priceDifference > 0 ? (*/}
+      {/*                  <>*/}
+      {/*                    <FaArrowUp className="text-red-500 mr-1"/>*/}
+      {/*                    <span className="text-red-500 font-medium">*/}
+      {/*                        {history.priceDifference.toLocaleString()}원 ({history.percentageChange.toFixed(1)}%)*/}
+      {/*                      </span>*/}
+      {/*                  </>*/}
+      {/*                ) : (*/}
+      {/*                  <span className="text-gray-500">변동 없음</span>*/}
+      {/*                )}*/}
+      {/*              </div>*/}
+      {/*            </td>*/}
+      {/*          </tr>*/}
+      {/*        ))}*/}
+      {/*        </tbody>*/}
+      {/*      </table>*/}
+      {/*    </div>*/}
+      {/*  </section>*/}
+      {/*)}*/}
 
       {/* 연관 상품 레이아웃 - 개선된 UI/UX 디자인 */}
       {productData?.similarProducts && Object.keys(productData.similarProducts).length > 0 && (
