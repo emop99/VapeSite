@@ -37,7 +37,7 @@ if (workbox) {
   // 이미지 요청: 캐시 우선, 30일간 캐시. 단, /uploads 경로는 제외
   registerRoute(
     ({request, url}) =>
-      request.destination === 'image' && !url.pathname.startsWith('/uploads/'),
+      request.destination === 'image' && !url.pathname.includes('/uploads/'),
     new CacheFirst({
       cacheName: 'juicegoblin-image-cache',
       plugins: [
