@@ -8,8 +8,6 @@ importScripts('https://storage.googleapis.com/workbox-cdn/releases/6.5.4/workbox
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 
 if (workbox) {
-  console.log(`Yay! Workbox is loaded 🎉`);
-
   // 3. Workbox 모듈 별칭 설정
   const {precacheAndRoute, cleanupOutdatedCaches} = workbox.precaching;
   const {registerRoute, setCatchHandler} = workbox.routing;
@@ -19,8 +17,13 @@ if (workbox) {
 
   // 4. Precaching 설정
   cleanupOutdatedCaches(); // 이전 버전의 precache 정리
+
+  // 사전 캐싱 중 404 오류를 일으키는 문제가 있는 매니페스트를 필터링합니다.
+  const precacheManifest = (self.__WB_MANIFEST || []).filter(
+    (entry) => !entry.url.includes('dynamic-css-manifest.json')
+  );
   // next-pwa가 빌드 시 생성된 정적 파일들을 자동으로 캐싱하도록 하는 플레이스홀더
-  precacheAndRoute(self.__WB_MANIFEST || []);
+  precacheAndRoute(precacheManifest);
 
   // 5. 오프라인 Fallback 설정
   const OFFLINE_URL = '/offline.html';
@@ -30,22 +33,6 @@ if (workbox) {
     }
     return Response.error();
   });
-
-  // 6. 캐싱 전략 라우팅 설정
-  // API 요청: 네트워크 우선, 5분간 캐시
-  registerRoute(
-    ({request}) => request.url.includes('/api/'),
-    new NetworkFirst({
-      cacheName: 'juicegoblin-api-cache',
-      plugins: [
-        new ExpirationPlugin({
-          maxEntries: 50,
-          maxAgeSeconds: 5 * 60, // 5 minutes
-        }),
-        new CacheableResponsePlugin({statuses: [200]}),
-      ],
-    })
-  );
 
   // 이미지 요청: 캐시 우선, 30일간 캐시
   registerRoute(
