@@ -34,10 +34,26 @@ if (workbox) {
     return Response.error();
   });
 
-  // 이미지 요청: 캐시 우선, 30일간 캐시. 단, /uploads 경로는 제외
+  // 6. 캐싱 전략 라우팅 설정
+  // API 요청: 네트워크 우선, 5분간 캐시
+  registerRoute(
+    ({request}) => request.url.includes('/api/'),
+    new NetworkFirst({
+      cacheName: 'juicegoblin-api-cache',
+      plugins: [
+        new ExpirationPlugin({
+          maxEntries: 50,
+          maxAgeSeconds: 5 * 60, // 5 minutes
+        }),
+        new CacheableResponsePlugin({statuses: [200]}),
+      ],
+    })
+  );
+
+  // 이미지 요청: 캐시 우선, 30일간 캐시
   registerRoute(
     ({request, url}) =>
-      request.destination === 'image' && !url.pathname.includes('/uploads/'),
+      request.destination === 'image' && !url.pathname.startsWith('/uploads/'),
     new CacheFirst({
       cacheName: 'juicegoblin-image-cache',
       plugins: [
