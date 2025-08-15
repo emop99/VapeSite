@@ -1,168 +1,93 @@
 // 서비스 워커 파일
 // 웹 푸시 알림 및 오프라인 기능 처리
 
-// 캐시 이름 설정
-const CACHE_NAME = 'juicegoblin-cache-v2';
-const STATIC_CACHE_NAME = 'juicegoblin-static-v2';
-const DYNAMIC_CACHE_NAME = 'juicegoblin-dynamic-v2';
+// 1. Workbox 라이브러리 로드
+importScripts('https://storage.googleapis.com/workbox-cdn/releases/6.5.4/workbox-sw.js');
 
-// 오프라인 페이지 URL
-const OFFLINE_URL = '/offline.html';
+// 2. VAPID 키 (next-pwa에 의해 주입됨)
+const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 
-// 사전 캐싱할 정적 자산 목록
-const STATIC_ASSETS = [
-  '/',
-  '/offline.html',
-  '/manifest.json',
-  '/favicon.ico',
-  '/image/juicegoblin_bi.png',
-  '/icons/icon-72x72.png',
-  '/icons/icon-96x96.png',
-  '/icons/icon-128x128.png',
-  '/icons/icon-144x144.png',
-  '/icons/icon-152x152.png',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png',
-];
+if (workbox) {
+  console.log(`Yay! Workbox is loaded 🎉`);
 
-// 설치 이벤트 처리
-self.addEventListener('install', (event) => {
-  console.log('Service Worker installing...');
+  // 3. Workbox 모듈 별칭 설정
+  const {precacheAndRoute, cleanupOutdatedCaches} = workbox.precaching;
+  const {registerRoute, setCatchHandler} = workbox.routing;
+  const {NetworkFirst, CacheFirst, StaleWhileRevalidate} = workbox.strategies;
+  const {ExpirationPlugin} = workbox.expiration;
+  const {CacheableResponsePlugin} = workbox.cacheableResponse;
 
-  // 정적 자산 사전 캐싱
-  event.waitUntil(
-    caches.open(STATIC_CACHE_NAME)
-      .then(cache => {
-        console.log('Service Worker: Caching static assets');
-        return cache.addAll(STATIC_ASSETS);
-      })
-      .catch(error => {
-        console.error('Service Worker: Pre-caching failed:', error);
-      })
-  );
+  // 4. Precaching 설정
+  cleanupOutdatedCaches(); // 이전 버전의 precache 정리
+  // next-pwa가 빌드 시 생성된 정적 파일들을 자동으로 캐싱하도록 하는 플레이스홀더
+  precacheAndRoute(self.__WB_MANIFEST || []);
 
-  self.skipWaiting(); // 새 서비스 워커가 즉시 활성화되도록 함
-});
+  // 5. 오프라인 Fallback 설정
+  const OFFLINE_URL = '/offline.html';
+  setCatchHandler(({event}) => {
+    if (event.request.mode === 'navigate') {
+      return caches.match(OFFLINE_URL);
+    }
+    return Response.error();
+  });
 
-// 활성화 이벤트 처리
-self.addEventListener('activate', (event) => {
-  console.log('Service Worker activating...');
-
-  // 이전 캐시 정리
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          // 현재 버전의 캐시가 아닌 경우 삭제
-          if (
-            cacheName !== CACHE_NAME &&
-            cacheName !== STATIC_CACHE_NAME &&
-            cacheName !== DYNAMIC_CACHE_NAME
-          ) {
-            console.log('Service Worker: Clearing old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
+  // 6. 캐싱 전략 라우팅 설정
+  // API 요청: 네트워크 우선, 5분간 캐시
+  registerRoute(
+    ({request}) => request.url.includes('/api/'),
+    new NetworkFirst({
+      cacheName: 'juicegoblin-api-cache',
+      plugins: [
+        new ExpirationPlugin({
+          maxEntries: 50,
+          maxAgeSeconds: 5 * 60, // 5 minutes
+        }),
+        new CacheableResponsePlugin({statuses: [200]}),
+      ],
     })
   );
 
-  return self.clients.claim(); // 모든 클라이언트에 대한 제어권 획득
-});
-
-// 네트워크 요청 가로채기 (fetch 이벤트)
-self.addEventListener('fetch', (event) => {
-  // API 요청은 네트워크 우선 전략 사용
-  if (event.request.url.includes('/api/')) {
-    event.respondWith(
-      fetch(event.request)
-        .catch(() => {
-          return caches.match(event.request);
-        })
-    );
-    return;
-  }
-
-  // HTML 페이지 요청은 네트워크 우선, 실패 시 오프라인 페이지 제공
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request)
-        .catch(() => {
-          return caches.match(OFFLINE_URL);
-        })
-    );
-    return;
-  }
-
-  // 이미지, CSS, JS 등 정적 자산은 캐시 우선 전략 사용
-  if (
-    event.request.destination === 'style' ||
-    event.request.destination === 'script' ||
-    event.request.destination === 'image' ||
-    event.request.destination === 'font'
-  ) {
-    event.respondWith(
-      caches.match(event.request)
-        .then((cachedResponse) => {
-          // 캐시에 있으면 캐시에서 제공
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-
-          // 캐시에 없으면 네트워크에서 가져오고 캐시에 저장
-          return fetch(event.request)
-            .then((networkResponse) => {
-              // 유효한 응답인 경우에만 캐시에 저장
-              if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-                return networkResponse;
-              }
-
-              // 응답을 복제하여 캐시에 저장 (스트림은 한 번만 사용 가능)
-              const responseToCache = networkResponse.clone();
-              caches.open(DYNAMIC_CACHE_NAME)
-                .then((cache) => {
-                  cache.put(event.request, responseToCache);
-                });
-
-              return networkResponse;
-            })
-            .catch(() => {
-              // 네트워크 요청 실패 시 오프라인 대체 이미지 제공 (이미지인 경우)
-              if (event.request.destination === 'image') {
-                return caches.match('/image/offline-image.png');
-              }
-              return null;
-            });
-        })
-    );
-    return;
-  }
-
-  // 기타 요청은 네트워크 우선, 실패 시 캐시 사용
-  event.respondWith(
-    fetch(event.request)
-      .then((networkResponse) => {
-        // GET 요청인 경우에만 캐시에 저장
-        if (event.request.method === 'GET') {
-          const responseToCache = networkResponse.clone();
-          caches.open(DYNAMIC_CACHE_NAME)
-            .then((cache) => {
-              cache.put(event.request, responseToCache);
-            });
-        }
-
-        return networkResponse;
-      })
-      .catch(() => {
-        // GET 요청인 경우에만 캐시에서 확인
-        if (event.request.method === 'GET') {
-          return caches.match(event.request);
-        }
-        // 다른 메서드의 요청은 실패 시 null 반환
-        return null;
-      })
+  // 이미지 요청: 캐시 우선, 30일간 캐시
+  registerRoute(
+    ({request}) => request.destination === 'image',
+    new CacheFirst({
+      cacheName: 'juicegoblin-image-cache',
+      plugins: [
+        new ExpirationPlugin({
+          maxEntries: 60,
+          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 Days
+        }),
+        new CacheableResponsePlugin({statuses: [0, 200]}), // 0 for opaque responses (CORS)
+      ],
+    })
   );
-});
+
+  // CSS, JS, 폰트 등 정적 리소스: Stale-While-Revalidate 전략
+  registerRoute(
+    ({request}) =>
+      request.destination === 'style' ||
+      request.destination === 'script' ||
+      request.destination === 'font' ||
+      request.destination === 'worker',
+    new StaleWhileRevalidate({
+      cacheName: 'juicegoblin-static-resources',
+    })
+  );
+} else {
+  console.log(`Boo! Workbox didn't load 😬`);
+}
+
+// Base64 문자열을 Uint8Array로 변환하는 유틸리티 함수
+const urlBase64ToUint8Array = (base64String) => {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = self.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+};
 
 // 푸시 이벤트 처리
 self.addEventListener('push', (event) => {
@@ -235,17 +160,42 @@ self.addEventListener('notificationclick', (event) => {
 self.addEventListener('pushsubscriptionchange', (event) => {
   console.log('Service Worker: Push subscription changed');
 
-  // 서버에 새 구독 정보 전송
-  event.waitUntil(
-    fetch('/api/notifications/push/update-subscription', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        oldSubscription: event.oldSubscription,
-        newSubscription: event.newSubscription,
-      }),
-    })
-  );
+  const handleSubscriptionChange = async () => {
+    try {
+      let newSubscription = event.newSubscription;
+
+      // 브라우저가 새 구독을 제공하지 않으면 수동으로 재구독
+      if (!newSubscription) {
+        console.log('Service Worker: New subscription not provided, re-subscribing...');
+        const applicationServerKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
+        newSubscription = await self.registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey,
+        });
+      }
+
+      // 갱신된 구독 정보를 서버에 전송
+      const response = await fetch('/api/notifications/push/update-subscription', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          oldSubscription: event.oldSubscription,
+          newSubscription: newSubscription,
+          userAgent: navigator.userAgent,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Server error during subscription update.');
+      }
+
+      console.log('Service Worker: Push subscription updated successfully.');
+    } catch (error) {
+      console.error('Service Worker: Error handling push subscription change:', error);
+    }
+  };
+
+  event.waitUntil(handleSubscriptionChange());
 });

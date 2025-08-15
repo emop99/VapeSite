@@ -1,10 +1,35 @@
-import React, {createContext, useContext, useEffect, useState} from 'react';
+import React, {createContext, useCallback, useContext, useEffect, useMemo, useRef, useState} from 'react';
 import {useSession} from 'next-auth/react';
 import io from 'socket.io-client';
 import {toast} from "react-hot-toast";
+import {useRouter} from "next/navigation";
 
 // 알림 컨텍스트 생성
 const NotificationContext = createContext(null);
+
+// Base64 문자열을 Uint8Array로 변환하는 유틸리티 함수
+const urlBase64ToUint8Array = (base64String) => {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding)
+    .replace(/-/g, '+')
+    .replace(/_/g, '/');
+
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+};
+
+const SOCKET_EVENTS = {
+  CONNECT: 'connect',
+  DISCONNECT: 'disconnect',
+  AUTHENTICATE: 'authenticate',
+  NOTIFICATION: 'notification',
+  CONNECT_ERROR: 'connect_error',
+};
 
 /**
  * 알림 컨텍스트 제공자 컴포넌트
@@ -16,37 +41,39 @@ export const NotificationProvider = ({children}) => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isConnected, setIsConnected] = useState(false);
+  const [isSubscribing, setIsSubscribing] = useState(false); // 푸시 구독 처리 중 상태
+  const isSubscribingRef = useRef(false); // 중복 실행 방지를 위한 동기적 플래그
+  const router = useRouter();
 
   // 세션이 변경될 때 소켓 연결 관리
   useEffect(() => {
-    let cleanup;
+    if (!session?.user?.id) {
+      return;
+    }
 
-    // 소켓 연결 함수
     const connectSocket = () => {
-      if (!session?.user?.id) return () => {
-      };
-
       const socketInstance = io(process.env.NEXT_PUBLIC_BASE_URL || window.location.origin, {
         withCredentials: true,
       });
 
       // 소켓 이벤트 핸들러 설정
-      socketInstance.on('connect', () => {
+      socketInstance.on(SOCKET_EVENTS.CONNECT, () => {
         setIsConnected(true);
-
         // 사용자 인증
-        socketInstance.emit('authenticate', session.user.id);
+        socketInstance.emit(SOCKET_EVENTS.AUTHENTICATE, session.user.id);
       });
 
-      socketInstance.on('disconnect', () => {
+      socketInstance.on(SOCKET_EVENTS.DISCONNECT, () => {
         setIsConnected(false);
       });
 
-      socketInstance.on('notification', (notification) => {
+      socketInstance.on(SOCKET_EVENTS.CONNECT_ERROR, (error) => {
+        console.error('Socket connection error:', error);
+      });
 
+      socketInstance.on(SOCKET_EVENTS.NOTIFICATION, (notification) => {
         // 새 알림을 목록에 추가
         setNotifications(prev => [notification, ...prev]);
-
         // 읽지 않은 알림 수 증가
         setUnreadCount(prev => prev + 1);
 
@@ -66,8 +93,8 @@ export const NotificationProvider = ({children}) => {
 
           // 알림 클릭 시 해당 URL로 이동
           browserNotification.onclick = () => {
+            router.push(notification.url);
             window.focus();
-            window.location.href = notification.url;
           };
         }
       });
@@ -75,23 +102,15 @@ export const NotificationProvider = ({children}) => {
       setSocket(socketInstance);
 
       // 컴포넌트 언마운트 시 소켓 연결 해제
-      return () => {
-        try {
-          socketInstance.removeAllListeners?.();
-        } catch (e) {
-        }
-        socketInstance.disconnect();
-        setSocket(null);
-        setIsConnected(false);
-      };
+      return socketInstance;
     };
 
-    // 소켓 연결
-    cleanup = connectSocket();
+    const socketInstance = connectSocket();
 
-    // 컴포넌트 언마운트 시 소켓 연결 해제
     return () => {
-      if (typeof cleanup === 'function') cleanup();
+      socketInstance?.disconnect();
+      setSocket(null);
+      setIsConnected(false);
     };
   }, [session?.user?.id]);
 
@@ -113,10 +132,10 @@ export const NotificationProvider = ({children}) => {
     };
 
     fetchNotifications();
-  }, [session]);
+  }, [session?.user?.id]);
 
   // 알림 읽음 처리 함수
-  const markAsRead = async (notificationId) => {
+  const markAsRead = useCallback(async (notificationId) => {
     try {
       const response = await fetch('/api/notifications', {
         method: 'PUT',
@@ -145,10 +164,10 @@ export const NotificationProvider = ({children}) => {
       console.error('Failed to mark notification as read:', error);
       return false;
     }
-  };
+  }, []);
 
   // 모든 알림 읽음 처리 함수
-  const markAllAsRead = async () => {
+  const markAllAsRead = useCallback(async () => {
     try {
       const response = await fetch('/api/notifications', {
         method: 'PUT',
@@ -176,10 +195,10 @@ export const NotificationProvider = ({children}) => {
       toast.error('모든 알림 읽음 처리에 실패했습니다.');
       return false;
     }
-  };
+  }, []);
 
   // 더 많은 알림 로드 함수
-  const loadMoreNotifications = async (page = 2) => {
+  const loadMoreNotifications = useCallback(async (page = 2) => {
     try {
       const response = await fetch(`/api/notifications?page=${page}&limit=20`);
       if (response.ok) {
@@ -192,42 +211,10 @@ export const NotificationProvider = ({children}) => {
       console.error('Failed to load more notifications:', error);
       return null;
     }
-  };
-
-  // 웹 푸시 알림 권한 요청 및 구독 함수
-  const requestNotificationPermission = async () => {
-    // 브라우저가 알림을 지원하는지 확인
-    if (!('Notification' in window)) {
-      return {success: false, reason: 'browser-no-support'};
-    }
-
-    // 이미 권한이 허용된 경우
-    if (Notification.permission === 'granted') {
-      // 서비스 워커 등록 및 푸시 구독 진행
-      return await subscribeToPushNotifications();
-    }
-
-    // 권한이 거부되지 않은 경우 권한 요청
-    if (Notification.permission !== 'denied') {
-      try {
-        const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-          // 권한이 허용된 경우 서비스 워커 등록 및 푸시 구독 진행
-          return await subscribeToPushNotifications();
-        } else {
-          return {success: false, reason: 'permission-denied'};
-        }
-      } catch (error) {
-        console.error('Error requesting notification permission:', error);
-        return {success: false, reason: 'permission-error', error};
-      }
-    }
-
-    return {success: false, reason: 'permission-denied'};
-  };
+  }, []);
 
   // 푸시 알림 구독 함수
-  const subscribeToPushNotifications = async () => {
+  const subscribeToPushNotifications = useCallback(async () => {
     try {
       // 서비스 워커가 지원되는지 확인
       if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
@@ -235,7 +222,7 @@ export const NotificationProvider = ({children}) => {
       }
 
       // 서비스 워커 등록
-      const registration = await navigator.serviceWorker.register('/service-worker.js');
+      const registration = await navigator.serviceWorker.register('/sw.js');
 
       // 기존 구독 확인
       const existingSubscription = await registration.pushManager.getSubscription();
@@ -277,35 +264,62 @@ export const NotificationProvider = ({children}) => {
       console.error('Error subscribing to push notifications:', error);
       return {success: false, reason: 'subscription-error', error};
     }
-  };
+  }, []);
 
-  // Base64 문자열을 Uint8Array로 변환하는 유틸리티 함수
-  const urlBase64ToUint8Array = (base64String) => {
-    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-    const base64 = (base64String + padding)
-      .replace(/-/g, '+')
-      .replace(/_/g, '/');
-
-    const rawData = window.atob(base64);
-    const outputArray = new Uint8Array(rawData.length);
-
-    for (let i = 0; i < rawData.length; ++i) {
-      outputArray[i] = rawData.charCodeAt(i);
+  // 웹 푸시 알림 권한 요청 및 구독 함수
+  const requestNotificationPermission = useCallback(async () => {
+    // Ref를 사용하여 중복 실행을 즉시 방지
+    if (isSubscribingRef.current) {
+      return {success: false, reason: 'in-progress'};
     }
-    return outputArray;
-  };
+    // 플래그를 동기적으로 설정하고, UI 업데이트를 위해 상태도 변경
+    isSubscribingRef.current = true;
+    setIsSubscribing(true);
+
+    try {
+      // 1. 브라우저 지원 여부 확인
+      if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
+        return {success: false, reason: 'browser-no-support'};
+      }
+
+      // 2. 현재 권한 상태 확인 및 필요한 경우 요청
+      let permission = Notification.permission;
+      if (permission === 'default') {
+        permission = await Notification.requestPermission();
+      }
+
+      // 3. 최종 권한이 'granted'인 경우에만 구독 진행
+      if (permission === 'granted') {
+        return await subscribeToPushNotifications();
+      }
+
+      // 4. 거부된 경우
+      return {success: false, reason: 'permission-denied'};
+
+    } catch (error) {
+      console.error('Error during notification permission or subscription process:', error);
+      return {success: false, reason: 'permission-error', error};
+    } finally {
+      // 처리가 끝나면 플래그와 상태를 모두 초기화
+      isSubscribingRef.current = false;
+      setIsSubscribing(false);
+    }
+  }, [subscribeToPushNotifications]);
 
   // 컨텍스트 값
-  const value = {
-    socket,
-    isConnected,
-    notifications,
-    unreadCount,
-    markAsRead,
-    markAllAsRead,
-    loadMoreNotifications,
-    requestNotificationPermission,
-  };
+  const value = useMemo(() => ({
+      socket,
+      isConnected,
+      notifications,
+      unreadCount,
+      isSubscribing,
+      markAsRead,
+      markAllAsRead,
+      loadMoreNotifications,
+      requestNotificationPermission,
+    }),
+    [socket, isConnected, notifications, unreadCount, isSubscribing, markAsRead, markAllAsRead, loadMoreNotifications, requestNotificationPermission]
+  );
 
   return (
     <NotificationContext.Provider value={value}>

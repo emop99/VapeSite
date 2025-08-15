@@ -24,6 +24,12 @@ const loadEnvConfig = () => {
 // 환경 변수 로드
 const envVars = loadEnvConfig();
 
+const withPWA = require('next-pwa')({
+  dest: 'public',
+  swSrc: 'public/service-worker.js',
+});
+
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   // 리액트 스트릭트 모드 활성화
   reactStrictMode: true,
@@ -67,4 +73,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+module.exports = withPWA(nextConfig);

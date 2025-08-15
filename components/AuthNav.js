@@ -28,23 +28,28 @@ export default function AuthNav() {
     };
   }, [dropdownRef]);
 
-  // 알림 권한 요청 처리 함수
-  const handleRequestPermission = async () => {
-    try {
-      const result = await requestNotificationPermission();
+  // 로그인 시 알림 권한을 요청하는 로직을 useEffect로 이동
+  useEffect(() => {
+    const handleRequestPermission = async () => {
+      try {
+        const result = await requestNotificationPermission();
 
-      if (result.success && !result.alreadySubscribed) {
-        toast.success('알림 권한이 허용되었습니다.');
+        if (result.success && !result.alreadySubscribed) {
+          toast.success('알림 권한이 허용되었습니다.');
+        }
+      } catch (error) {
+        console.error('Error requesting notification permission:', error);
+        toast.error('알림 설정 중 오류가 발생했습니다.');
       }
-    } catch (error) {
-      console.error('Error requesting notification permission:', error);
-      toast.error('알림 설정 중 오류가 발생했습니다.');
+    };
+
+    // 세션이 있을 때만 권한 요청
+    if (session) {
+      handleRequestPermission();
     }
-  };
+  }, [session, requestNotificationPermission]);
 
   if (session) {
-    handleRequestPermission();
-
     return (
       <div className="flex items-center space-x-3">
         {/* 알림 벨 버튼 */}
