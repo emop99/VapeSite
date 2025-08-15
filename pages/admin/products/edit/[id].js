@@ -25,6 +25,7 @@ export default function EditProduct() {
     imageUrl: '',
     stock: '',
     isShow: true,
+    isRedisplayed: true,
   });
 
   // 목록으로 돌아가는 URL 생성
@@ -68,6 +69,7 @@ export default function EditProduct() {
             imageUrl: result.data.imageUrl || '',
             stock: result.data.stock ? String(result.data.stock) : '',
             isShow: result.data.isShow !== undefined ? result.data.isShow : true,
+            isRedisplayed: result.data.isRedisplayed !== undefined ? result.data.isRedisplayed : true,
           });
 
           console.log('로드된 상품 데이터:', result.data);
@@ -113,6 +115,7 @@ export default function EditProduct() {
           imageUrl: formData.imageUrl,
           stock: formData.stock ? parseInt(formData.stock) : 0,
           isShow: formData.isShow,
+          isRedisplayed: formData.isRedisplayed,
         }),
       });
 

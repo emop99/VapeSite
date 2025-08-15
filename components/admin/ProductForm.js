@@ -329,6 +329,69 @@ const ProductForm = ({
         )}
       </div>
 
+      {/* 상품 설정 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* 노출 여부 */}
+        <div className="flex items-center">
+          <label className="flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              name="isShow"
+              checked={formData.isShow}
+              onChange={(e) => setFormData({...formData, isShow: e.target.checked})}
+              className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <span className="text-sm font-medium text-gray-700">상품 노출</span>
+          </label>
+        </div>
+
+        {/* 재전시 여부 */}
+        <div className="flex items-center">
+          <label className="flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              name="isRedisplayed"
+              checked={formData.isRedisplayed}
+              onChange={(e) => setFormData({...formData, isRedisplayed: e.target.checked})}
+              className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <span className="text-sm font-medium text-gray-700">재전시</span>
+          </label>
+        </div>
+      </div>
+
+      {/* 재고 수량 */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            재고 수량
+          </label>
+          <input
+            type="number"
+            name="stock"
+            value={formData.stock}
+            onChange={handleChange}
+            min="0"
+            className="block w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+      </div>
+
+      {/* 상품 설명 */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          상품 설명
+        </label>
+        <textarea
+          name="description"
+          value={formData.description}
+          onChange={handleChange}
+          rows="4"
+          className="block w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          placeholder="상품에 대한 설명을 입력하세요..."
+        />
+      </div>
+
       {/* 제출 버튼 */}
       <div className="flex justify-end pt-4">
         <button
