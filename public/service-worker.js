@@ -34,9 +34,10 @@ if (workbox) {
     return Response.error();
   });
 
-  // 이미지 요청: 캐시 우선, 30일간 캐시
+  // 이미지 요청: 캐시 우선, 30일간 캐시. 단, /uploads 경로는 제외
   registerRoute(
-    ({request}) => request.destination === 'image',
+    ({request, url}) =>
+      request.destination === 'image' && !url.pathname.startsWith('/uploads/'),
     new CacheFirst({
       cacheName: 'juicegoblin-image-cache',
       plugins: [
