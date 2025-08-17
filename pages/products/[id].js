@@ -2,7 +2,7 @@ import {useEffect, useState} from 'react';
 import {useRouter} from 'next/router';
 import Link from 'next/link';
 import Head from 'next/head';
-import {FaEdit, FaHeart, FaRegHeart} from 'react-icons/fa';
+import {FaEdit, FaHeart, FaRegHeart, FaSearch} from 'react-icons/fa';
 import Image from 'next/image';
 import {normalizeImageUrl} from '../../utils/helper';
 import ReviewForm from '../../components/ReviewForm';
@@ -54,6 +54,8 @@ export default function ProductDetail({productData, error: serverError}) {
   const [isWished, setIsWished] = useState(productData?.isWished || false);
   // 찜하기 로딩 상태
   const [wishLoading, setWishLoading] = useState(false);
+  // 검색어 상태
+  const [searchQuery, setSearchQuery] = useState('');
 
   // 페이지네이션 상태
   const REVIEWS_PER_PAGE = 5;
@@ -69,14 +71,14 @@ export default function ProductDetail({productData, error: serverError}) {
   // 상품 데이터 변경 감지 및 데이터 로드
   useEffect(() => {
     setProduct(productData);
-    setPriceComparisons(productData.priceComparisons || []);
-    setPriceHistory(productData.priceHistory || []);
-    setReviews(productData.reviews || []);
-    setAverageRating(productData.averageRating || 0);
+    setPriceComparisons(productData?.priceComparisons || []);
+    setPriceHistory(productData?.priceHistory || []);
+    setReviews(productData?.reviews || []);
+    setAverageRating(productData?.averageRating || 0);
     setIsEditing(false);
     setEditingReview(null);
     setUserReview(null);
-    setIsWished(productData.isWished || false);
+    setIsWished(productData?.isWished || false);
   }, [productData]);
 
   // 찜하기/취소 토글 함수
@@ -165,16 +167,58 @@ export default function ProductDetail({productData, error: serverError}) {
     }
   };
 
+  // 검색 핸들러
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
   // 제품이 없을 때
   if (!product) {
     return (
-      <div className="container mx-auto px-4 py-16">
-        <div className="max-w-lg mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
-          <div className="p-8 text-center">
-            <h2 className="text-2xl font-bold text-gray-700 mb-3">제품을 찾을 수 없습니다</h2>
-            <p className="text-gray-500 mb-9">요청하신 제품이 존재하지 않거나 삭제되었을 수 있습니다.</p>
-            <Link href="/" className="inline-block bg-primary hover:bg-primary-dark text-white font-medium py-2 px-6 rounded-md transition-colors duration-300">
-              메인 페이지로 돌아가기
+      <div className="bg-gray-50 flex items-center justify-center min-h-[calc(100vh-200px)]">
+        <div className="w-full max-w-lg p-8 space-y-8 bg-white rounded-2xl shadow-lg text-center">
+
+          {/* 아이콘 */}
+          <div className="flex justify-center">
+            <div className="w-20 h-20 bg-primary-lightest rounded-full flex items-center justify-center">
+              <FaSearch className="text-primary text-4xl"/>
+            </div>
+          </div>
+
+          {/* 제목 및 설명 */}
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold text-gray-800">상품을 찾을 수 없습니다</h1>
+            <p className="text-gray-500">
+              요청하신 상품이 존재하지 않거나 판매 중지 되었을 수 있습니다.
+              <br/>
+              다른 상품을 검색해 보시겠어요?
+            </p>
+          </div>
+
+          {/* 검색 폼 */}
+          <form onSubmit={handleSearchSubmit} className="w-full">
+            <div className="relative">
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="브랜드, 제품명 등을 검색해보세요."
+                className="w-full px-5 py-3 pr-12 text-gray-700 bg-white border-2 border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
+              />
+              <button type="submit"
+                      className="absolute top-0 right-0 h-full px-5 text-gray-400 hover:text-primary transition-colors rounded-full">
+                <FaSearch className="text-lg"/>
+              </button>
+            </div>
+          </form>
+
+          {/* 메인 페이지로 돌아가기 */}
+          <div className="pt-4">
+            <Link href="/" className="text-base font-medium text-primary hover:text-primary-dark transition-colors">
+              메인 페이지로 돌아가기 <span aria-hidden="true">&rarr;</span>
             </Link>
           </div>
         </div>
