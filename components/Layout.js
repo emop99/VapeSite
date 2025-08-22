@@ -150,21 +150,21 @@ export default function Layout({ children, title = '쥬스고블린 | 전자담�
             </div>
 
             {/* 기타 */}
-            <div>
-              <h3 className="text-xl font-bold mb-5 text-accent">기타</h3>
-              <ul className="text-goblin-light">
-                <li className="mb-2">
-                  <Link href="/terms-of-service" className="hover:text-accent text-goblin-light">
-                    서비스 약관
-                  </Link>
-                </li>
-                <li className="mb-2">
-                  <Link href="/privacy-policy" className="hover:text-accent text-goblin-light">
-                    개인정보 처리방침
-                  </Link>
-                </li>
-              </ul>
-            </div>
+            {/*<div>*/}
+            {/*  <h3 className="text-xl font-bold mb-5 text-accent">기타</h3>*/}
+            {/*  <ul className="text-goblin-light">*/}
+            {/*    <li className="mb-2">*/}
+            {/*      <Link href="/terms-of-service" className="hover:text-accent text-goblin-light">*/}
+            {/*        서비스 약관*/}
+            {/*      </Link>*/}
+            {/*    </li>*/}
+            {/*    <li className="mb-2">*/}
+            {/*      <Link href="/privacy-policy" className="hover:text-accent text-goblin-light">*/}
+            {/*        개인정보 처리방침*/}
+            {/*      </Link>*/}
+            {/*    </li>*/}
+            {/*  </ul>*/}
+            {/*</div>*/}
 
             {/* 연락처 */}
             <div>
