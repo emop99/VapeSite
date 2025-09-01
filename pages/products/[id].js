@@ -88,6 +88,7 @@ export default function ProductDetail({productData, error: serverError}) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Keep-Alive': 'timeout=5, max=1000'
         },
         body: JSON.stringify({
           productId: product.id,
@@ -108,10 +109,10 @@ export default function ProductDetail({productData, error: serverError}) {
   // 구매하러 가기 클릭 핸들러
   const handlePurchaseClick = async (sellerUrl, sellerId, clickType, priceAtClick) => {
     // 로그 기록
-    await logPurchaseClick(sellerId, clickType, priceAtClick);
+    logPurchaseClick(sellerId, clickType, priceAtClick).then();
 
     // 외부 사이트로 이동
-    window.open(sellerUrl, '_blank', 'noopener,noreferrer');
+    location.href = sellerUrl;
   };
 
   // 찜하기/취소 토글 함수
