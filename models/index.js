@@ -19,6 +19,7 @@ const Notification = require('./Notification');
 const NotificationSettings = require('./NotificationSettings');
 const PushSubscription = require('./PushSubscription');
 const BoardNotificationPreference = require('./BoardNotificationPreference');
+const PurchaseClickLog = require('./PurchaseClickLog');
 // 모델 간의 관계는 각 모델 파일에서 정의됨
 
 module.exports = {
@@ -40,4 +41,5 @@ module.exports = {
   NotificationSettings,
   PushSubscription,
   BoardNotificationPreference,
+  PurchaseClickLog,
 };

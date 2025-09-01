@@ -404,6 +404,33 @@ create table vapesite.vape_wish_list
         foreign key (userId) references vapesite.vape_user (id)
 ) comment '찜 목록 테이블';
 
+create table vapesite.vape_purchase_click_log
+(
+    id           int auto_increment primary key,
+    productId    int                                  not null comment '클릭된 상품 ID',
+    sellerId     int                                  not null comment '클릭된 판매사이트 ID',
+    userId       int null comment '클릭한 유저 ID (로그인한 경우)',
+    ip           varchar(50) null comment '클라이언트 IP 주소',
+    clickType    enum('main_button', 'comparison_table') default 'main_button' not null comment '클릭 버튼 유형',
+    priceAtClick int                                  not null comment '클릭 시점의 상품 가격',
+    createdAt    datetime default current_timestamp() not null comment '클릭 발생 일시',
+    constraint vape_purchase_click_log_vape_products_id_fk
+        foreign key (productId) references vapesite.vape_products (id),
+    constraint vape_purchase_click_log_vape_seller_site_id_fk
+        foreign key (sellerId) references vapesite.vape_seller_site (id),
+    constraint vape_purchase_click_log_vape_user_id_fk
+        foreign key (userId) references vapesite.vape_user (id)
+) comment '구매하러가기 버튼 클릭 로그 테이블';
+
+create index vape_purchase_click_log_createdAt_index
+    on vapesite.vape_purchase_click_log (createdAt);
+
+create index vape_purchase_click_log_productId_index
+    on vapesite.vape_purchase_click_log (productId);
+
+create index vape_purchase_click_log_sellerId_index
+    on vapesite.vape_purchase_click_log (sellerId);
+
 create
     definer = vapeuser@`%` procedure vapesite.get_similar_products(IN p_product_id int)
 BEGIN

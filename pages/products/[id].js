@@ -81,6 +81,39 @@ export default function ProductDetail({productData, error: serverError}) {
     setIsWished(productData?.isWished || false);
   }, [productData]);
 
+  // 구매 클릭 로그 기록 함수
+  const logPurchaseClick = async (sellerId, clickType, priceAtClick) => {
+    try {
+      const response = await fetch('/api/log/product', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          productId: product.id,
+          sellerId: sellerId,
+          clickType: clickType,
+          priceAtClick: priceAtClick
+        }),
+      });
+
+      if (!response.ok) {
+        console.warn('Purchase click logging failed:', await response.text());
+      }
+    } catch (error) {
+      console.error('Purchase click log error:', error);
+    }
+  };
+
+  // 구매하러 가기 클릭 핸들러
+  const handlePurchaseClick = async (sellerUrl, sellerId, clickType, priceAtClick) => {
+    // 로그 기록
+    await logPurchaseClick(sellerId, clickType, priceAtClick);
+
+    // 외부 사이트로 이동
+    window.open(sellerUrl, '_blank');
+  };
+
   // 찜하기/취소 토글 함수
   const toggleWish = async () => {
     if (!session) {
@@ -371,14 +404,17 @@ export default function ProductDetail({productData, error: serverError}) {
 
             <div className="flex space-x-3 mb-4">
               {product.priceComparisons[0].sellerUrl && (
-                <a
-                  href={product.priceComparisons[0].sellerUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  onClick={() => handlePurchaseClick(
+                    product.priceComparisons[0].sellerUrl,
+                    product.priceComparisons[0].sellerId,
+                    'main_button',
+                    product.priceComparisons[0].price
+                  )}
                   className="btn-primary flex-1 text-center"
                 >
                   최저가로 구매하러 가기
-                </a>
+                </button>
               )}
 
               {/* 찜하기 버튼 추가 */}
@@ -420,17 +456,20 @@ export default function ProductDetail({productData, error: serverError}) {
                     {comparison.price.toLocaleString()}원
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
-                    <a
-                      href={comparison.sellerUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button
+                      onClick={() => handlePurchaseClick(
+                        comparison.sellerUrl,
+                        comparison.sellerId,
+                        'comparison_table',
+                        comparison.price
+                      )}
                       className="inline-flex items-center justify-center px-3 py-1.5 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded transition-colors duration-200 whitespace-nowrap"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 mr-1">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
                       </svg>
                       구매하기
-                    </a>
+                    </button>
                   </td>
                 </tr>
               ))}
