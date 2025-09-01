@@ -111,7 +111,7 @@ export default function ProductDetail({productData, error: serverError}) {
     await logPurchaseClick(sellerId, clickType, priceAtClick);
 
     // 외부 사이트로 이동
-    window.open(sellerUrl, '_blank');
+    window.open(sellerUrl, '_blank', 'noopener,noreferrer');
   };
 
   // 찜하기/취소 토글 함수
