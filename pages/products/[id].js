@@ -86,9 +86,9 @@ export default function ProductDetail({productData, error: serverError}) {
     try {
       const response = await fetch('/api/log/product', {
         method: 'POST',
+        keepalive: true,
         headers: {
           'Content-Type': 'application/json',
-          'Keep-Alive': 'timeout=5, max=1000'
         },
         body: JSON.stringify({
           productId: product.id,
