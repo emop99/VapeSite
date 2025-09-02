@@ -35,7 +35,7 @@ const Notification = sequelize.define('Notification', {
   },
   // 알림 유형
   type: {
-    type: DataTypes.ENUM('comment', 'like', 'reply', 'new_post'),
+    type: DataTypes.ENUM('comment', 'like', 'reply', 'new_post', 'system'),
     allowNull: false,
     comment: '알림 유형',
   },
