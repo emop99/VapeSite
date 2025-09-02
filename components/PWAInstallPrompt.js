@@ -116,7 +116,7 @@ export default function PWAInstallPrompt() {
               <FaMobile className="text-xl"/>
             </div>
             <div className="flex-1">
-              <h3 className="font-bold text-accent text-sm sm:text-base hover:scale-105 transition-transform">
+              <h3 className="font-bold text-accent text-sm sm:text-base">
                 쥬스고블린 앱 설치하기
               </h3>
               <p className="text-goblin-light text-xs sm:text-sm animate-pulse">
