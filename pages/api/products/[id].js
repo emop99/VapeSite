@@ -104,7 +104,8 @@ async function getProduct(req, res, id) {
     // 총 조회수 증가 처리
     await product.increment('viewCount');
     // 일자별 조회수 증가 처리
-    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD 형식
+    // 'Asia/Seoul' 시간대 기준으로 YYYY-MM-DD 형식의 날짜를 가져옵니다.
+    const today = new Date().toLocaleString('sv-SE', {timeZone: 'Asia/Seoul'}).split(' ')[0];
     const [dailyViewRecord, created] = await ProductsViewCount.findOrCreate({
       where: {
         productId: id,
