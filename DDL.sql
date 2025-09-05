@@ -431,6 +431,20 @@ create index vape_purchase_click_log_productId_index
 create index vape_purchase_click_log_sellerId_index
     on vapesite.vape_purchase_click_log (sellerId);
 
+create table vapesite.vape_products_view_count
+(
+    productId int                                  not null,
+    viewCount int      default 0                   not null,
+    viewDate  date     default current_timestamp() not null,
+    updatedAt datetime default current_timestamp() null on update current_timestamp(),
+    primary key (viewDate, productId),
+    constraint vape_products_view_count_vape_products_id_fk
+        foreign key (productId) references vapesite.vape_products (id)
+) comment '상품 조회수 테이블';
+
+create index vape_products_view_count_viewDate_index
+    on vapesite.vape_products_view_count (viewDate);
+
 create
     definer = vapeuser@`%` procedure vapesite.get_similar_products(IN p_product_id int)
 BEGIN

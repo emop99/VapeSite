@@ -8,7 +8,8 @@ import Review from '../../../models/Review';
 import User from '../../../models/User';
 import WishList from '../../../models/WishList';
 import {sequelize} from '../../../lib/db';
-import {getSession} from 'next-auth/react'; // 세션 정보를 얻기 위해 추가
+import {getSession} from 'next-auth/react';
+import {ProductsViewCount} from "../../../models"; // 세션 정보를 얻기 위해 추가
 
 /**
  * 단일 제품 API 핸들러
@@ -100,8 +101,26 @@ async function getProduct(req, res, id) {
       isWished = !!wish; // 찜 목록에 있으면 true, 없으면 false
     }
 
-    // 조회수 증가 처리
+    // 총 조회수 증가 처리
     await product.increment('viewCount');
+    // 일자별 조회수 증가 처리
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD 형식
+    const [dailyViewRecord, created] = await ProductsViewCount.findOrCreate({
+      where: {
+        productId: id,
+        viewDate: today
+      },
+      defaults: {
+        productId: id,
+        viewDate: today,
+        viewCount: 1
+      }
+    });
+    // 기존 레코드가 있다면 조회수 증가
+    if (!created) {
+      await dailyViewRecord.increment('viewCount');
+    }
+
 
     // 평균 평점 계산
     const averageRating = reviews.length > 0

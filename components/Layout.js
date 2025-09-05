@@ -96,36 +96,41 @@ export default function Layout({ children, title = '쥬스고블린 | 전자담�
       {/* 헤더 - 고블린 테마 적용 */}
       <header className="bg-goblin-dark text-white shadow-md border-b-2 border-goblin-light">
         <div className="container py-4">
-          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-            {/* 로고 및 브랜드명 */}
-            <Link href="/" className="flex items-center space-x-2">
-              <Image
-                src={`${process.env.NEXT_PUBLIC_SITE_URL}/image/juicegoblin_bi.png`}
-                alt="쥬스고블린" 
-                width={80}
-                height={20}
-                priority
-                className="drop-shadow-md"
-              />
-              <span className="font-cursive text-3xl text-accent drop-shadow-sm inline md:hidden">JuiceGoblin</span>
-            </Link>
+          <div className="flex flex-col gap-4">
+            <div className="flex justify-between items-center">
+              {/* 로고 및 브랜드명 */}
+              <Link href="/" className="flex items-center space-x-2">
+                <Image
+                  src={`${process.env.NEXT_PUBLIC_SITE_URL}/image/juicegoblin_bi.png`}
+                  alt="쥬스고블린"
+                  width={80}
+                  height={20}
+                  priority
+                  className="drop-shadow-md"
+                />
+                <span className="font-cursive text-3xl text-accent drop-shadow-sm">JuiceGoblin</span>
+              </Link>
 
-            {/* 네비게이션 - 고블린 테마 적용 */}
+              {/* 인증 네비게이션 */}
+              <AuthNav/>
+            </div>
+
+            {/* 메뉴 네비게이션 */}
             <div className="flex items-center justify-between w-full">
-              <nav className="flex items-center space-x-6">
-                <Link href="/mouth-inhalation" className={`${isActive('/mouth-inhalation')} hover:text-accent text-goblin-light font-medium`}>
+              <nav className="flex items-center space-x-6 overflow-x-auto whitespace-nowrap scrollbar-hide">
+                <Link href="/mouth-inhalation" className={`${isActive('/mouth-inhalation')} hover:text-accent text-goblin-light font-medium flex-shrink-0`}>
                   입호흡
                 </Link>
-                <Link href="/lung-inhalation" className={`${isActive('/lung-inhalation')} hover:text-accent text-goblin-light font-medium`}>
+                <Link href="/lung-inhalation" className={`${isActive('/lung-inhalation')} hover:text-accent text-goblin-light font-medium flex-shrink-0`}>
                   폐호흡
                 </Link>
-                <Link href="/community" className={`${isActive('/community')} hover:text-accent text-goblin-light font-medium`}>
+                {/*<Link href="/ranking" className={`${isActive('/ranking')} hover:text-accent text-goblin-light font-medium flex-shrink-0`}>*/}
+                {/*  랭킹*/}
+                {/*</Link>*/}
+                <Link href="/community" className={`${isActive('/community')} hover:text-accent text-goblin-light font-medium flex-shrink-0`}>
                   커뮤니티
                 </Link>
               </nav>
-
-              {/* 인증 네비게이션 */}
-              <AuthNav />
             </div>
           </div>
         </div>
@@ -150,7 +155,7 @@ export default function Layout({ children, title = '쥬스고블린 | 전자담�
             </div>
 
             {/* 기타 */}
-            {/*<div>*/}
+            <div>
             {/*  <h3 className="text-xl font-bold mb-5 text-accent">기타</h3>*/}
             {/*  <ul className="text-goblin-light">*/}
             {/*    <li className="mb-2">*/}
@@ -164,7 +169,7 @@ export default function Layout({ children, title = '쥬스고블린 | 전자담�
             {/*      </Link>*/}
             {/*    </li>*/}
             {/*  </ul>*/}
-            {/*</div>*/}
+            </div>
 
             {/* 연락처 */}
             <div>
