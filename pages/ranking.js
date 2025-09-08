@@ -43,19 +43,6 @@ export default function Ranking() {
     fetchRankingData();
   }, [session, status]);
 
-  const getRankBorderStyle = (rank) => {
-    switch (rank) {
-      case 1:
-        return 'border-l-4 border-accent';
-      case 2:
-        return 'border-l-4 border-goblin-light';
-      case 3:
-        return 'border-l-4 border-secondary';
-      default:
-        return 'border-l-4 border-transparent';
-    }
-  };
-
   const getRankIcon = (rank) => {
     if (rank === 1) return '🥇';
     if (rank === 2) return '🥈';
@@ -73,12 +60,17 @@ export default function Ranking() {
       <div className="divide-y divide-gray-200">
         {rankingData.map((site) => (
           <div key={site.rank}
-               className={`flex flex-col sm:flex-row sm:items-center sm:justify-between p-6 transition-colors duration-200 hover:bg-gray-50 ${getRankBorderStyle(site.rank)}`}>
+               className={`flex flex-col sm:flex-row sm:items-center sm:justify-between p-6 transition-colors duration-200 hover:bg-gray-50`}>
             <div className="flex items-center mb-4 sm:mb-0">
-              <div className="text-2xl font-bold text-gray-500 w-12 text-center">{getRankIcon(site.rank)}</div>
+              <div className={`text-2xl font-bold text-gray-500 w-12 text-center ${site.rank <= 3 ? `text-4xl` : ``}`}>{getRankIcon(site.rank)}</div>
               <div className="ml-4">
                 <Link href={site.siteUrl}>
-                  <div className="text-lg font-bold text-gray-800">{site.siteName}</div>
+                  <div className="text-lg font-bold text-gray-800 flex items-center gap-1 hover:text-accent transition-colors duration-200">
+                    {site.siteName}
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                    </svg>
+                  </div>
                 </Link>
                 <div className="text-sm text-gray-500">{description} <span className="font-semibold text-gray-700">{site.value.toLocaleString()}</span>개</div>
               </div>
@@ -102,12 +94,17 @@ export default function Ranking() {
     <div className="divide-y divide-gray-200">
       {rankingData.map((site) => (
         <div key={site.rank}
-             className={`flex flex-col sm:flex-row sm:items-center sm:justify-between p-6 transition-colors duration-200 hover:bg-gray-50 ${getRankBorderStyle(site.rank)}`}>
+             className={`flex flex-col sm:flex-row sm:items-center sm:justify-between p-6 transition-colors duration-200 hover:bg-gray-50`}>
           <div className="flex items-center mb-4 sm:mb-0">
-            <div className="text-2xl font-bold text-gray-500 w-12 text-center">{getRankIcon(site.rank)}</div>
+            <div className={`text-2xl font-bold text-gray-500 w-12 text-center ${site.rank <= 3 ? `text-4xl` : ``}`}>{getRankIcon(site.rank)}</div>
             <div className="ml-4">
               <Link href={site.siteUrl}>
-                <div className="text-lg font-bold text-gray-800">{site.siteName}</div>
+                <div className="text-lg font-bold text-gray-800 flex items-center gap-1 hover:text-accent transition-colors duration-200">
+                  {site.siteName}
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                  </svg>
+                </div>
               </Link>
             </div>
           </div>
@@ -118,10 +115,10 @@ export default function Ranking() {
   );
 
   const renderTabContent = (title, description, list) => (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden">
-      <div className="p-6 border-b border-gray-200">
-        <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
-        <p className="text-gray-500 mt-1 text-sm">{description}</p>
+    <div className="bg-white rounded-lg shadow-md overflow-hidden border-l-4">
+      <div className="p-6 border-b border-gray-100">
+        <h2 className="text-2xl font-bold text-goblin-dark">{title}</h2>
+        <p className="text-gray-600 mt-2 text-sm">{description}</p>
       </div>
       {list}
     </div>
@@ -135,24 +132,36 @@ export default function Ranking() {
 
   // 로그인 필요 오버레이 컴포넌트
   const LoginRequiredOverlay = () => (
-    <div className="max-w-5xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
-      <div className="text-center mb-10">
-        <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight sm:text-5xl flex items-center justify-center gap-3">
-          <span className="text-5xl">🏆</span>사이트 랭킹
-        </h1>
+    <div className="max-w-5xl mx-auto sm:px-6 py-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 bg-white p-6 rounded-lg shadow-md border-l-4 border-accent">
+        <div>
+          <h1 className="text-3xl font-bold text-goblin-dark">사이트 랭킹</h1>
+          <p className="text-gray-600 mt-2 text-sm">베이프샵 사이트들의 랭킹을 확인하세요</p>
+        </div>
+        <div className="mt-4 sm:mt-0">
+          <div className="text-sm text-gray-500">
+            <span className="inline-flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H9a2 2 0 01-2-2z"/>
+              </svg>
+              랭킹 데이터를 보시려면 로그인이 필요합니다
+            </span>
+          </div>
+        </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      <div className="bg-white rounded-lg shadow-md overflow-hidden border-l-4 border-accent">
         <div className="p-8 text-center">
           <div className="mb-6">
             <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-              <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 448 512" class="text-sm" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+              <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 448 512" className="text-sm" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
                 <path
                   d="M224 256c70.7 0 128-57.3 128-128S294.7 0 224 0 96 57.3 96 128s57.3 128 128 128zm89.6 32h-16.7c-22.2 10.2-46.9 16-72.9 16s-50.6-5.8-72.9-16h-16.7C60.2 288 0 348.2 0 422.4V464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48v-41.6c0-74.2-60.2-134.4-134.4-134.4z"></path>
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">로그인이 필요합니다</h2>
-            <p className="text-gray-500 mb-6">랭킹 데이터를 보시려면 로그인을 해주세요.</p>
+            <h2 className="text-2xl font-bold text-goblin-dark mb-2">로그인이 필요합니다</h2>
+            <p className="text-gray-600 mb-6">랭킹 데이터를 보시려면 로그인을 해주세요.</p>
 
             <button
               onClick={() => router.push('/auth/signin?callbackUrl=/ranking')}
@@ -188,27 +197,57 @@ export default function Ranking() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
-      <div className="text-center mb-10">
-        <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight sm:text-5xl flex items-center justify-center gap-3">
-          <span className="text-5xl">🏆</span>사이트 랭킹
-        </h1>
+    <div className="max-w-5xl mx-auto sm:px-6 py-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 bg-white p-6 rounded-lg shadow-md border-l-4 border-accent">
+        <div>
+          <h1 className="text-3xl font-bold text-goblin-dark"><span className="text-4xl">🏆</span>랭킹</h1>
+          <p className="text-gray-600 mt-2 text-sm">베이프샵 사이트들의 랭킹을 확인하세요</p>
+        </div>
+        <div className="mt-4 sm:mt-0">
+          <div className="text-sm text-gray-500">
+            <span className="inline-flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                </path>
+              </svg>
+              탭을 선택하여 다양한 랭킹 정보를 확인해보세요
+            </span>
+          </div>
+        </div>
       </div>
 
-      <div className="flex justify-center mb-8">
-        <div className="flex flex-wrap justify-center gap-2 bg-gray-200 p-1 rounded-xl">
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors duration-200 ${
-                activeTab === tab.id ? 'bg-white text-goblin-dark shadow-sm' : 'text-gray-500 hover:bg-gray-300/50'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {tabs.map(tab => (
+          <div
+            key={tab.id}
+            className={`bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer ${
+              activeTab === tab.id ? 'ring-2 ring-accent' : ''
+            }`}
+            onClick={() => setActiveTab(tab.id)}
+          >
+            <div className={`p-6 border-l-4 transition-all duration-300 ${
+              activeTab === tab.id ? 'border-accent' : 'border-transparent group-hover:border-accent'
+            }`}>
+              <div className="flex items-center justify-between">
+                <h3 className={`text-lg font-bold transition-colors duration-200 ${
+                  activeTab === tab.id ? 'text-accent' : 'text-goblin-dark group-hover:text-accent'
+                }`}>
+                  {tab.label}
+                </h3>
+                <div className={`transition-opacity duration-300 ${
+                  activeTab === tab.id ? 'opacity-100 text-accent' : 'opacity-0 group-hover:opacity-100 text-accent'
+                }`}>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
       <div>
