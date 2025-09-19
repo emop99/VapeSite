@@ -17,6 +17,7 @@ module.exports = {
         'primary': '#2D5F2D', // 고블린 스킨 녹색
         'secondary': '#8B4513', // 고블린 갑옷 갈색
         'accent': '#FF6B1A', // 고블린 강조 주황색
+        'accent-dark': '#E55A14', // 어두운 고블린 강조 주황색
         'background': '#F0F2E6', // 연한 이끼 녹색 배경
         'text': '#2A2A2A', // 어두운 텍스트 색상
         'goblin-dark': '#1A3A1A', // 어두운 고블린 녹색

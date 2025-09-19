@@ -7,10 +7,12 @@ import LinkExtension from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 import Youtube from '@tiptap/extension-youtube';
 import Video from '../../../lib/tiptap-extensions/video';
+import TextStyle from '@tiptap/extension-text-style';
+import Color from '@tiptap/extension-color';
 
 export default function PostEditPage() {
   const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState('<p></p><p></p><p></p>');
   const [isNotice, setIsNotice] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -22,6 +24,9 @@ export default function PostEditPage() {
   const [linkModalOpen, setLinkModalOpen] = useState(false);
   const [youtubeModalOpen, setYoutubeModalOpen] = useState(false);
   const [inputUrl, setInputUrl] = useState('');
+  const [htmlMode, setHtmlMode] = useState(false);
+  const [htmlContent, setHtmlContent] = useState('');
+  const [colorPaletteOpen, setColorPaletteOpen] = useState(false);
   const fileInputRef = useRef(null);
   const videoInputRef = useRef(null);
   const router = useRouter();
@@ -32,6 +37,10 @@ export default function PostEditPage() {
   const editor = useEditor({
     extensions: [
       StarterKit,
+      TextStyle,
+      Color.configure({
+        types: ['textStyle'],
+      }),
       LinkExtension.configure({
         openOnClick: true,
         HTMLAttributes: {
@@ -67,10 +76,17 @@ export default function PostEditPage() {
       }),
     ],
     content: content,
+    parseOptions: {
+      preserveWhitespace: 'full',
+    },
     onUpdate: ({editor}) => {
       setContent(editor.getHTML());
     },
     editorProps: {
+      transformPastedHTML(html) {
+        // HTML 콘텐츠를 그대로 유지하여 인라인 스타일 보존
+        return html;
+      },
       handlePaste(view, event, slice) {
         // 이미지 붙여넣기 처리
         const items = event.clipboardData?.items;
@@ -279,6 +295,7 @@ export default function PostEditPage() {
           setPost(postData.post);
           setTitle(postData.post.title);
           setContent(postData.post.content);
+          setHtmlContent(postData.post.content);
           setIsNotice(postData.post.isNotice);
 
           // 게시글의 게시판 정보 불러오기
@@ -327,7 +344,10 @@ export default function PostEditPage() {
       return;
     }
 
-    if (!content.trim()) {
+    // HTML 모드인 경우 HTML 콘텐츠를 사용
+    const finalContent = htmlMode ? htmlContent : content;
+
+    if (!finalContent.trim()) {
       toast.error('내용을 입력해주세요.');
       return;
     }
@@ -348,7 +368,7 @@ export default function PostEditPage() {
         body: JSON.stringify({
           boardId: isEditMode ? post.boardId : boardId,
           title,
-          content,
+          content: finalContent,
           isNotice: isAdmin ? isNotice : false,
         }),
       });
@@ -435,6 +455,47 @@ export default function PostEditPage() {
     setYoutubeModalOpen(false);
     setInputUrl('');
   }, [editor, inputUrl]);
+
+  // HTML 모드 토글 함수
+  const toggleHtmlMode = useCallback(() => {
+    if (!editor) return;
+
+    if (htmlMode) {
+      try {
+        editor.commands.setContent(htmlContent);
+        setContent(htmlContent);
+        setHtmlMode(false);
+        toast.success('비주얼 모드로 전환되었습니다.');
+      } catch (error) {
+        toast.error('HTML 코드에 오류가 있습니다. 다시 확인해주세요.');
+      }
+    } else {
+      // 비주얼 모드에서 HTML 모드로 전환
+      const currentHtml = editor.getHTML();
+      setHtmlContent(currentHtml);
+      setHtmlMode(true);
+      toast.success('HTML 모드로 전환되었습니다.');
+    }
+  }, [editor, htmlMode, htmlContent]);
+
+  // HTML 콘텐츠 변경 핸들러
+  const handleHtmlContentChange = useCallback((e) => {
+    setHtmlContent(e.target.value);
+  }, []);
+
+  // 색상 팔레트 외부 클릭 시 닫기
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (colorPaletteOpen && !event.target.closest('.color-palette-container')) {
+        setColorPaletteOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [colorPaletteOpen]);
 
   return (
     <>
@@ -637,9 +698,62 @@ export default function PostEditPage() {
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" className="w-5 h-5">
                           <path fill="none" d="M0 0h24v24H0z"/>
                           <path
-                            d="M17.154 14c.23.516.346 1.09.346 1.72 0 1.342-.524 2.392-1.571 3.147C14.88 19.622 13.433 20 11.586 20c-1.64 0-3.263-.381-4.87-1.144V16.6c1.52.877 3.075 1.316 4.666 1.316 2.551 0 3.83-.732 3.839-2.197a2.21 2.21 0 0 0-.648-1.603l-.12-.117H3v-2h18v2h-3.846zm-4.078-3H7.629a4.086 4.086 0 0 1-.481-.522C6.716 9.92 6.5 9.246 6.5 8.452c0-1.236.466-2.287 1.397-3.153C8.83 4.433 10.271 4 12.222 4c1.471 0 2.879.328 4.222.984v2.152c-1.2-.687-2.515-1.03-3.946-1.03-2.48 0-3.719.782-3.719 2.346 0 .42.218.786.654 1.099.436.313.974.562 1.613.75.62.18 1.297.414 2.03.699z"/>
+                            d="M17.154 14c.23.516.346 1.09.346 1.72 0 1.342-.524 2.392-1.571 3.147C14.88 19.622 13.433 20 11.586 20c-1.64 0-3.263-.381-4.87-1.144V16.6c1.52.877 3.075 1.316 4.666 1.316 2.551 0 3.83-.732 3.839-2.197a2.21 2.21 0 0 0-.648-1.603l-.12-.117H3v-2h18v2h-3.846zm-4.078-3H7.629a4.086 4.086 0 0 1-.481-.522C6.716 9.92 6.5 9.246 6.5 8.452c0-1.236.466-2.287 1.397-3.153C8.83 4.433 10.271 4 12.222 4c1.471 0 2.879.328 4.222.984v2.152c-1.2-.687-2.515-1.03-3.946-1.30-2.48 0-3.719.782-3.719 2.346 0 .42.218.786.654 1.099.436.313.974.562 1.613.75.62.18 1.297.414 2.03.699z"/>
                         </svg>
                       </button>
+                      <div className="relative color-palette-container">
+                        <button
+                          type="button"
+                          onClick={() => setColorPaletteOpen(!colorPaletteOpen)}
+                          className="p-1 rounded hover:bg-gray-200 relative"
+                          title="텍스트 색상"
+                          disabled={submitting}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" className="w-5 h-5">
+                            <path fill="none" d="M0 0h24v24H0z"/>
+                            <path d="M15.246 14H8.754l-1.6 4H5l6-15h2l6 15h-2.154l-1.6-4zm-.8-2L12 5.885 9.554 12h4.892z"/>
+                          </svg>
+                          <div
+                            className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-3 h-1 rounded-full border border-gray-300"
+                            style={{backgroundColor: editor?.getAttributes('textStyle').color || '#000000'}}
+                          ></div>
+                        </button>
+                        {colorPaletteOpen && (
+                          <div className="absolute top-full right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-xl p-3 z-[100]">
+                            <div className="grid grid-cols-4 gap-1.5 min-w-[120px]">
+                              {[
+                                '#000000', '#FF0000', '#00FF00', '#0000FF',
+                                '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500',
+                                '#800080', '#FFC0CB', '#A52A2A', '#808080'
+                              ].map(color => (
+                                <button
+                                  key={color}
+                                  type="button"
+                                  className="w-7 h-7 rounded-full border-2 border-gray-300 hover:border-gray-600 hover:scale-105 transition-all duration-150 shadow-sm"
+                                  style={{backgroundColor: color}}
+                                  onClick={() => {
+                                    editor?.chain().focus().setColor(color).run();
+                                    setColorPaletteOpen(false);
+                                  }}
+                                  title={`색상: ${color}`}
+                                />
+                              ))}
+                            </div>
+                            <div className="mt-3 pt-2 border-t border-gray-200">
+                              <button
+                                type="button"
+                                className="w-full px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-100 rounded transition-colors"
+                                onClick={() => {
+                                  editor?.chain().focus().unsetColor().run();
+                                  setColorPaletteOpen(false);
+                                }}
+                              >
+                                색상 제거
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                       <div className="w-px h-6 bg-gray-300 mx-1"></div>
                       <button
                         type="button"
@@ -803,14 +917,54 @@ export default function PostEditPage() {
                             d="M19.606 6.995c-.076-.298-.292-.523-.539-.592C18.63 6.28 16.5 6 12 6s-6.628.28-7.069.403c-.244.068-.46.293-.537.592C4.285 7.419 4 9.196 4 12s.285 4.58.394 5.006c.076.297.292.522.538.59C5.372 17.72 7.5 18 12 18s6.629-.28 7.069-.403c.244-.068.46-.293.537-.592C19.715 16.581 20 14.8 20 12s-.285-4.58-.394-5.005zm1.937-.497C22 8.28 22 12 22 12s0 3.72-.457 5.502c-.254.985-.997 1.76-1.938 2.022C17.896 20 12 20 12 20s-5.893 0-7.605-.476c-.945-.266-1.687-1.04-1.938-2.022C2 15.72 2 12 2 12s0-3.72.457-5.502c.254-.985.997-1.76 1.938-2.022C6.107 4 12 4 12 4s5.896 0 7.605.476c.945.266 1.687 1.04 1.938 2.022zM10 15.5v-7l6 3.5-6 3.5z"/>
                         </svg>
                       </button>
+                      <div className="w-px h-6 bg-gray-300 mx-1"></div>
+                      <button
+                        type="button"
+                        onClick={toggleHtmlMode}
+                        className={`p-1 rounded ${htmlMode ? 'bg-blue-200 text-blue-700' : 'hover:bg-gray-200'}`}
+                        title={htmlMode ? 'HTML 모드 (비주얼 모드로 전환)' : 'HTML 모드로 전환'}
+                        disabled={submitting}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2"
+                             strokeLinecap="round" strokeLinejoin="round">
+                          <path d="m18 16 4-4-4-4"/>
+                          <path d="m6 8-4 4 4 4"/>
+                          <path d="m14.5 4-5 16"/>
+                        </svg>
+                      </button>
                     </div>
 
                     {/* 에디터 본문 */}
-                    <EditorContent
-                      editor={editor}
-                      className="w-full p-4 flex-grow overflow-y-auto focus:outline-none h-full"
-                      disabled={submitting}
-                    />
+                    {htmlMode ? (
+                      /* HTML 코드 에디터 */
+                      <div className="w-full p-4 flex-grow">
+                        <textarea
+                          value={htmlContent}
+                          onChange={handleHtmlContentChange}
+                          className="w-full h-96 p-3 border-0 focus:outline-none resize-none font-mono text-sm bg-gray-50"
+                          placeholder="HTML 코드를 입력하세요..."
+                          disabled={submitting}
+                        />
+                        <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-sm text-blue-700">
+                          <div className="flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <div>
+                              <p className="font-medium">HTML 모드 안내</p>
+                              <p className="mt-1">HTML 태그를 직접 작성할 수 있습니다. 비주얼 모드로 전환하면 작성한 HTML이 적용됩니다.</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      /* 비주얼 에디터 */
+                      <EditorContent
+                        editor={editor}
+                        className="w-full p-4 flex-grow overflow-y-auto focus:outline-none h-full tiptap-content"
+                        disabled={submitting}
+                      />
+                    )}
                   </div>
                 </div>
 
