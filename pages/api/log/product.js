@@ -4,10 +4,7 @@ import {PurchaseClickLog, User} from '../../../models';
 // 클라이언트 IP 주소 추출 함수
 function getClientIP(req) {
   return (
-    req.socket?.remoteAddress ||
-    req.connection?.remoteAddress ||
     req.headers['x-real-ip'] ||
-    req.headers['x-forwarded-for']?.split(',')[0] ||
     null
   );
 }
