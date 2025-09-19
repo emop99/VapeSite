@@ -3,6 +3,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Froala Editor 스타일 - 게시글 표시용 */
+@import 'froala-editor/css/froala_style.min.css';
+
 /* 애니메이션 키프레임 정의 */
 @keyframes fadeIn {
     from {
