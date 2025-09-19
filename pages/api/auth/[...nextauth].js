@@ -69,7 +69,7 @@ export default NextAuth({
           // 로그인 로그 기록
           await UserLoginLog.create({
             userId: dbUser.id,
-            ip: req.headers['x-forwarded-for']
+            ip: req.headers['x-real-ip']
           });
 
           // 로그인 성공 시 사용자 정보 반환
