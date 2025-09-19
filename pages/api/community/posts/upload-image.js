@@ -44,49 +44,33 @@ async function uploadImageHandler(req, res) {
       uploadDir,
       keepExtensions: true,
       maxFileSize: 5 * 1024 * 1024, // 5MB 제한
-      multiples: true, // 다중 파일 업로드 허용
       filter: (part) => {
         // 이미지 파일만 허용 (MIME 타입 체크)
         return part.mimetype?.includes('image/') || false;
       },
       filename: (name, ext, part, form) => {
-        // 파일 이름 형식: timestamp-random-originalfilename.ext
-        return `${Date.now()}-${Math.random().toString(36).substring(2)}-${part.originalFilename}`;
+        // 파일 이름 형식: timestamp-originalfilename.ext
+        return `${Date.now()}-${part.originalFilename}`;
       }
     };
 
     // 파일 업로드 처리
     const {files} = await formidablePromise(req, options);
+    const uploadedFile = files.image;
 
-    // 업로드된 파일들 처리 (단일 파일 또는 다중 파일 지원)
-    let uploadedFiles = [];
-
-    // files 객체에서 모든 파일 추출
-    Object.keys(files).forEach(key => {
-      const fileArray = Array.isArray(files[key]) ? files[key] : [files[key]];
-      uploadedFiles.push(...fileArray);
-    });
-
-    if (!uploadedFiles || uploadedFiles.length === 0) {
+    if (!uploadedFile) {
       return res.status(400).json({success: false, message: '이미지 파일이 없습니다.'});
     }
 
-    // 업로드된 파일들의 경로 생성
-    const links = uploadedFiles.map(file => {
-      return `/uploads/posts/${path.basename(file.filepath)}`;
-    });
+    // 업로드된 파일 경로 생성
+    const relativePath = `/uploads/posts/${path.basename(uploadedFile[0].filepath)}`;
 
-    // 성공 응답 반환 (Froala 형식에 맞춤)
-    // 단일 파일인 경우 기존 형식 유지, 다중 파일인 경우 배열 반환
-    if (links.length === 1) {
-      return res.status(200).json({
-        link: links[0]
-      });
-    } else {
-      return res.status(200).json({
-        links: links
-      });
-    }
+    // 성공 응답 반환
+    return res.status(200).json({
+      success: true,
+      message: '이미지가 성공적으로 업로드되었습니다.',
+      data: {imageUrl: relativePath}
+    });
 
   } catch (error) {
     console.error('이미지 업로드 오류:', error);
