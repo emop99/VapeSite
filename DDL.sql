@@ -11,7 +11,8 @@ create table vapesite.vape_board
     deletedAt   datetime                               null,
     constraint vape_board_slug_pk
         unique (slug)
-) comment '커뮤니티 게시판 정보 테이블';
+)
+    comment '커뮤니티 게시판 정보 테이블';
 
 create index vape_board_isActive_index
     on vapesite.vape_board (isActive);
@@ -24,7 +25,8 @@ create table vapesite.vape_company
     createdAt datetime default current_timestamp() null,
     constraint vape_company_pk
         unique (name)
-) comment '제조사 정보 테이블';
+)
+    comment '제조사 정보 테이블';
 
 create table vapesite.vape_product_category
 (
@@ -39,20 +41,22 @@ create table vapesite.vape_products
 (
     id                  int auto_increment
         primary key,
-    companyId           int                                  not null,
-    productCategoryId   int                                  not null,
-    productGroupingName varchar(100)                         not null comment '상품 그룹 처리 Key Name',
-    visibleName         varchar(100)                         not null comment 'Front 노출 상품명',
+    companyId           int                                    not null,
+    productCategoryId   int                                    not null,
+    productGroupingName varchar(100)                           not null comment '상품 그룹 처리 Key Name',
+    visibleName         varchar(100)                           not null comment 'Front 노출 상품명',
     isShow              tinyint(1) default 1                   not null comment '상품 노출 여부',
-    imageUrl            varchar(255)                         null,
-    createdAt           datetime default current_timestamp() not null,
-    updatedAt           datetime default current_timestamp() null on update current_timestamp(),
-    viewCount           int      default 0                   not null comment '상품 조회수',
+    isRedisplayed       tinyint(1) default 1                   not null,
+    imageUrl            varchar(255)                           null,
+    createdAt           datetime   default current_timestamp() not null,
+    updatedAt           datetime   default current_timestamp() null on update current_timestamp(),
+    viewCount           int        default 0                   not null comment '상품 조회수',
     constraint vape_products_vape_company_id_fk
         foreign key (companyId) references vapesite.vape_company (id),
     constraint vape_products_vape_product_category_id_fk
         foreign key (productCategoryId) references vapesite.vape_product_category (id)
-) comment '상품 정보 테이블';
+)
+    comment '상품 정보 테이블';
 
 create fulltext index products_name_ft
     on vapesite.vape_products (visibleName, productGroupingName);
@@ -66,6 +70,21 @@ create index vape_products_productGroupingName_index
 create index vape_products_visibleName_index
     on vapesite.vape_products (visibleName);
 
+create table vapesite.vape_products_view_count
+(
+    productId int                                  not null,
+    viewCount int      default 0                   not null,
+    viewDate  date     default current_timestamp() not null,
+    updatedAt datetime default current_timestamp() null on update current_timestamp(),
+    primary key (viewDate, productId),
+    constraint vape_products_view_count_vape_products_id_fk
+        foreign key (productId) references vapesite.vape_products (id)
+)
+    comment '상품 조회수 테이블';
+
+create index vape_products_view_count_viewDate_index
+    on vapesite.vape_products_view_count (viewDate);
+
 create table vapesite.vape_seller_site
 (
     id        int auto_increment
@@ -76,7 +95,8 @@ create table vapesite.vape_seller_site
     updatedAt datetime default current_timestamp() null on update current_timestamp(),
     constraint sellerSite_pk_2
         unique (name)
-) comment '판매 사이트 정보 테이블';
+)
+    comment '판매 사이트 정보 테이블';
 
 create table vapesite.vape_price_comparisons
 (
@@ -93,7 +113,8 @@ create table vapesite.vape_price_comparisons
         foreign key (productId) references vapesite.vape_products (id),
     constraint vape_price_comparisons_vape_seller_site_id_fk
         foreign key (sellerId) references vapesite.vape_seller_site (id)
-) comment '판매 사이트별 현재 가격 정보 테이블';
+)
+    comment '판매 사이트별 현재 가격 정보 테이블';
 
 create table vapesite.vape_price_history
 (
@@ -110,7 +131,8 @@ create table vapesite.vape_price_history
         foreign key (productId) references vapesite.vape_products (id),
     constraint vape_price_history_vape_seller_site_id_fk
         foreign key (sellerId) references vapesite.vape_seller_site (id)
-) comment '판매 사이트별 가격 변동 시 저장되는 테이블';
+)
+    comment '판매 사이트별 가격 변동 시 저장되는 테이블';
 
 create index vape_price_history_createdAt_index
     on vapesite.vape_price_history (createdAt);
@@ -135,7 +157,8 @@ create table vapesite.vape_user
     deletedAt           datetime                             null comment '회원 탈퇴 일시',
     constraint vape_user_pk
         unique (email)
-) comment '유저 정보 테이블';
+)
+    comment '유저 정보 테이블';
 
 create table vapesite.vape_attachment
 (
@@ -151,13 +174,40 @@ create table vapesite.vape_attachment
     createdAt  datetime default current_timestamp() not null,
     constraint vape_attachment_ibfk_1
         foreign key (userId) references vapesite.vape_user (id)
-) comment '게시글/댓글 첨부파일 테이블';
+)
+    comment '게시글/댓글 첨부파일 테이블';
 
 create index userId
     on vapesite.vape_attachment (userId);
 
 create index vape_attachment_target_index
     on vapesite.vape_attachment (targetType, targetId);
+
+create table vapesite.vape_board_notification_preferences
+(
+    id        int auto_increment
+        primary key,
+    userId    int                                    not null comment '사용자 ID',
+    boardId   int                                    not null comment '게시판 ID',
+    enabled   tinyint(1) default 1                   not null comment '해당 게시판 푸시 알림 활성화 여부',
+    createdAt datetime   default current_timestamp() not null,
+    updatedAt datetime   default current_timestamp() not null on update current_timestamp(),
+    constraint vape_board_notification_preferences_unique
+        unique (userId, boardId),
+    constraint fk_board_notification_board
+        foreign key (boardId) references vapesite.vape_board (id)
+            on delete cascade,
+    constraint fk_board_notification_user
+        foreign key (userId) references vapesite.vape_user (id)
+            on delete cascade
+)
+    comment '게시판별 푸시 알림 설정 테이블' collate = utf8mb4_unicode_ci;
+
+create index vape_board_notification_preferences_boardId_index
+    on vapesite.vape_board_notification_preferences (boardId);
+
+create index vape_board_notification_preferences_userId_index
+    on vapesite.vape_board_notification_preferences (userId);
 
 create table vapesite.vape_like
 (
@@ -171,7 +221,8 @@ create table vapesite.vape_like
         unique (userId, targetType, targetId),
     constraint vape_like_ibfk_1
         foreign key (userId) references vapesite.vape_user (id)
-) comment '게시글/댓글 좋아요 테이블';
+)
+    comment '게시글/댓글 좋아요 테이블';
 
 create index vape_like_target_index
     on vapesite.vape_like (targetType, targetId);
@@ -193,7 +244,8 @@ create table vapesite.vape_notification_settings
     constraint fk_notification_settings_user
         foreign key (userId) references vapesite.vape_user (id)
             on delete cascade
-) collate = utf8mb4_unicode_ci;
+)
+    collate = utf8mb4_unicode_ci;
 
 create index vape_notification_settings_userId_index
     on vapesite.vape_notification_settings (userId);
@@ -216,7 +268,8 @@ create table vapesite.vape_post
         foreign key (boardId) references vapesite.vape_board (id),
     constraint vape_post_ibfk_2
         foreign key (userId) references vapesite.vape_user (id)
-) comment '커뮤니티 게시글 테이블';
+)
+    comment '커뮤니티 게시글 테이블';
 
 create table vapesite.vape_comment
 (
@@ -236,7 +289,8 @@ create table vapesite.vape_comment
         foreign key (userId) references vapesite.vape_user (id),
     constraint vape_comment_ibfk_3
         foreign key (parentId) references vapesite.vape_comment (id)
-) comment '게시글 댓글 테이블';
+)
+    comment '게시글 댓글 테이블';
 
 create index vape_comment_createdAt_index
     on vapesite.vape_comment (createdAt);
@@ -254,15 +308,15 @@ create table vapesite.vape_notification
 (
     id        int auto_increment
         primary key,
-    userId    int                                    not null comment '알림을 받을 유저',
-    senderId  int                                    not null,
-    type      enum ('comment', 'like', 'reply')      not null comment '알림 유형',
-    postId    int                                    not null,
-    commentId int                                    null,
-    content   varchar(500)                           not null,
-    url       varchar(500)                           not null,
-    isRead    tinyint(1) default 0                   not null comment '읽음 여부',
-    createdAt datetime   default current_timestamp() not null,
+    userId    int                                                     not null comment '알림을 받을 유저',
+    senderId  int                                                     not null,
+    type      enum ('comment', 'like', 'reply', 'new_post', 'system') not null comment '알림 유형',
+    postId    int                                                     not null,
+    commentId int                                                     null,
+    content   varchar(500)                                            not null,
+    url       varchar(500)                                            not null,
+    isRead    tinyint(1) default 0                                    not null comment '읽음 여부',
+    createdAt datetime   default current_timestamp()                  not null,
     constraint fk_notification_comment
         foreign key (commentId) references vapesite.vape_comment (id)
             on delete cascade,
@@ -274,7 +328,8 @@ create table vapesite.vape_notification
             on delete cascade,
     constraint vape_notification_ibfk_1
         foreign key (userId) references vapesite.vape_user (id)
-) comment '유저 알림 테이블';
+)
+    comment '유저 알림 테이블';
 
 create index vape_notification_commentId_index
     on vapesite.vape_notification (commentId);
@@ -300,6 +355,35 @@ create index vape_post_isNotice_index
 create index vape_post_userId_index
     on vapesite.vape_post (userId);
 
+create table vapesite.vape_purchase_click_log
+(
+    id           int auto_increment
+        primary key,
+    productId    int                                                                  not null comment '클릭된 상품 ID',
+    sellerId     int                                                                  not null comment '클릭된 판매사이트 ID',
+    userId       int                                                                  null comment '클릭한 유저 ID (로그인한 경우)',
+    ip           varchar(50)                                                          null comment '클라이언트 IP 주소',
+    clickType    enum ('main_button', 'comparison_table') default 'main_button'       not null comment '클릭 버튼 유형',
+    priceAtClick int                                                                  not null comment '클릭 시점의 상품 가격',
+    createdAt    datetime                                 default current_timestamp() not null comment '클릭 발생 일시',
+    constraint vape_purchase_click_log_vape_products_id_fk
+        foreign key (productId) references vapesite.vape_products (id),
+    constraint vape_purchase_click_log_vape_seller_site_id_fk
+        foreign key (sellerId) references vapesite.vape_seller_site (id),
+    constraint vape_purchase_click_log_vape_user_id_fk
+        foreign key (userId) references vapesite.vape_user (id)
+)
+    comment '구매하러가기 버튼 클릭 로그 테이블';
+
+create index vape_purchase_click_log_createdAt_index
+    on vapesite.vape_purchase_click_log (createdAt);
+
+create index vape_purchase_click_log_productId_index
+    on vapesite.vape_purchase_click_log (productId);
+
+create index vape_purchase_click_log_sellerId_index
+    on vapesite.vape_purchase_click_log (sellerId);
+
 create table vapesite.vape_push_subscription
 (
     id             int auto_increment
@@ -317,35 +401,11 @@ create table vapesite.vape_push_subscription
     constraint fk_push_subscription_user
         foreign key (userId) references vapesite.vape_user (id)
             on delete cascade
-) collate = utf8mb4_unicode_ci;
+)
+    collate = utf8mb4_unicode_ci;
 
 create index vape_push_subscription_userId_index
     on vapesite.vape_push_subscription (userId);
-
-create table vapesite.vape_board_notification_preferences
-(
-    id        int auto_increment
-        primary key,
-    userId    int                                    not null comment '사용자 ID',
-    boardId   int                                    not null comment '게시판 ID',
-    enabled   tinyint(1) default 1                   not null comment '해당 게시판 푸시 알림 활성화 여부',
-    createdAt datetime   default current_timestamp() not null,
-    updatedAt datetime   default current_timestamp() not null on update current_timestamp(),
-    constraint vape_board_notification_preferences_unique
-        unique (userId, boardId),
-    constraint fk_board_notification_user
-        foreign key (userId) references vapesite.vape_user (id)
-            on delete cascade,
-    constraint fk_board_notification_board
-        foreign key (boardId) references vapesite.vape_board (id)
-            on delete cascade
-) comment '게시판별 푸시 알림 설정 테이블' collate = utf8mb4_unicode_ci;
-
-create index vape_board_notification_preferences_userId_index
-    on vapesite.vape_board_notification_preferences (userId);
-
-create index vape_board_notification_preferences_boardId_index
-    on vapesite.vape_board_notification_preferences (boardId);
 
 create table vapesite.vape_reviews
 (
@@ -367,7 +427,8 @@ create table vapesite.vape_reviews
         foreign key (productId) references vapesite.vape_products (id),
     constraint vape_reviews_vape_user_id_fk
         foreign key (userId) references vapesite.vape_user (id)
-) comment '판매 상품 리뷰 테이블';
+)
+    comment '판매 상품 리뷰 테이블';
 
 create index productId
     on vapesite.vape_reviews (productId);
@@ -390,7 +451,8 @@ create table vapesite.vape_user_login_log
     createdAt datetime default current_timestamp() not null,
     constraint vape_user_login_log_vape_user_id_fk
         foreign key (userId) references vapesite.vape_user (id)
-) comment '회원 로그인 로그';
+)
+    comment '회원 로그인 로그';
 
 create table vapesite.vape_wish_list
 (
@@ -402,51 +464,11 @@ create table vapesite.vape_wish_list
         foreign key (productId) references vapesite.vape_products (id),
     constraint vape_wish_list_vape_user_id_fk
         foreign key (userId) references vapesite.vape_user (id)
-) comment '찜 목록 테이블';
-
-create table vapesite.vape_purchase_click_log
-(
-    id           int auto_increment primary key,
-    productId    int                                  not null comment '클릭된 상품 ID',
-    sellerId     int                                  not null comment '클릭된 판매사이트 ID',
-    userId       int null comment '클릭한 유저 ID (로그인한 경우)',
-    ip           varchar(50) null comment '클라이언트 IP 주소',
-    clickType    enum('main_button', 'comparison_table') default 'main_button' not null comment '클릭 버튼 유형',
-    priceAtClick int                                  not null comment '클릭 시점의 상품 가격',
-    createdAt    datetime default current_timestamp() not null comment '클릭 발생 일시',
-    constraint vape_purchase_click_log_vape_products_id_fk
-        foreign key (productId) references vapesite.vape_products (id),
-    constraint vape_purchase_click_log_vape_seller_site_id_fk
-        foreign key (sellerId) references vapesite.vape_seller_site (id),
-    constraint vape_purchase_click_log_vape_user_id_fk
-        foreign key (userId) references vapesite.vape_user (id)
-) comment '구매하러가기 버튼 클릭 로그 테이블';
-
-create index vape_purchase_click_log_createdAt_index
-    on vapesite.vape_purchase_click_log (createdAt);
-
-create index vape_purchase_click_log_productId_index
-    on vapesite.vape_purchase_click_log (productId);
-
-create index vape_purchase_click_log_sellerId_index
-    on vapesite.vape_purchase_click_log (sellerId);
-
-create table vapesite.vape_products_view_count
-(
-    productId int                                  not null,
-    viewCount int      default 0                   not null,
-    viewDate  date     default current_timestamp() not null,
-    updatedAt datetime default current_timestamp() null on update current_timestamp(),
-    primary key (viewDate, productId),
-    constraint vape_products_view_count_vape_products_id_fk
-        foreign key (productId) references vapesite.vape_products (id)
-) comment '상품 조회수 테이블';
-
-create index vape_products_view_count_viewDate_index
-    on vapesite.vape_products_view_count (viewDate);
+)
+    comment '찜 목록 테이블';
 
 create
-    definer = vapeuser@`%` procedure vapesite.get_similar_products(IN p_product_id int)
+    definer = vapeuser@localhost procedure vapesite.get_similar_products(IN p_product_id int)
 BEGIN
     -- 현재 상품 정보 가져오기
     DECLARE
@@ -484,3 +506,4 @@ BEGIN
     ORDER BY relevance DESC
     LIMIT 10;
 END;
+
