@@ -141,24 +141,6 @@ function MyApp({ Component, pageProps }) {
                 `,
               }}
           />
-          <Script
-              id="hilltop-multitag-banner"
-              strategy="afterInteractive"
-              dangerouslySetInnerHTML={{
-                __html: `
-                  (function(izoub){
-                  var d = document,
-                      s = d.createElement('script'),
-                      l = d.scripts[d.scripts.length - 1];
-                  s.settings = izoub || {};
-                  s.src = "\\/\\/aggressivestruggle.com\\/b\\/XkV.s\\/d\\/Gyla0\\/YKWDcY\\/DeKmn9uu\\/ZVUFltkoPcTiYs3KMgTHgH0CM-jgUytoNTjUcXxQOXD\\/Q\\/yWNwgi";
-                  s.async = true;
-                  s.referrerPolicy = 'no-referrer-when-downgrade';
-                  l.parentNode.insertBefore(s, l);
-                  })({})
-                `,
-              }}
-          />
         </>
       ) : ``}
 

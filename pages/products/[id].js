@@ -289,6 +289,8 @@ export default function ProductDetail({productData, error: serverError}) {
         <meta name="keywords"
               content={`${product.visibleName}, ${product.Company.name}, 쥬스고블린, 베이핑, 전자담배, 입호흡, 폐호흡, 액상, 액상최저가, 최저가, 최저가검색, 액상 추천, 액상추천, 전자담배 추천, 전자담배추천, 가격비교, 액상가격비교, 액상 가격비교, 최저가 찾기, 최저가찾기`}/>
 
+        <meta name="referrer" content="no-referrer-when-downgrade" />
+
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="product"/>
         <meta property="og:title" content={`${product.visibleName} - ${product.Company.name} | 쥬스고블린 전자담배 액상 최저가 비교 가격 변동`}/>
