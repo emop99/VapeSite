@@ -87,6 +87,24 @@ function MyApp({ Component, pageProps }) {
             src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4259248617155600`}
             crossOrigin="anonymous"
           />
+          <Script
+            id="hilltop-ads"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
+                (function(rnyd){
+                  var d = document,
+                      s = d.createElement('script'),
+                      l = d.scripts[d.scripts.length - 1];
+                  s.settings = rnyd || {};
+                  s.src = "//anchored-exam.com/ceD/9v6bb.2C5/lKSxWnQz9vNRjwc/x_OVDjQYyZMHyJ0L2FNczGEB4/NMDTI/0r";
+                  s.async = true;
+                  s.referrerPolicy = 'no-referrer-when-downgrade';
+                  l.parentNode.insertBefore(s, l);
+                })({})
+              `,
+            }}
+          />
         </>
       ) : ``}
 
