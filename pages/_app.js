@@ -88,7 +88,7 @@ function MyApp({ Component, pageProps }) {
             crossOrigin="anonymous"
           />
           <Script
-            id="hilltop-ads"
+            id="hilltop-popunder"
             strategy="afterInteractive"
             dangerouslySetInnerHTML={{
               __html: `
@@ -104,6 +104,60 @@ function MyApp({ Component, pageProps }) {
                 })({})
               `,
             }}
+          />
+          <Script
+              id="hilltop-multitag-vast"
+              strategy="afterInteractive"
+              dangerouslySetInnerHTML={{
+                __html: `
+                (function(clqq){
+                  var d = document,
+                      s = d.createElement('script'),
+                      l = d.scripts[d.scripts.length - 1];
+                  s.settings = clqq || {};
+                  s.src = "//aggressivestruggle.com/bvX/Ves.dzGllX0pYzWdcF/Sefm/9vuSZ/Uhlyk/PPTFYg3YMYTZgm0JM_j/krt/NYjSc-xYOtD/QtzYMZAv";
+                  s.async = true;
+                  s.referrerPolicy = 'no-referrer-when-downgrade';
+                  l.parentNode.insertBefore(s, l);
+                })({})
+              `,
+              }}
+          />
+          <Script
+              id="hilltop-multitag-inpage"
+              strategy="afterInteractive"
+              dangerouslySetInnerHTML={{
+                __html: `
+                (function(yjozo){
+                  var d = document,
+                      s = d.createElement('script'),
+                      l = d.scripts[d.scripts.length - 1];
+                  s.settings = yjozo || {};
+                  s.src = "//aggressivestruggle.com/b/X.VzsrdDGslS0/Y/WScK/sedmH9/uBZjUpljkLPKTgYt3GMGTJgI0-MdzTMXtONFjWcbxXOpDtQrzVNqAH";
+                  s.async = true;
+                  s.referrerPolicy = 'no-referrer-when-downgrade';
+                  l.parentNode.insertBefore(s, l);
+                })({})
+                `,
+              }}
+          />
+          <Script
+              id="hilltop-multitag-banner"
+              strategy="afterInteractive"
+              dangerouslySetInnerHTML={{
+                __html: `
+                  (function(izoub){
+                  var d = document,
+                      s = d.createElement('script'),
+                      l = d.scripts[d.scripts.length - 1];
+                  s.settings = izoub || {};
+                  s.src = "\\/\\/aggressivestruggle.com\\/b\\/XkV.s\\/d\\/Gyla0\\/YKWDcY\\/DeKmn9uu\\/ZVUFltkoPcTiYs3KMgTHgH0CM-jgUytoNTjUcXxQOXD\\/Q\\/yWNwgi";
+                  s.async = true;
+                  s.referrerPolicy = 'no-referrer-when-downgrade';
+                  l.parentNode.insertBefore(s, l);
+                  })({})
+                `,
+              }}
           />
         </>
       ) : ``}
