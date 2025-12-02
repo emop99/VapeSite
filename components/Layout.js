@@ -17,45 +17,49 @@ export default function Layout({ children, title = '쥬스고블린 | 전자담�
   // 좌/우측 배너 스크립트를 배너 컨테이너 내부에 직접 주입
   // Next.js Script 컴포넌트의 body-hoist로 인해 하단에 렌더링되는 문제를 방지합니다.
   useEffect(() => {
+    const leftEl = leftAdRef.current;
+    const rightEl = rightAdRef.current;
+    const mobileEl = mobileAdRef.current;
+
     // 좌측 배너 주입
-    if (leftAdRef.current) {
+    if (leftEl) {
       // cleanup any previous
-      leftAdRef.current.innerHTML = '';
+      leftEl.innerHTML = '';
       const sLeft = document.createElement('script');
       sLeft.async = true;
       sLeft.referrerPolicy = 'no-referrer-when-downgrade';
       sLeft.src = "//aggressivestruggle.com/b/XkV.s/d/Gyla0/YKWDcY/DeKmn9uu/ZVUFltkoPcTiYs3KMgTHgH0CM-jgUytoNTjUcXxQOXD/Q/yWNwgi";
-      leftAdRef.current.appendChild(sLeft);
+      leftEl.appendChild(sLeft);
     }
 
     // 우측 배너 주입
-    if (rightAdRef.current) {
-      rightAdRef.current.innerHTML = '';
+    if (rightEl) {
+      rightEl.innerHTML = '';
       const sRight = document.createElement('script');
       sRight.async = true;
       sRight.referrerPolicy = 'no-referrer-when-downgrade';
       sRight.src = "//aggressivestruggle.com/biXEV.sydlGqlv0/YcW/cb/DeDmo9iuoZdUtlJkjPyTiYj3/MdT/ge0fNkD_MQtmNyjfcqxmOlDkQp0MN_A_";
-      rightAdRef.current.appendChild(sRight);
+      rightEl.appendChild(sRight);
     }
 
     // 모바일 상단 배너 주입 (lg 미만에서만)
-    if (mobileAdRef.current) {
+    if (mobileEl) {
       const isDesktopOrLarger = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(min-width: 1024px)').matches;
-      mobileAdRef.current.innerHTML = '';
+      mobileEl.innerHTML = '';
       if (!isDesktopOrLarger) {
         const sMobile = document.createElement('script');
         sMobile.async = true;
         sMobile.referrerPolicy = 'no-referrer-when-downgrade';
         sMobile.src = "//aggressivestruggle.com/bpX.V/sidIGXla0/YoW/cc/Pemmz9/uyZfUClOk_PyTjYF3zMQTngS0ZN/DTcBtiNij-caxUOXDpQr0-OaAb";
-        mobileAdRef.current.appendChild(sMobile);
+        mobileEl.appendChild(sMobile);
       }
     }
 
     // cleanup on unmount
     return () => {
-      if (leftAdRef.current) leftAdRef.current.innerHTML = '';
-      if (rightAdRef.current) rightAdRef.current.innerHTML = '';
-      if (mobileAdRef.current) mobileAdRef.current.innerHTML = '';
+      if (leftEl) leftEl.innerHTML = '';
+      if (rightEl) rightEl.innerHTML = '';
+      if (mobileEl) mobileEl.innerHTML = '';
     };
   }, []);
 
