@@ -12,14 +12,40 @@ export default function Layout({ children, title = '쥬스고블린 | 전자담�
   const {data: session} = useSession();
   const leftAdRef = useRef(null);
   const rightAdRef = useRef(null);
-  const mobileAdRef = useRef(null);
+  const topAdRef = useRef(null);
 
   // 좌/우측 배너 스크립트를 배너 컨테이너 내부에 직접 주입
   // Next.js Script 컴포넌트의 body-hoist로 인해 하단에 렌더링되는 문제를 방지합니다.
   useEffect(() => {
     const leftEl = leftAdRef.current;
     const rightEl = rightAdRef.current;
-    const mobileEl = mobileAdRef.current;
+    const topEl = topAdRef.current;
+
+    // 창 크기에 따라 배너 표시 제어 (FHD 기준)
+    const controlByResolution = () => {
+      try {
+        const isFHDOrAbove = typeof window !== 'undefined' && window.innerWidth >= 1920;
+        const leftBanner = document.getElementById('left-ad-banner');
+        const rightBanner = document.getElementById('right-ad-banner');
+        const topBanner = document.getElementById('top-ad-banner');
+
+        if (leftBanner) leftBanner.style.display = isFHDOrAbove ? 'block' : 'none';
+        if (rightBanner) rightBanner.style.display = isFHDOrAbove ? 'block' : 'none';
+        if (topBanner) topBanner.style.display = isFHDOrAbove ? 'none' : 'block';
+      } catch (_) {
+        // noop
+      }
+    };
+
+    // 초기 1회 적용
+    controlByResolution();
+    // 리사이즈 이벤트 등록
+    if (typeof window !== 'undefined') {
+      const onResize = () => controlByResolution();
+      window.addEventListener('resize', onResize);
+      // cleanup listener
+      var cleanupResize = () => window.removeEventListener('resize', onResize);
+    }
 
     // 좌측 배너 주입
     if (leftEl) {
@@ -42,24 +68,22 @@ export default function Layout({ children, title = '쥬스고블린 | 전자담�
       rightEl.appendChild(sRight);
     }
 
-    // 모바일 상단 배너 주입 (lg 미만에서만)
-    if (mobileEl) {
-      const isDesktopOrLarger = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(min-width: 1024px)').matches;
-      mobileEl.innerHTML = '';
-      if (!isDesktopOrLarger) {
-        const sMobile = document.createElement('script');
-        sMobile.async = true;
-        sMobile.referrerPolicy = 'no-referrer-when-downgrade';
-        sMobile.src = "//aggressivestruggle.com/bpX.V/sidIGXla0/YoW/cc/Pemmz9/uyZfUClOk_PyTjYF3zMQTngS0ZN/DTcBtiNij-caxUOXDpQr0-OaAb";
-        mobileEl.appendChild(sMobile);
-      }
+    // 상단 배너 주입 (lg 미만에서만)
+    if (topEl) {
+      topEl.innerHTML = '';
+      const sTop = document.createElement('script');
+      sTop.async = true;
+      sTop.referrerPolicy = 'no-referrer-when-downgrade';
+      sTop.src = "//excitableminor.com/b/X.Vos_dDGOlg0eYWWEcD/HeumY9/uxZKUElPk/P-TeYz3IM_TBkyxkN/DJk/tyNBj/chxAOWTkEJ1MMqAW";
+      topEl.appendChild(sTop);
     }
 
     // cleanup on unmount
     return () => {
       if (leftEl) leftEl.innerHTML = '';
       if (rightEl) rightEl.innerHTML = '';
-      if (mobileEl) mobileEl.innerHTML = '';
+      if (topEl) topEl.innerHTML = '';
+      if (typeof cleanupResize === 'function') cleanupResize();
     };
   }, []);
 
@@ -194,13 +218,13 @@ export default function Layout({ children, title = '쥬스고블린 | 전자담�
       {/* 메인 콘텐츠 - 고블린 테마 적용 */}
       <main className="flex-grow bg-background py-6">
         <div className="container mx-auto px-4">
-          {/* 모바일 전용 상단 배너 (lg 이상에서는 숨김) */}
-          <div className="block lg:hidden mb-4" aria-label="mobile-top-ad">
+          {/* 상단 배너 (lg 이상에서는 숨김) */}
+          <div id="top-ad-banner" className="block lg:hidden mb-4" aria-label="top-ad-banner">
             {/* 고정 크기 300x100 영역을 중앙 정렬 */}
             <div className="mx-auto w-[300px] bg-white/70 backdrop-blur rounded shadow border border-gray-200 overflow-hidden">
               <div className="text-center text-xs text-gray-500 py-1 bg-gray-50 border-b">AD</div>
               {/* 광고 렌더 영역을 정확히 300x100으로 고정 */}
-              <div className="w-[300px] h-[100px]" ref={mobileAdRef} />
+              <div className="w-[300px]" ref={topAdRef} />
             </div>
           </div>
           {children}
