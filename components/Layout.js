@@ -47,36 +47,36 @@ export default function Layout({ children, title = '쥬스고블린 | 전자담�
       var cleanupResize = () => window.removeEventListener('resize', onResize);
     }
 
-    // 좌측 배너 주입
-    if (leftEl) {
-      // cleanup any previous
-      leftEl.innerHTML = '';
-      const sLeft = document.createElement('script');
-      sLeft.async = true;
-      sLeft.referrerPolicy = 'no-referrer-when-downgrade';
-      sLeft.src = "//aggressivestruggle.com/b/XkV.s/d/Gyla0/YKWDcY/DeKmn9uu/ZVUFltkoPcTiYs3KMgTHgH0CM-jgUytoNTjUcXxQOXD/Q/yWNwgi";
-      leftEl.appendChild(sLeft);
-    }
-
-    // 우측 배너 주입
-    if (rightEl) {
-      rightEl.innerHTML = '';
-      const sRight = document.createElement('script');
-      sRight.async = true;
-      sRight.referrerPolicy = 'no-referrer-when-downgrade';
-      sRight.src = "//aggressivestruggle.com/biXEV.sydlGqlv0/YcW/cb/DeDmo9iuoZdUtlJkjPyTiYj3/MdT/ge0fNkD_MQtmNyjfcqxmOlDkQp0MN_A_";
-      rightEl.appendChild(sRight);
-    }
-
-    // 상단 배너 주입 (lg 미만에서만)
-    if (topEl) {
-      topEl.innerHTML = '';
-      const sTop = document.createElement('script');
-      sTop.async = true;
-      sTop.referrerPolicy = 'no-referrer-when-downgrade';
-      sTop.src = "//excitableminor.com/b/X.Vos_dDGOlg0eYWWEcD/HeumY9/uxZKUElPk/P-TeYz3IM_TBkyxkN/DJk/tyNBj/chxAOWTkEJ1MMqAW";
-      topEl.appendChild(sTop);
-    }
+    // // 좌측 배너 주입
+    // if (leftEl) {
+    //   // cleanup any previous
+    //   leftEl.innerHTML = '';
+    //   const sLeft = document.createElement('script');
+    //   sLeft.async = true;
+    //   sLeft.referrerPolicy = 'no-referrer-when-downgrade';
+    //   sLeft.src = "//aggressivestruggle.com/b/XkV.s/d/Gyla0/YKWDcY/DeKmn9uu/ZVUFltkoPcTiYs3KMgTHgH0CM-jgUytoNTjUcXxQOXD/Q/yWNwgi";
+    //   leftEl.appendChild(sLeft);
+    // }
+    //
+    // // 우측 배너 주입
+    // if (rightEl) {
+    //   rightEl.innerHTML = '';
+    //   const sRight = document.createElement('script');
+    //   sRight.async = true;
+    //   sRight.referrerPolicy = 'no-referrer-when-downgrade';
+    //   sRight.src = "//aggressivestruggle.com/biXEV.sydlGqlv0/YcW/cb/DeDmo9iuoZdUtlJkjPyTiYj3/MdT/ge0fNkD_MQtmNyjfcqxmOlDkQp0MN_A_";
+    //   rightEl.appendChild(sRight);
+    // }
+    //
+    // // 상단 배너 주입 (lg 미만에서만)
+    // if (topEl) {
+    //   topEl.innerHTML = '';
+    //   const sTop = document.createElement('script');
+    //   sTop.async = true;
+    //   sTop.referrerPolicy = 'no-referrer-when-downgrade';
+    //   sTop.src = "//excitableminor.com/b/X.Vos_dDGOlg0eYWWEcD/HeumY9/uxZKUElPk/P-TeYz3IM_TBkyxkN/DJk/tyNBj/chxAOWTkEJ1MMqAW";
+    //   topEl.appendChild(sTop);
+    // }
 
     // cleanup on unmount
     return () => {
@@ -220,11 +220,10 @@ export default function Layout({ children, title = '쥬스고블린 | 전자담�
         <div className="container mx-auto px-4">
           {/* 상단 배너 (lg 이상에서는 숨김) */}
           <div id="top-ad-banner" className="block lg:hidden mb-4" aria-label="top-ad-banner">
-            {/* 고정 크기 300x100 영역을 중앙 정렬 */}
-            <div className="mx-auto w-[300px] bg-white/70 backdrop-blur rounded shadow border border-gray-200 overflow-hidden">
+            {/* 고정 크기 350x100 영역을 중앙 정렬 */}
+            <div className="mx-auto w-[350px] bg-white/70 backdrop-blur rounded shadow border border-gray-200 overflow-hidden">
               <div className="text-center text-xs text-gray-500 py-1 bg-gray-50 border-b">AD</div>
-              {/* 광고 렌더 영역을 정확히 300x100으로 고정 */}
-              <div className="w-[300px]" ref={topAdRef} />
+              <div className="w-[350px]" ref={topAdRef} style={{ height: 100}} />
             </div>
           </div>
           {children}
@@ -243,7 +242,7 @@ export default function Layout({ children, title = '쥬스고블린 | 전자담�
         >
           <div className="w-[300px] bg-white/70 backdrop-blur rounded shadow border border-gray-200 overflow-hidden">
             <div className="text-center text-xs text-gray-500 py-1 bg-gray-50 border-b">AD</div>
-            <div ref={leftAdRef} />
+            <div ref={leftAdRef} style={{ height: 720 }} />
           </div>
         </div>
 
@@ -256,7 +255,7 @@ export default function Layout({ children, title = '쥬스고블린 | 전자담�
         >
           <div className="w-[300px] bg-white/70 backdrop-blur rounded shadow border border-gray-200 overflow-hidden">
             <div className="text-center text-xs text-gray-500 py-1 bg-gray-50 border-b">AD</div>
-            <div ref={rightAdRef} />
+            <div ref={rightAdRef} style={{ height: 720 }} />
           </div>
         </div>
       </div>

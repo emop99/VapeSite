@@ -87,60 +87,6 @@ function MyApp({ Component, pageProps }) {
             src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4259248617155600`}
             crossOrigin="anonymous"
           />
-          <Script
-            id="hilltop-popunder"
-            strategy="afterInteractive"
-            dangerouslySetInnerHTML={{
-              __html: `
-                (function(rnyd){
-                  var d = document,
-                      s = d.createElement('script'),
-                      l = d.scripts[d.scripts.length - 1];
-                  s.settings = rnyd || {};
-                  s.src = "//anchored-exam.com/ceD/9v6bb.2C5/lKSxWnQz9vNRjwc/x_OVDjQYyZMHyJ0L2FNczGEB4/NMDTI/0r";
-                  s.async = true;
-                  s.referrerPolicy = 'no-referrer-when-downgrade';
-                  l.parentNode.insertBefore(s, l);
-                })({})
-              `,
-            }}
-          />
-          <Script
-              id="hilltop-multitag-vast"
-              strategy="afterInteractive"
-              dangerouslySetInnerHTML={{
-                __html: `
-                (function(clqq){
-                  var d = document,
-                      s = d.createElement('script'),
-                      l = d.scripts[d.scripts.length - 1];
-                  s.settings = clqq || {};
-                  s.src = "//aggressivestruggle.com/bvX/Ves.dzGllX0pYzWdcF/Sefm/9vuSZ/Uhlyk/PPTFYg3YMYTZgm0JM_j/krt/NYjSc-xYOtD/QtzYMZAv";
-                  s.async = true;
-                  s.referrerPolicy = 'no-referrer-when-downgrade';
-                  l.parentNode.insertBefore(s, l);
-                })({})
-              `,
-              }}
-          />
-          <Script
-              id="hilltop-multitag-inpage"
-              strategy="afterInteractive"
-              dangerouslySetInnerHTML={{
-                __html: `
-                (function(yjozo){
-                  var d = document,
-                      s = d.createElement('script'),
-                      l = d.scripts[d.scripts.length - 1];
-                  s.settings = yjozo || {};
-                  s.src = "//aggressivestruggle.com/b/X.VzsrdDGslS0/Y/WScK/sedmH9/uBZjUpljkLPKTgYt3GMGTJgI0-MdzTMXtONFjWcbxXOpDtQrzVNqAH";
-                  s.async = true;
-                  s.referrerPolicy = 'no-referrer-when-downgrade';
-                  l.parentNode.insertBefore(s, l);
-                })({})
-                `,
-              }}
-          />
         </>
       ) : ``}
 
