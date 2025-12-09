@@ -44,9 +44,9 @@ export default function Layout({children, title = '쥬스고블린 | 전자담�
     }
 
     // Google AdSense: 좌측 배너 최초 1회 로드 시도
-    const tryLoadLeftAdsense = () => {
+    const tryLoadAdsense = () => {
       try {
-        if (typeof window !== 'undefined' && leftEl && !leftEl.getAttribute('data-adsbygoogle-status')) {
+        if (typeof window !== 'undefined') {
           // eslint-disable-next-line no-undef
           (window.adsbygoogle = window.adsbygoogle || []).push({});
         }
@@ -56,8 +56,8 @@ export default function Layout({children, title = '쥬스고블린 | 전자담�
     };
 
     // 스크립트가 비동기로 로드되므로 약간의 지연 후에도 시도
-    tryLoadLeftAdsense();
-    setTimeout(tryLoadLeftAdsense, 1200);
+    tryLoadAdsense();
+    setTimeout(tryLoadAdsense, 1200);
 
     // cleanup on unmount
     return () => {
@@ -83,13 +83,6 @@ export default function Layout({children, title = '쥬스고블린 | 전자담�
               <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
               <meta name="referrer" content="no-referrer-when-downgrade"/>
-
-              {/* Google AdSense */}
-              <script
-                  async
-                  src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4259248617155600"
-                  crossOrigin="anonymous"
-              />
 
               {/* PWA 관련 메타 태그 */}
               <link rel="manifest" href="/manifest.json"/>
@@ -239,7 +232,7 @@ export default function Layout({children, title = '쥬스고블린 | 전자담�
               aria-label="right-side-ad"
           >
             <ins
-                class="adsbygoogle"
+                className="adsbygoogle"
                 style={{display: 'block'}}
                 data-ad-client="ca-pub-4259248617155600"
                 data-ad-slot="9833167103"
