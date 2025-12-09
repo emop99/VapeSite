@@ -33,6 +33,59 @@ export default function ProductListPage({
   const [page, setPage] = useState(initialPagination.page);
   const [totalPages, setTotalPages] = useState(initialPagination.totalPages);
 
+  // 모바일 전용 광고 삽입을 위한 상태
+  const [isMobile, setIsMobile] = useState(false);
+  const [adIndex, setAdIndex] = useState(null);
+
+  // 클라이언트 사이드에서만 화면 크기 체크
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const checkMobile = () => {
+      try {
+        // Tailwind sm breakpoint: 640px
+        setIsMobile(window.innerWidth < 640);
+      } catch (_) {
+        // noop
+      }
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // 제품 목록이 바뀌거나 모바일 전환 시 랜덤 광고 위치 선정
+  useEffect(() => {
+    if (isMobile && products && products.length > 0) {
+      const nextIndex = Math.floor(Math.random() * products.length);
+      setAdIndex(nextIndex);
+    } else {
+      setAdIndex(null);
+    }
+  }, [isMobile, products]);
+
+  // 광고 요소가 DOM에 추가된 뒤 AdSense 렌더 트리거
+  useEffect(() => {
+    if (!isMobile || adIndex === null) return;
+    try {
+      if (typeof window !== 'undefined') {
+        // eslint-disable-next-line no-undef
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+        // 스크립트 비동기 로드 지연 대비 재시도
+        setTimeout(() => {
+          try {
+            // eslint-disable-next-line no-undef
+            (window.adsbygoogle = window.adsbygoogle || []).push({});
+          } catch (_) {
+          }
+        }, 800);
+      }
+    } catch (_) {
+      // noop
+    }
+  }, [isMobile, adIndex]);
+
   // 페이지 뒤로가기/앞으로 가기 시 검색어와 OR 검색어를 유지하기 위해 URL 쿼리 파라미터를 사용
   useEffect(() => {
     const {page, search, orKeywords} = router.query;
@@ -245,8 +298,25 @@ export default function ProductListPage({
             </h2>
           )}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
+            {products.map((product, idx) => (
+              <div className="contents" key={`wrap-${product.id}`}>
+                {/* 제품 카드 */}
+                <ProductCard key={`product-${product.id}`} product={product} />
+
+                {/* 모바일 전용 랜덤 광고 카드 (한 개) */}
+                {isMobile && adIndex === idx && (
+                  <div key={`ad-${page}-${idx}`} className="block sm:hidden">
+                    <ins
+                      className="adsbygoogle"
+                      style={{display: 'block'}}
+                      data-ad-client="ca-pub-4259248617155600"
+                      data-ad-slot="6131394119"
+                      data-ad-format="auto"
+                      data-full-width-responsive="true"
+                    />
+                  </div>
+                )}
+              </div>
             ))}
           </div>
 
