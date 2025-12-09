@@ -3,89 +3,12 @@ import Link from 'next/link';
 import Image from 'next/image';
 import {useRouter} from 'next/router';
 import {useSession} from 'next-auth/react';
-import { useEffect, useRef } from 'react';
 import AuthNav from './AuthNav';
 
 // 레이아웃 컴포넌트
 export default function Layout({ children, title = '쥬스고블린 | 전자담배 액상 최저가 비교 가격 변동' }) {
   const router = useRouter();
   const {data: session} = useSession();
-  const leftAdRef = useRef(null);
-  const rightAdRef = useRef(null);
-  const topAdRef = useRef(null);
-
-  // 좌/우측 배너 스크립트를 배너 컨테이너 내부에 직접 주입
-  // Next.js Script 컴포넌트의 body-hoist로 인해 하단에 렌더링되는 문제를 방지합니다.
-  useEffect(() => {
-    const leftEl = leftAdRef.current;
-    const rightEl = rightAdRef.current;
-    const topEl = topAdRef.current;
-
-    // 창 크기에 따라 배너 표시 제어 (FHD 기준)
-    const controlByResolution = () => {
-      try {
-        const isFHDOrAbove = typeof window !== 'undefined' && window.innerWidth >= 1920;
-        const leftBanner = document.getElementById('left-ad-banner');
-        const rightBanner = document.getElementById('right-ad-banner');
-        const topBanner = document.getElementById('top-ad-banner');
-
-        if (leftBanner) leftBanner.style.display = isFHDOrAbove ? 'block' : 'none';
-        if (rightBanner) rightBanner.style.display = isFHDOrAbove ? 'block' : 'none';
-        if (topBanner) topBanner.style.display = isFHDOrAbove ? 'none' : 'block';
-      } catch (_) {
-        // noop
-      }
-    };
-
-    // 초기 1회 적용
-    controlByResolution();
-    // 리사이즈 이벤트 등록
-    if (typeof window !== 'undefined') {
-      const onResize = () => controlByResolution();
-      window.addEventListener('resize', onResize);
-      // cleanup listener
-      var cleanupResize = () => window.removeEventListener('resize', onResize);
-    }
-
-    // // 좌측 배너 주입
-    // if (leftEl) {
-    //   // cleanup any previous
-    //   leftEl.innerHTML = '';
-    //   const sLeft = document.createElement('script');
-    //   sLeft.async = true;
-    //   sLeft.referrerPolicy = 'no-referrer-when-downgrade';
-    //   sLeft.src = "//aggressivestruggle.com/b/XkV.s/d/Gyla0/YKWDcY/DeKmn9uu/ZVUFltkoPcTiYs3KMgTHgH0CM-jgUytoNTjUcXxQOXD/Q/yWNwgi";
-    //   leftEl.appendChild(sLeft);
-    // }
-    //
-    // // 우측 배너 주입
-    // if (rightEl) {
-    //   rightEl.innerHTML = '';
-    //   const sRight = document.createElement('script');
-    //   sRight.async = true;
-    //   sRight.referrerPolicy = 'no-referrer-when-downgrade';
-    //   sRight.src = "//aggressivestruggle.com/biXEV.sydlGqlv0/YcW/cb/DeDmo9iuoZdUtlJkjPyTiYj3/MdT/ge0fNkD_MQtmNyjfcqxmOlDkQp0MN_A_";
-    //   rightEl.appendChild(sRight);
-    // }
-    //
-    // // 상단 배너 주입 (lg 미만에서만)
-    // if (topEl) {
-    //   topEl.innerHTML = '';
-    //   const sTop = document.createElement('script');
-    //   sTop.async = true;
-    //   sTop.referrerPolicy = 'no-referrer-when-downgrade';
-    //   sTop.src = "//excitableminor.com/b/X.Vos_dDGOlg0eYWWEcD/HeumY9/uxZKUElPk/P-TeYz3IM_TBkyxkN/DJk/tyNBj/chxAOWTkEJ1MMqAW";
-    //   topEl.appendChild(sTop);
-    // }
-
-    // cleanup on unmount
-    return () => {
-      if (leftEl) leftEl.innerHTML = '';
-      if (rightEl) rightEl.innerHTML = '';
-      if (topEl) topEl.innerHTML = '';
-      if (typeof cleanupResize === 'function') cleanupResize();
-    };
-  }, []);
 
   // 현재 경로에 따라 네비게이션 링크 활성화 여부 결정
   const isActive = (path) => {
@@ -218,47 +141,9 @@ export default function Layout({ children, title = '쥬스고블린 | 전자담�
       {/* 메인 콘텐츠 - 고블린 테마 적용 */}
       <main className="flex-grow bg-background py-6">
         <div className="container mx-auto px-4">
-          {/* 상단 배너 (lg 이상에서는 숨김) */}
-          <div id="top-ad-banner" className="block lg:hidden mb-4" aria-label="top-ad-banner">
-            {/* 고정 크기 350x100 영역을 중앙 정렬 */}
-            <div className="mx-auto w-[350px] bg-white/70 backdrop-blur rounded shadow border border-gray-200 overflow-hidden">
-              <div className="text-center text-xs text-gray-500 py-1 bg-gray-50 border-b">AD</div>
-              <div className="w-[350px]" ref={topAdRef} style={{ height: 100}} />
-            </div>
-          </div>
           {children}
         </div>
       </main>
-
-      {/* PC 전용 좌/우 고정 광고 배너 영역 */}
-      {/* 화면 폭이 충분할 때만 노출되도록 lg 기준으로 표시합니다. */}
-      <div className="hidden lg:block">
-        {/* 좌측 배너 - 화면 중앙 정렬, 스크롤 고정 */}
-        <div
-          id="left-ad-banner"
-          className="fixed left-4 top-1/2 -translate-y-1/2 z-40"
-          style={{ width: 300 }}
-          aria-label="left-side-ad"
-        >
-          <div className="w-[300px] bg-white/70 backdrop-blur rounded shadow border border-gray-200 overflow-hidden">
-            <div className="text-center text-xs text-gray-500 py-1 bg-gray-50 border-b">AD</div>
-            <div ref={leftAdRef} style={{ height: 720 }} />
-          </div>
-        </div>
-
-        {/* 우측 배너 - 화면 중앙 정렬, 스크롤 고정 */}
-        <div
-          id="right-ad-banner"
-          className="fixed right-4 top-1/2 -translate-y-1/2 z-40"
-          style={{ width: 300 }}
-          aria-label="right-side-ad"
-        >
-          <div className="w-[300px] bg-white/70 backdrop-blur rounded shadow border border-gray-200 overflow-hidden">
-            <div className="text-center text-xs text-gray-500 py-1 bg-gray-50 border-b">AD</div>
-            <div ref={rightAdRef} style={{ height: 720 }} />
-          </div>
-        </div>
-      </div>
 
       {/* 푸터 - 고블린 테마 적용 */}
       <footer className="bg-goblin-dark text-white py-8 border-t-2 border-goblin-light">
