@@ -149,6 +149,13 @@ export default function Layout({children, title = '쥬스고블린 | 전자담�
               <meta name="robots" content="index, follow"/>
               <meta name="language" content="Korean"/>
               <meta name="author" content="쥬스고블린"/>
+
+              {/* Google AdSense */}
+              <script
+                  async
+                  src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4259248617155600"
+                  crossOrigin="anonymous"
+              />
             </Head>
         ) : ``}
 

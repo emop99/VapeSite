@@ -305,7 +305,7 @@ export default function ProductListPage({
 
                 {/* 모바일 전용 랜덤 광고 카드 (한 개) */}
                 {isMobile && adIndex === idx && (
-                  <div key={`ad-${page}-${idx}`} className="block sm:hidden">
+                  <div key={`ad-${page}-${idx}`} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow relative">
                     <ins
                       className="adsbygoogle"
                       style={{display: 'block'}}
