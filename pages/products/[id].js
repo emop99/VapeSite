@@ -360,6 +360,13 @@ export default function ProductDetail({productData, error: serverError}) {
             })
           }}
         />
+
+        {/* Google AdSense */}
+        <script
+            async
+            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4259248617155600"
+            crossOrigin="anonymous"
+        />
       </Head>
 
       {/* 제품 상세 정보 */}
