@@ -11,6 +11,7 @@ import {useSession} from 'next-auth/react';
 import toast from 'react-hot-toast';
 import {renderStarRating} from '../../utils/renderStarRating';
 import Pagination from '../../components/Pagination'; // Pagination 컴포넌트 import
+import AdSense from '../../components/AdSense';
 
 // 리뷰가 현재 로그인한 사용자의 것인지 확인하는 함수
 function isUsersReview(review, session) {
@@ -360,13 +361,6 @@ export default function ProductDetail({productData, error: serverError}) {
             })
           }}
         />
-
-        {/* Google AdSense */}
-        <script
-            async
-            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4259248617155600"
-            crossOrigin="anonymous"
-        />
       </Head>
 
       {/* 제품 상세 정보 */}
@@ -444,6 +438,16 @@ export default function ProductDetail({productData, error: serverError}) {
           </div>
         </div>
       </div>
+
+      {/* 상품 상세 - 구글 애드센스 영역 */}
+      <section className="bg-white rounded-lg shadow-md p-6 mb-8">
+        <AdSense
+          slot="8722106235"
+          format="auto"
+          responsive
+          style={{display: 'block'}}
+        />
+      </section>
 
       {/* 가격 비교 레이아웃 */}
       {priceComparisons.length > 0 && (

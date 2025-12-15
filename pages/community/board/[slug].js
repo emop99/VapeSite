@@ -48,13 +48,6 @@ export default function BoardPage({board, posts, totalPages, currentPage}) {
 
           {/* 캐노니컬 URL */}
           <link rel="canonical" href={`${process.env.NEXT_PUBLIC_SITE_URL}/community/board/${slug}`}/>
-
-          {/* Google AdSense */}
-          <script
-              async
-              src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4259248617155600"
-              crossOrigin="anonymous"
-          />
         </Head>
       )}
       <div className="max-w-5xl mx-auto sm:px-6 py-6">

@@ -3,22 +3,18 @@ import Link from 'next/link';
 import Image from 'next/image';
 import {useRouter} from 'next/router';
 import {useSession} from 'next-auth/react';
-import {useEffect, useRef} from 'react';
+import {useEffect} from 'react';
+import AdSense from './AdSense';
 import AuthNav from './AuthNav';
 
 // 레이아웃 컴포넌트
 export default function Layout({children, title = '쥬스고블린 | 전자담배 액상 최저가 비교 가격 변동'}) {
   const router = useRouter();
   const {data: session} = useSession();
-  const leftAdRef = useRef(null);
-  const rightAdRef = useRef(null);
 
   // 좌/우측 배너 스크립트를 배너 컨테이너 내부에 직접 주입
   // Next.js Script 컴포넌트의 body-hoist로 인해 하단에 렌더링되는 문제를 방지합니다.
   useEffect(() => {
-    const leftEl = leftAdRef.current;
-    const rightEl = rightAdRef.current;
-
     // 창 크기에 따라 배너 표시 제어 (FHD 기준)
     const controlByResolution = () => {
       try {
@@ -43,26 +39,8 @@ export default function Layout({children, title = '쥬스고블린 | 전자담�
       var cleanupResize = () => window.removeEventListener('resize', onResize);
     }
 
-    // Google AdSense: 좌측 배너 최초 1회 로드 시도
-    const tryLoadAdsense = () => {
-      try {
-        if (typeof window !== 'undefined') {
-          // eslint-disable-next-line no-undef
-          (window.adsbygoogle = window.adsbygoogle || []).push({});
-        }
-      } catch (_) {
-        // noop
-      }
-    };
-
-    // 스크립트가 비동기로 로드되므로 약간의 지연 후에도 시도
-    tryLoadAdsense();
-    setTimeout(tryLoadAdsense, 1200);
-
     // cleanup on unmount
     return () => {
-      if (leftEl) leftEl.innerHTML = '';
-      if (rightEl) rightEl.innerHTML = '';
       if (typeof cleanupResize === 'function') cleanupResize();
     };
   }, []);
@@ -149,13 +127,6 @@ export default function Layout({children, title = '쥬스고블린 | 전자담�
               <meta name="robots" content="index, follow"/>
               <meta name="language" content="Korean"/>
               <meta name="author" content="쥬스고블린"/>
-
-              {/* Google AdSense */}
-              <script
-                  async
-                  src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4259248617155600"
-                  crossOrigin="anonymous"
-              />
             </Head>
         ) : ``}
 
@@ -220,15 +191,7 @@ export default function Layout({children, title = '쥬스고블린 | 전자담�
               aria-label="left-side-ad"
           >
             {/* Google AdSense: PC_좌측_배너 */}
-            <ins
-                className="adsbygoogle"
-                style={{display: 'block'}}
-                data-ad-client="ca-pub-4259248617155600"
-                data-ad-slot="9700648621"
-                data-ad-format="auto"
-                data-full-width-responsive="true"
-                ref={leftAdRef}
-            />
+            <AdSense slot="9700648621" style={{display: 'block', width: 300}} />
           </div>
 
           {/* 우측 배너 - 화면 중앙 정렬, 스크롤 고정 */}
@@ -238,15 +201,7 @@ export default function Layout({children, title = '쥬스고블린 | 전자담�
               style={{width: 300}}
               aria-label="right-side-ad"
           >
-            <ins
-                className="adsbygoogle"
-                style={{display: 'block'}}
-                data-ad-client="ca-pub-4259248617155600"
-                data-ad-slot="9833167103"
-                data-ad-format="auto"
-                data-full-width-responsive="true"
-                ref={rightAdRef}
-            />
+            <AdSense slot="9833167103" style={{display: 'block', width: 300}} />
           </div>
         </div>
 

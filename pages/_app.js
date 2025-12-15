@@ -84,6 +84,14 @@ function MyApp({ Component, pageProps }) {
         </>
       ) : ``}
 
+      {/* Google AdSense */}
+      <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4259248617155600"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+      />
+
       {/* PWA 설치 프롬프트 */}
       <PWAInstallPrompt/>
 
