@@ -1,4 +1,5 @@
 import {useEffect, useRef} from 'react';
+import {useRouter} from 'next/router';
 
 // 공용 Google AdSense 광고 슬롯 컴포넌트
 // 사용 예시:
@@ -15,6 +16,7 @@ export default function AdSense({
   style = {display: 'block'},
   id,
 }) {
+  const router = useRouter();
   const insRef = useRef(null);
   const pushedRef = useRef(false);
   const resizeObserverRef = useRef(null);
@@ -120,7 +122,7 @@ export default function AdSense({
         window.removeEventListener('load', onLoad);
       }
     };
-  }, [client, slot]);
+  }, [client, slot, router.asPath]);
 
   // 필수 속성 안전장치
   if (!slot) {
