@@ -28,16 +28,17 @@ export default function AdSense({
     const doPush = () => {
       if (pushedRef.current) return;
       try {
-        // eslint-disable-next-line no-undef
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
+        const adsbygoogle = window.adsbygoogle || [];
+        adsbygoogle.push({});
         pushedRef.current = true;
-      } catch (_) {
+      } catch (e) {
+        console.error('AdSense push error:', e);
         // 스크립트 로드 지연 가능성: 잠시 후 재시도 (단, 중복 방지)
         const t = setTimeout(() => {
           if (!pushedRef.current) {
             try {
-              // eslint-disable-next-line no-undef
-              (window.adsbygoogle = window.adsbygoogle || []).push({});
+              const adsbygoogle = window.adsbygoogle || [];
+              adsbygoogle.push({});
               pushedRef.current = true;
             } catch (__) {
               // 마지막 재시도 실패 시에는 조용히 무시 (다음 화면 전환에서 재시도될 수 있음)
@@ -133,6 +134,7 @@ export default function AdSense({
 
   return (
     <ins
+      key={router.asPath + (slot || '')}
       ref={insRef}
       className={`adsbygoogle ${className}`.trim()}
       style={style}
