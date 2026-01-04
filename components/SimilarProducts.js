@@ -79,11 +79,19 @@ const SimilarProducts = ({
                           fill
                           sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
                           className="object-contain absolute inset-0 p-4 transition-transform duration-300 group-hover:scale-105"
+                          unoptimized
+                          onError={(e) => {
+                            e.target.src = `${process.env.NEXT_PUBLIC_SITE_URL}/image/no_search_product.png`;
+                          }}
                         />
                       ) : (
-                        <div className="absolute inset-0 flex items-center justify-center text-gray-400">
-                          <span className="text-sm">이미지 없음</span>
-                        </div>
+                        <Image
+                          src={`${process.env.NEXT_PUBLIC_SITE_URL}/image/no_search_product.png`}
+                          alt={product.visibleName}
+                          fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
+                          className="object-contain absolute inset-0 p-4 transition-transform duration-300 group-hover:scale-105"
+                        />
                       )}
                     </div>
                     <div className="p-4 flex-1 flex flex-col">

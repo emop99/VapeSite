@@ -302,9 +302,9 @@ const ProductForm = ({
                   height={150}
                   alt="상품 이미지 미리보기"
                   className="h-32 w-auto object-contain"
+                  unoptimized
                   onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = "https://via.placeholder.com/150?text=이미지+없음";
+                    e.target.src = `${process.env.NEXT_PUBLIC_SITE_URL}/image/no_search_product.png`;
                   }}
                 />
               </div>

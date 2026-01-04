@@ -91,11 +91,20 @@ export default function SimilarProductsManager({productId}) {
                       width={48}
                       height={48}
                       className="w-12 h-12 object-contain"
+                      unoptimized
+                      onError={(e) => {
+                        e.target.src = `${process.env.NEXT_PUBLIC_SITE_URL}/image/no_search_product.png`;
+                      }}
                     />
                   ) : (
-                    <div className="w-12 h-12 bg-gray-200 flex items-center justify-center text-xs text-gray-500">
-                      No Image
-                    </div>
+                    <Image
+                      src={`${process.env.NEXT_PUBLIC_SITE_URL}/image/no_search_product.png`}
+                      alt={product.visibleName}
+                      width={48}
+                      height={48}
+                      className="w-12 h-12 object-contain"
+                      unoptimized
+                    />
                   )}
                 </td>
                 <td className="py-2 px-3 border-b">{product.visibleName}</td>

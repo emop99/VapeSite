@@ -131,9 +131,20 @@ export default function ProductCard({product}) {
                 width={300}
                 height={300}
                 className="max-h-full max-w-full object-contain"
+                unoptimized
+                onError={(e) => {
+                  e.target.src = `${process.env.NEXT_PUBLIC_SITE_URL}/image/no_search_product.png`;
+                }}
               />
             ) : (
-              <div className="text-gray-400">이미지 없음</div>
+              <Image
+                src={`${process.env.NEXT_PUBLIC_SITE_URL}/image/no_search_product.png`}
+                alt={product.visibleName}
+                width={300}
+                height={300}
+                className="max-h-full max-w-full object-contain"
+                unoptimized
+              />
             )}
           </div>
 

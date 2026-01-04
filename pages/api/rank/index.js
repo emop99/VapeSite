@@ -78,11 +78,66 @@ export default async function handler(req, res) {
       }));
     };
 
+    // 최근 한달 인기 검색어 쿼리
+    const [popularSearches] = await sequelize.query(`
+        SELECT search_keyword, COUNT(*) as searchCount
+        FROM vapesite.vape_search_logs
+        WHERE search_keyword IS NOT NULL
+          AND search_keyword != ''
+          AND created_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
+        GROUP BY search_keyword
+        ORDER BY searchCount DESC
+        LIMIT 20;
+    `);
+
+    // 최근 한달 인기 상품 쿼리 (구매 클릭수 기준)
+    const [popularProducts] = await sequelize.query(`
+        SELECT
+            vpcl.productId,
+            vp.visibleName as name,
+            vp.imageUrl,
+            vp_cate.name AS categoryName,
+            COUNT(*) as clicks,
+            MIN(vpc.price) as minPrice
+        FROM vapesite.vape_purchase_click_log AS vpcl
+          JOIN vapesite.vape_products vp ON vpcl.productId = vp.id
+          JOIN vapesite.vape_product_category vp_cate ON vp.productCategoryId = vp_cate.id
+          JOIN vapesite.vape_price_comparisons vpc ON vp.id = vpc.productId
+        WHERE vpcl.createdAt >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
+        GROUP BY vpcl.productId, vp.visibleName, vp.imageUrl, vp.productCategoryId
+        ORDER BY clicks DESC
+        LIMIT 20;
+    `);
+
+    // 인기 검색어 데이터 포맷팅
+    const formatPopularSearches = (data) => {
+      return data.map((item, index) => ({
+        rank: index + 1,
+        keyword: item.search_keyword,
+        searchCount: parseInt(item.searchCount)
+      }));
+    };
+
+    // 인기 상품 데이터 포맷팅
+    const formatPopularProducts = (data) => {
+      return data.map((item, index) => ({
+        rank: index + 1,
+        productId: item.productId,
+        productName: item.name,
+        imageUrl: item.imageUrl,
+        categoryName: item.categoryName,
+        clickCount: parseInt(item.clicks),
+        minPrice: item.minPrice ? parseInt(item.minPrice) : null
+      }));
+    };
+
     // 응답 데이터 구성
     const responseData = {
       productCount: calculatePercentages(productCountRanking, 'productCount'),
       lowestPrice: calculatePercentages(lowestPriceRanking, 'productCount'),
       averagePrice: formatAveragePriceData(averagePriceRanking),
+      popularSearches: formatPopularSearches(popularSearches),
+      popularProducts: formatPopularProducts(popularProducts),
     };
 
     return res.status(200).json(responseData);

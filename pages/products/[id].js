@@ -375,11 +375,19 @@ export default function ProductDetail({productData, error: serverError}) {
                 width={500}
                 height={500}
                 className="max-w-full max-h-96 object-contain"
+                unoptimized
+                onError={(e) => {
+                  e.target.src = `${process.env.NEXT_PUBLIC_SITE_URL}/image/no_search_product.png`;
+                }}
               />
             ) : (
-              <div className="w-full h-64 flex items-center justify-center text-gray-400">
-                이미지 없음
-              </div>
+              <Image
+                src={`${process.env.NEXT_PUBLIC_SITE_URL}/image/no_search_product.png`}
+                alt={product.visibleName}
+                width={500}
+                height={500}
+                className="max-w-full max-h-96 object-contain"
+              />
             )}
           </div>
 

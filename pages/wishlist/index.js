@@ -127,11 +127,19 @@ export default function WishList() {
                             width={80}
                             height={80}
                             className="w-full h-full object-cover"
+                            unoptimized
+                            onError={(e) => {
+                              e.target.src = `${process.env.NEXT_PUBLIC_SITE_URL}/image/no_search_product.png`;
+                            }}
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-400">
-                            이미지 없음
-                          </div>
+                          <Image
+                            src={`${process.env.NEXT_PUBLIC_SITE_URL}/image/no_search_product.png`}
+                            alt={item.Product.visibleName}
+                            width={80}
+                            height={80}
+                            className="w-full h-full object-cover"
+                          />
                         )}
                       </div>
                       <div>
