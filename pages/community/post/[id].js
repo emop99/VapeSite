@@ -289,7 +289,7 @@ export default function PostDetailPage({post: initialPost, comments: initialComm
 
   // 메타 설명 생성 함수
   const generateMetaDescription = (post) => {
-    if (!post) return '전자담배 액상 최저가 비교 가격 변동 확인 사이트';
+    if (!post) return '전자담배 액상 가격 비교 사이트, 전자담배 액상 가격비교, 전자담배 폐호흡 액상 가격비교, 전자담배 입호흡 액상 가격비교, 전자담배 인기 액상 정보 등등 다양한 정보를 제공하는 사이트입니다.';
 
     // HTML 태그 제거
     const contentWithoutTags = post.content.replace(/<[^>]*>/g, '');
@@ -317,32 +317,117 @@ export default function PostDetailPage({post: initialPost, comments: initialComm
     <>
       {post && (
         <Head>
-          <title>{post.title ? `${post.title} | 주스고블린 커뮤니티` : '주스고블린 커뮤니티'}</title>
+          <title>{post.title ? `${post.title} | 쥬스고블린 커뮤니티` : '쥬스고블린 커뮤니티'}</title>
           <meta name="description" content={generateMetaDescription(post)}/>
+          <meta name="keywords" content={`전자담배, 액상, 가격비교, 폐호흡, 입호흡, 전자담배 액상, ${post.Board?.name || '커뮤니티'}, ${post.title}`}/>
 
           {/* Open Graph 태그 */}
-          <meta property="og:title" content={post.title || '주스고블린 커뮤니티'}/>
+          <meta property="og:title" content={post.title || '쥬스고블린 커뮤니티'}/>
           <meta property="og:description" content={generateMetaDescription(post)}/>
           <meta property="og:type" content="article"/>
           <meta property="og:url" content={`${process.env.NEXT_PUBLIC_SITE_URL}/community/post/${id}`}/>
           <meta property="og:image" content={generateMataImageUrl(post)}/>
+          <meta property="og:image:width" content="1024"/>
+          <meta property="og:image:height" content="1024"/>
+          <meta property="og:site_name" content="쥬스고블린"/>
+          <meta property="og:locale" content="ko_KR"/>
 
           {/* Twitter 카드 */}
           <meta name="twitter:card" content="summary_large_image"/>
-          <meta name="twitter:title" content={post.title || '주스고블린 커뮤니티'}/>
+          <meta name="twitter:title" content={post.title || '쥬스고블린 커뮤니티'}/>
           <meta name="twitter:description" content={generateMetaDescription(post)}/>
           <meta name="twitter:image" content={generateMataImageUrl(post)}/>
+          <meta name="twitter:site" content="@juicegoblin"/>
 
           {/* 추가 메타 태그 */}
           <meta name="article:published_time" content={post.createdAt}/>
           <meta name="article:modified_time" content={post.updatedAt}/>
           {post.Board?.name && <meta name="article:section" content={post.Board.name}/>}
-          <meta name="robots" content="index, follow"/>
+          <meta name="article:author" content={post.User?.username || '쥬스고블린'}/>
+          <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"/>
           <meta name="language" content="Korean"/>
           <meta name="author" content="쥬스고블린"/>
+          <meta name="viewport" content="width=device-width, initial-scale=1"/>
+          <meta httpEquiv="content-language" content="ko"/>
 
           {/* 캐노니컬 URL */}
           <link rel="canonical" href={`${process.env.NEXT_PUBLIC_SITE_URL}/community/post/${id}`}/>
+
+          {/* JSON-LD 구조화된 데이터 */}
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "DiscussionForumPosting",
+                "headline": post.title,
+                "description": generateMetaDescription(post),
+                "image": generateMataImageUrl(post),
+                "author": {
+                  "@type": "Person",
+                  "name": post.User?.username || "쥬스고블린"
+                },
+                "publisher": {
+                  "@type": "Organization",
+                  "name": "쥬스고블린",
+                  "logo": {
+                    "@type": "ImageObject",
+                    "url": `${process.env.NEXT_PUBLIC_SITE_URL}/image/juicegoblin_bi.png`
+                  }
+                },
+                "datePublished": post.createdAt,
+                "dateModified": post.updatedAt,
+                "mainEntityOfPage": {
+                  "@type": "WebPage",
+                  "@id": `${process.env.NEXT_PUBLIC_SITE_URL}/community/post/${id}`
+                },
+                "articleSection": post.Board?.name || "커뮤니티",
+                "commentCount": comments.length,
+                "interactionStatistic": {
+                  "@type": "InteractionCounter",
+                  "interactionType": "https://schema.org/LikeAction",
+                  "userInteractionCount": post.likeCount || 0
+                }
+              })
+            }}
+          />
+
+          {/* BreadcrumbList JSON-LD */}
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                  {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "홈",
+                    "item": process.env.NEXT_PUBLIC_SITE_URL
+                  },
+                  {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": "커뮤니티",
+                    "item": `${process.env.NEXT_PUBLIC_SITE_URL}/community`
+                  },
+                  {
+                    "@type": "ListItem",
+                    "position": 3,
+                    "name": post.Board?.name || "게시판",
+                    "item": `${process.env.NEXT_PUBLIC_SITE_URL}/community/board/${post.Board?.slug}`
+                  },
+                  {
+                    "@type": "ListItem",
+                    "position": 4,
+                    "name": post.title,
+                    "item": `${process.env.NEXT_PUBLIC_SITE_URL}/community/post/${id}`
+                  }
+                ]
+              })
+            }}
+          />
         </Head>
       )}
       <div className="max-w-5xl mx-auto sm:px-6 py-6">

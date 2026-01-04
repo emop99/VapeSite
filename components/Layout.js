@@ -55,7 +55,7 @@ export default function Layout({children, title = '쥬스고블린 | 전자담�
         {!router.pathname.startsWith('/products/') && !router.pathname.startsWith('/community/post/') ? (
             <Head>
               <title>{title}</title>
-              <meta name="description" content="전자담배 액상 최저가 비교 가격 변동 확인 사이트"/>
+              <meta name="description" content="전자담배 액상 가격 비교 사이트, 전자담배 액상 가격비교, 전자담배 폐호흡 액상 가격비교, 전자담배 입호흡 액상 가격비교, 전자담배 인기 액상 정보 등등 다양한 정보를 제공하는 사이트입니다."/>
               <meta name="keywords" content="쥬스고블린, 베이핑, 전자담배, 입호흡, 폐호흡, 액상, 액상최저가, 최저가, 최저가검색, 액상 추천, 액상추천, 전자담배 추천, 전자담배추천, 가격비교, 액상가격비교, 액상 가격비교, 최저가 찾기, 최저가찾기"/>
               <link rel="icon" href="/favicon.ico" sizes="any"/>
               <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -112,16 +112,20 @@ export default function Layout({children, title = '쥬스고블린 | 전자담�
               <meta property="og:type" content="website"/>
               <meta property="og:url" content={`${process.env.NEXT_PUBLIC_SITE_URL}${router.asPath}`}/>
               <meta property="og:title" content={title}/>
-              <meta property="og:description" content="전자담배 액상 최저가 비교 가격 변동 확인 사이트"/>
+              <meta property="og:description" content="전자담배 액상 가격 비교 사이트, 전자담배 액상 가격비교, 전자담배 폐호흡 액상 가격비교, 전자담배 입호흡 액상 가격비교, 전자담배 인기 액상 정보 등등 다양한 정보를 제공하는 사이트입니다."/>
               <meta property="og:image" content={`${process.env.NEXT_PUBLIC_SITE_URL}/image/juicegoblin_bi.png`}/>
               <meta property="og:site_name" content={title}/>
+              <meta property="og:image:width" content="1024"/>
+              <meta property="og:image:height" content="1024"/>
+              <meta property="og:locale" content="ko_KR"/>
 
               {/* Twitter */}
               <meta property="twitter:card" content="summary_large_image"/>
               <meta property="twitter:url" content={`${process.env.NEXT_PUBLIC_SITE_URL}${router.asPath}`}/>
               <meta property="twitter:title" content={title}/>
-              <meta property="twitter:description" content="전자담배 액상 최저가 비교 가격 변동 확인 사이트"/>
+              <meta property="twitter:description" content="전자담배 액상 가격 비교 사이트, 전자담배 액상 가격비교, 전자담배 폐호흡 액상 가격비교, 전자담배 입호흡 액상 가격비교, 전자담배 인기 액상 정보 등등 다양한 정보를 제공하는 사이트입니다."/>
               <meta property="twitter:image" content={`${process.env.NEXT_PUBLIC_SITE_URL}/image/juicegoblin_bi.png`}/>
+              <meta name="twitter:site" content="@juicegoblin"/>
 
               {/* Additional SEO tags */}
               <meta name="robots" content="index, follow"/>
