@@ -5,6 +5,7 @@ import Company from '../../models/Company';
 import PriceComparisons from '../../models/PriceComparisons';
 import Review from '../../models/Review';
 import WishList from '../../models/WishList';
+import SearchLog from '../../models/SearchLog';
 import {Op} from "sequelize";
 import {sequelize} from '../../lib/db';
 import {getSession} from 'next-auth/react';
@@ -62,6 +63,27 @@ async function getProducts(req, res) {
       orKeywordsArray = orKeywords;
     } else {
       orKeywordsArray = [];
+    }
+
+    // 검색어가 있을 경우 검색 로그 저장
+    if (search || orKeywordsArray.length > 0) {
+      // 클라이언트 IP 주소 가져오기
+      const ipAddress = req.headers['x-forwarded-for']?.split(',')[0] || 
+                        req.headers['x-real-ip'] || 
+                        req.socket.remoteAddress;
+
+      try {
+        await SearchLog.create({
+          userId: userId || null,
+          searchKeyword: search || null,
+          orKeywords: orKeywordsArray.length > 0 ? orKeywordsArray : null,
+          category: category || null,
+          ipAddress: ipAddress
+        });
+      } catch (logError) {
+        // 로그 저장 실패 시 에러를 기록하지만 API 요청은 계속 진행
+        console.error('검색 로그 저장 오류:', logError);
+      }
     }
 
     // 필터 조건 구성

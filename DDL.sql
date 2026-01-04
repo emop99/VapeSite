@@ -467,6 +467,23 @@ create table vapesite.vape_wish_list
 )
     comment '찜 목록 테이블';
 
+CREATE TABLE IF NOT EXISTS vape_search_logs
+(
+    id             INT AUTO_INCREMENT PRIMARY KEY COMMENT '검색 로그 ID',
+    user_id        INT          NULL COMMENT '사용자 ID (로그인한 경우)',
+    search_keyword VARCHAR(255) NULL COMMENT '메인 검색어',
+    or_keywords    JSON         NULL COMMENT 'OR 검색어 (JSON 배열 형태)',
+    category       VARCHAR(100) NULL COMMENT '검색 시 선택한 카테고리',
+    ip_address     VARCHAR(45)  NULL COMMENT '검색자 IP 주소',
+    created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '검색 일시',
+    INDEX idx_search_keyword (search_keyword),
+    INDEX idx_category (category),
+    INDEX idx_created_at (created_at),
+    FOREIGN KEY (user_id) REFERENCES vapesite.vape_user (id) ON DELETE SET NULL
+    ) ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_unicode_ci COMMENT ='검색어 트래킹 테이블';
+
 create
     definer = vapeuser@localhost procedure vapesite.get_similar_products(IN p_product_id int)
 BEGIN
