@@ -561,6 +561,14 @@ export default function ProductDetail({productData, error: serverError}) {
         <SimilarProducts products={productData.similarProducts}/>
       )}
 
+      {/* 상품 상세 레이아웃 */}
+      {productData?.description && (
+          <div className="bg-white rounded-lg shadow-md p-6 mb-8" id="product-description-section">
+            <h2 className="text-2xl font-bold mb-4">상품 상세 정보 by Gemini</h2>
+            <div dangerouslySetInnerHTML={{ __html: productData.description }} />
+          </div>
+      )}
+
       {/* 유저 리뷰 레이아웃 */}
       <section className="bg-white rounded-lg shadow-md p-6 mb-8" id="review-section">
         <h2 className="text-2xl font-bold mb-4">사용자 리뷰</h2>
