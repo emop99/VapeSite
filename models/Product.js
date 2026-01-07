@@ -57,6 +57,11 @@ const Product = sequelize.define('Product', {
     type: DataTypes.STRING(255),
     allowNull: true,
   },
+  // 상품 설명
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
   // 상품 조회수
   viewCount: {
     type: DataTypes.INTEGER,

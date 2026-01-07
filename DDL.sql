@@ -48,6 +48,7 @@ create table vapesite.vape_products
     isShow              tinyint(1) default 1                   not null comment '상품 노출 여부',
     isRedisplayed       tinyint(1) default 1                   not null,
     imageUrl            varchar(255)                           null,
+    description         longtext                               null,
     createdAt           datetime   default current_timestamp() not null,
     updatedAt           datetime   default current_timestamp() null on update current_timestamp(),
     viewCount           int        default 0                   not null comment '상품 조회수',
