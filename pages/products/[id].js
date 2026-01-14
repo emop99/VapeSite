@@ -2,7 +2,7 @@ import {useEffect, useState} from 'react';
 import {useRouter} from 'next/router';
 import Link from 'next/link';
 import Head from 'next/head';
-import {FaEdit, FaHeart, FaRegHeart, FaSearch} from 'react-icons/fa';
+import {FaEdit, FaHeart, FaRegHeart, FaSearch, FaShareAlt} from 'react-icons/fa';
 import Image from 'next/image';
 import {normalizeImageUrl} from '../../utils/helper';
 import ReviewForm from '../../components/ReviewForm';
@@ -207,6 +207,34 @@ export default function ProductDetail({productData, error: serverError}) {
     e.preventDefault();
     if (searchQuery.trim()) {
       router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
+  // 공유하기 핸들러
+  const handleShare = async () => {
+    const shareData = {
+      title: `${product.visibleName} - ${product.Company.name}`,
+      text: `${product.visibleName} | 전자담배 액상 가격비교, 인기 액상 정보 등등 다양한 정보를 제공하는 사이트입니다.`,
+      url: window.location.href,
+    };
+
+    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error('공유 실패:', err);
+        }
+      }
+    } else {
+      // 내장 공유 기능이 없는 경우 클립보드 복사
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success('링크가 클립보드에 복사되었습니다.');
+      } catch (err) {
+        console.error('클립보드 복사 실패:', err);
+        toast.error('링크 복사에 실패했습니다.');
+      }
     }
   };
 
@@ -433,7 +461,7 @@ export default function ProductDetail({productData, error: serverError}) {
               <button
                 onClick={toggleWish}
                 disabled={wishLoading}
-                className={`flex items-center justify-center px-4 py-2 rounded transition-colors duration-200 ${
+                className={`flex items-center justify-center px-3 py-2 rounded transition-colors duration-200 ${
                   isWished
                     ? 'bg-pink-100 text-pink-500 hover:bg-pink-200'
                     : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
@@ -441,6 +469,16 @@ export default function ProductDetail({productData, error: serverError}) {
                 aria-label={isWished ? '찜 취소하기' : '찜하기'}
               >
                 {isWished ? <FaHeart className="text-xl"/> : <FaRegHeart className="text-xl"/>}
+              </button>
+
+              {/* 공유하기 버튼 추가 */}
+              <button
+                  onClick={handleShare}
+                  className="flex items-center justify-center px-3 py-2 rounded bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors duration-200"
+                  aria-label="공유하기"
+                  title="공유하기"
+              >
+                <FaShareAlt className="text-xl"/>
               </button>
             </div>
           </div>
