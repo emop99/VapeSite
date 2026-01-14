@@ -134,7 +134,7 @@ export default function BoardPage({board, posts, totalPages, currentPage}) {
                                   [{post.commentCount}]
                                 </span>
                               )}
-                              <div className="text-xs text-gray-500 mt-1 sm:hidden">
+                              <div suppressHydrationWarning className="text-xs text-gray-500 mt-1 sm:hidden">
                                 {post.User?.nickName || '알 수 없음'} • {formatDate(post.createdAt)} • 조회 {post.viewCount} •
                                 <span className="inline-flex items-center ml-1">
                                   <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-0.5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
@@ -150,7 +150,7 @@ export default function BoardPage({board, posts, totalPages, currentPage}) {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden sm:table-cell">
                           {post.User?.nickName || '알 수 없음'}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden md:table-cell">
+                        <td suppressHydrationWarning className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden md:table-cell">
                           {formatDate(post.createdAt)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden sm:table-cell">

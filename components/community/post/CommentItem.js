@@ -30,7 +30,7 @@ export default function CommentItem({
           </div>
           <div>
             <span className="font-semibold text-goblin-dark">{comment.User?.nickName || '알 수 없음'}</span>
-            <span className="text-gray-500 text-xs ml-2">{formatDate(comment.createdAt)}</span>
+            <span suppressHydrationWarning className="text-gray-500 text-xs ml-2">{formatDate(comment.createdAt)}</span>
           </div>
         </div>
       </div>
