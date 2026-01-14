@@ -14,8 +14,13 @@ export default function PostDetailPage({post: initialPost, comments: initialComm
   const [comments, setComments] = useState(initialComments || []);
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
-  const {id} = router.query;
+
+  // 마운트 여부 확인
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // 사용자 정보 가져오기
   useEffect(() => {
@@ -101,6 +106,7 @@ export default function PostDetailPage({post: initialPost, comments: initialComm
 
   // 날짜 포맷팅 함수
   const formatDate = (dateString) => {
+    if (!mounted) return ''; // hydration mismatch 방지
     const date = new Date(dateString);
     return date.toLocaleDateString();
   };

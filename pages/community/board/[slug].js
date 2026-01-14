@@ -1,3 +1,4 @@
+import {useEffect, useState} from 'react';
 import {useRouter} from 'next/router';
 import Link from 'next/link';
 import Head from 'next/head';
@@ -5,7 +6,12 @@ import Pagination from '../../../components/Pagination';
 import BoardNotificationButton from '../../../components/notifications/BoardNotificationButton';
 
 export default function BoardPage({board, posts, totalPages, currentPage}) {
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const {slug} = router.query;
 
   // 페이지 변경 핸들러
@@ -18,6 +24,7 @@ export default function BoardPage({board, posts, totalPages, currentPage}) {
 
   // 날짜 포맷팅 함수
   const formatDate = (dateString) => {
+    if (!mounted) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString();
   };
