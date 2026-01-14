@@ -14,6 +14,7 @@ export default function CommentItem({
   return (
     <div
       key={comment.id}
+      id={`comment-${comment.id}`}
       className={`border-b border-gray-200 py-5
         ${level > 0 ? 'ml-4 md:ml-8 pl-4 border-l-2 border-goblin-light/30 px-2 md:px-6' : ''}
         animate-fadeIn hover:bg-goblin-light/5 transition-all duration-300 rounded-lg

@@ -365,11 +365,13 @@ export default function PostDetailPage({post: initialPost, comments: initialComm
                 "image": generateMataImageUrl(post),
                 "author": {
                   "@type": "Person",
-                  "name": post.User?.username || "쥬스고블린"
+                  "name": post.User?.username || "쥬스고블린",
+                  "url": process.env.NEXT_PUBLIC_SITE_URL
                 },
                 "publisher": {
                   "@type": "Organization",
                   "name": "쥬스고블린",
+                  "url": process.env.NEXT_PUBLIC_SITE_URL,
                   "logo": {
                     "@type": "ImageObject",
                     "url": `${process.env.NEXT_PUBLIC_SITE_URL}/image/juicegoblin_bi.png`
@@ -381,13 +383,38 @@ export default function PostDetailPage({post: initialPost, comments: initialComm
                   "@type": "WebPage",
                   "@id": `${process.env.NEXT_PUBLIC_SITE_URL}/community/post/${id}`
                 },
+                "url": `${process.env.NEXT_PUBLIC_SITE_URL}/community/post/${id}`,
                 "articleSection": post.Board?.name || "커뮤니티",
+                "articleBody": post.content.replace(/<[^>]*>/g, ''),
+                "keywords": `전자담배, 액상, 가격비교, 폐호흡, 입호흡, 전자담배 액상, ${post.Board?.name || '커뮤니티'}, ${post.title}`,
                 "commentCount": comments.length,
-                "interactionStatistic": {
-                  "@type": "InteractionCounter",
-                  "interactionType": "https://schema.org/LikeAction",
-                  "userInteractionCount": post.likeCount || 0
-                }
+                "comment": comments.map(comment => ({
+                  "@type": "Comment",
+                  "text": comment.content,
+                  "dateCreated": comment.createdAt,
+                  "url": `${process.env.NEXT_PUBLIC_SITE_URL}/community/post/${id}#comment-${comment.id}`,
+                  "author": {
+                    "@type": "Person",
+                    "name": comment.User?.username || "익명"
+                  },
+                  "interactionStatistic": {
+                    "@type": "InteractionCounter",
+                    "interactionType": "https://schema.org/LikeAction",
+                    "userInteractionCount": comment.likeCount || 0
+                  }
+                })),
+                "interactionStatistic": [
+                  {
+                    "@type": "InteractionCounter",
+                    "interactionType": "https://schema.org/LikeAction",
+                    "userInteractionCount": post.likeCount || 0
+                  },
+                  {
+                    "@type": "InteractionCounter",
+                    "interactionType": "https://schema.org/ViewAction",
+                    "userInteractionCount": post.viewCount || 0
+                  }
+                ]
               })
             }}
           />
