@@ -485,6 +485,15 @@ CREATE TABLE IF NOT EXISTS vape_search_logs
     DEFAULT CHARSET = utf8mb4
     COLLATE = utf8mb4_unicode_ci COMMENT ='검색어 트래킹 테이블';
 
+CREATE TABLE vapesite.vape_red_dot
+(
+    targetKey VARCHAR(50)                            NOT NULL PRIMARY KEY COMMENT '레드닷 대상 키 (community, ranking 등)',
+    isActive  TINYINT(1) DEFAULT 1                   NOT NULL COMMENT '활성화 여부',
+    updatedAt DATETIME   DEFAULT CURRENT_TIMESTAMP() NULL ON UPDATE CURRENT_TIMESTAMP(),
+    createdAt DATETIME   DEFAULT CURRENT_TIMESTAMP() NOT NULL
+)
+    COMMENT '레드닷 관리 테이블';
+
 create
     definer = vapeuser@localhost procedure vapesite.get_similar_products(IN p_product_id int)
 BEGIN

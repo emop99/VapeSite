@@ -3,14 +3,42 @@ import Link from 'next/link';
 import Image from 'next/image';
 import {useRouter} from 'next/router';
 import {useSession} from 'next-auth/react';
-import {useEffect} from 'react';
+import {useEffect, useState} from 'react';
 import AdSense from './AdSense';
 import AuthNav from './AuthNav';
+import RedDot from './RedDot';
 
 // 레이아웃 컴포넌트
 export default function Layout({children, title = '쥬스고블린 | 전자담배 액상 최저가 비교 가격 변동'}) {
   const router = useRouter();
   const {data: session} = useSession();
+  const [redDotStatus, setRedDotStatus] = useState({community: false, ranking: false});
+
+  // 레드닷 정보 확인 (세션스토리지 활용)
+  useEffect(() => {
+    const checkRedDot = async () => {
+      try {
+        // 세션스토리지에서 캐시된 데이터 확인
+        const cachedStatus = sessionStorage.getItem('redDotStatus');
+        if (cachedStatus) {
+          setRedDotStatus(JSON.parse(cachedStatus));
+          return;
+        }
+
+        const response = await fetch('/api/common/red-dot');
+        if (response.ok) {
+          const data = await response.json();
+          setRedDotStatus(data);
+          // 브라우저 세션 동안 중복 호출 방지를 위해 저장
+          sessionStorage.setItem('redDotStatus', JSON.stringify(data));
+        }
+      } catch (error) {
+        console.error('레드닷 확인 중 오류:', error);
+      }
+    };
+
+    checkRedDot();
+  }, []);
 
   // 좌/우측 배너 스크립트를 배너 컨테이너 내부에 직접 주입
   // Next.js Script 컴포넌트의 body-hoist로 인해 하단에 렌더링되는 문제를 방지합니다.
@@ -158,18 +186,20 @@ export default function Layout({children, title = '쥬스고블린 | 전자담�
 
               {/* 메뉴 네비게이션 */}
               <div className="flex items-center justify-between w-full">
-                <nav className="flex items-center space-x-6 overflow-x-auto whitespace-nowrap scrollbar-hide">
+                <nav className="flex items-center space-x-6 whitespace-nowrap scrollbar-hide py-1">
                   <Link href="/mouth-inhalation" className={`${isActive('/mouth-inhalation')} hover:text-accent text-goblin-light font-medium flex-shrink-0`}>
                     입호흡
                   </Link>
                   <Link href="/lung-inhalation" className={`${isActive('/lung-inhalation')} hover:text-accent text-goblin-light font-medium flex-shrink-0`}>
                     폐호흡
                   </Link>
-                  <Link href="/ranking" className={`${isActive('/ranking')} hover:text-accent text-goblin-light font-medium flex-shrink-0`}>
+                  <Link href="/ranking" className={`${isActive('/ranking')} hover:text-accent text-goblin-light font-medium flex-shrink-0 relative`}>
                     랭킹
+                    {redDotStatus.ranking && <RedDot top="-top-1" right="-right-3" />}
                   </Link>
-                  <Link href="/community" className={`${isActive('/community')} hover:text-accent text-goblin-light font-medium flex-shrink-0`}>
+                  <Link href="/community" className={`${isActive('/community')} hover:text-accent text-goblin-light font-medium flex-shrink-0 relative`}>
                     커뮤니티
+                    {redDotStatus.community && <RedDot top="-top-1" right="-right-3" />}
                   </Link>
                 </nav>
               </div>
