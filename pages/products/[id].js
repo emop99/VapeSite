@@ -242,6 +242,11 @@ export default function ProductDetail({productData, error: serverError}) {
   if (!product) {
     return (
       <div className="bg-gray-50 flex items-center justify-center min-h-[calc(100vh-200px)]">
+        <Head>
+          <title>상품을 찾을 수 없습니다 | 쥬스고블린</title>
+          <meta name="description" content="요청하신 상품이 존재하지 않거나 판매 중지 되었을 수 있습니다. 쥬스고블린에서 다양한 전자담배 액상을 검색해보세요." />
+          <meta name="robots" content="noindex" />
+        </Head>
         <div className="w-full max-w-lg p-8 space-y-8 bg-white rounded-2xl shadow-lg text-center">
 
           {/* 아이콘 */}
