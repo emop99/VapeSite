@@ -54,7 +54,7 @@ export default function BoardPage({board, posts, totalPages, currentPage}) {
         {!board ? (
           <div className="bg-white rounded-lg shadow-lg p-8 text-center border-t-4 border-red-500 animate-fade-in">
             <p className="text-red-500 font-bold text-lg">게시판을 찾을 수 없습니다.</p>
-            <Link href="/community" className="text-accent hover:underline mt-4 inline-block transition-all duration-200 hover:text-accent-dark">
+            <Link href="/community/board/free-board" className="text-accent hover:underline mt-4 inline-block transition-all duration-200 hover:text-accent-dark">
               커뮤니티 메인으로 돌아가기
             </Link>
           </div>

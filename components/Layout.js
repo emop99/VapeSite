@@ -197,7 +197,7 @@ export default function Layout({children, title = '쥬스고블린 | 전자담�
                     랭킹
                     {redDotStatus.ranking && <RedDot top="-top-1" right="-right-3" />}
                   </Link>
-                  <Link href="/community" className={`${isActive('/community')} hover:text-accent text-goblin-light font-medium flex-shrink-0 relative`}>
+                  <Link href="/community/board/free-board" className={`${isActive('/community')} hover:text-accent text-goblin-light font-medium flex-shrink-0 relative`}>
                     커뮤니티
                     {redDotStatus.community && <RedDot top="-top-1" right="-right-3" />}
                   </Link>
