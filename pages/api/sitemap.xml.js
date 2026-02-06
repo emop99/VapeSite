@@ -74,6 +74,7 @@ export default async function handler(req, res) {
       '/products',
       '/lung-inhalation',
       '/mouth-inhalation',
+      '/under10k',
       '/auth/signin',
       '/auth/signup',
       '/community',

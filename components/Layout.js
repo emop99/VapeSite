@@ -3,7 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import {useRouter} from 'next/router';
 import {useSession} from 'next-auth/react';
-import {useEffect, useState} from 'react';
+import {useEffect, useState, useRef} from 'react';
 import AdSense from './AdSense';
 import AuthNav from './AuthNav';
 import RedDot from './RedDot';
@@ -12,7 +12,20 @@ import RedDot from './RedDot';
 export default function Layout({children, title = '쥬스고블린 | 전자담배 액상 최저가 비교 가격 변동'}) {
   const router = useRouter();
   const {data: session} = useSession();
-  const [redDotStatus, setRedDotStatus] = useState({community: false, ranking: false});
+  const [redDotStatus, setRedDotStatus] = useState({under10k: false, community: false, ranking: false});
+
+  const navRef = useRef(null);
+  const [showLeftGradient, setShowLeftGradient] = useState(false);
+  const [showRightGradient, setShowRightGradient] = useState(false);
+
+  // GNB 가로 스크롤 시 그라데이션 표시 여부 결정
+  const handleScroll = () => {
+    if (navRef.current) {
+      const {scrollLeft, scrollWidth, clientWidth} = navRef.current;
+      setShowLeftGradient(scrollLeft > 0);
+      setShowRightGradient(scrollLeft < scrollWidth - clientWidth - 1);
+    }
+  };
 
   // 레드닷 정보 확인 (세션스토리지 활용)
   useEffect(() => {
@@ -71,6 +84,20 @@ export default function Layout({children, title = '쥬스고블린 | 전자담�
     return () => {
       if (typeof cleanupResize === 'function') cleanupResize();
     };
+  }, []);
+
+  // GNB 스크롤 이벤트 등록
+  useEffect(() => {
+    const nav = navRef.current;
+    if (nav) {
+      handleScroll();
+      nav.addEventListener('scroll', handleScroll);
+      window.addEventListener('resize', handleScroll);
+      return () => {
+        nav.removeEventListener('scroll', handleScroll);
+        window.removeEventListener('resize', handleScroll);
+      };
+    }
   }, []);
 
   // 현재 경로에 따라 네비게이션 링크 활성화 여부 결정
@@ -185,13 +212,14 @@ export default function Layout({children, title = '쥬스고블린 | 전자담�
               </div>
 
               {/* 메뉴 네비게이션 */}
-              <div className="flex items-center justify-between w-full">
-                <nav className="flex items-center space-x-6 whitespace-nowrap scrollbar-hide py-1">
-                  <Link href="/mouth-inhalation" className={`${isActive('/mouth-inhalation')} hover:text-accent text-goblin-light font-medium flex-shrink-0`}>
-                    입호흡
-                  </Link>
-                  <Link href="/lung-inhalation" className={`${isActive('/lung-inhalation')} hover:text-accent text-goblin-light font-medium flex-shrink-0`}>
-                    폐호흡
+              <div className="flex items-center justify-between w-full relative overflow-hidden">
+                {/* 좌측 그라데이션 */}
+                <div className={`absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-goblin-dark to-transparent z-10 pointer-events-none transition-opacity duration-300 ${showLeftGradient ? 'opacity-100' : 'opacity-0'}`}></div>
+
+                <nav ref={navRef} className="flex items-center space-x-6 whitespace-nowrap scrollbar-hide py-2 overflow-x-auto px-4">
+                  <Link href="/under10k" className={`${isActive('/under10k')} hover:text-accent text-goblin-light font-medium flex-shrink-0 relative`}>
+                    만원미만
+                    {redDotStatus.under10k && <RedDot top="-top-1" right="-right-3" />}
                   </Link>
                   <Link href="/ranking" className={`${isActive('/ranking')} hover:text-accent text-goblin-light font-medium flex-shrink-0 relative`}>
                     랭킹
@@ -201,7 +229,16 @@ export default function Layout({children, title = '쥬스고블린 | 전자담�
                     커뮤니티
                     {redDotStatus.community && <RedDot top="-top-1" right="-right-3" />}
                   </Link>
+                  <Link href="/mouth-inhalation" className={`${isActive('/mouth-inhalation')} hover:text-accent text-goblin-light font-medium flex-shrink-0`}>
+                    입호흡
+                  </Link>
+                  <Link href="/lung-inhalation" className={`${isActive('/lung-inhalation')} hover:text-accent text-goblin-light font-medium flex-shrink-0`}>
+                    폐호흡
+                  </Link>
                 </nav>
+
+                {/* 우측 그라데이션 */}
+                <div className={`absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-goblin-dark to-transparent z-10 pointer-events-none transition-opacity duration-300 ${showRightGradient ? 'opacity-100' : 'opacity-0'}`}></div>
               </div>
             </div>
           </div>

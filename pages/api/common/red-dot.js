@@ -15,6 +15,7 @@ export default async function handler(req, res) {
     }, {});
 
     const results = {
+      under10k: false,
       community: false,
       ranking: false
     };
@@ -46,6 +47,11 @@ export default async function handler(req, res) {
     // 2. 랭킹 레드닷 체크
     if (settingsMap['ranking']) {
       results.ranking = true;
+    }
+
+    // 3. 만원미만 레드닷 체크
+    if (settingsMap['under10k']) {
+      results.under10k = true;
     }
 
     return res.status(200).json(results);

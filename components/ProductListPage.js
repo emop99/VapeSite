@@ -13,8 +13,9 @@ export default function ProductListPage({
   initialProducts = [],
   initialPagination = { page: 1, totalPages: 1 },
                                           initialSearchKeyword = '',
-                                          initialOrKeywords = []
-}) {
+                                          initialOrKeywords = [],
+                                          maxPrice
+                                        }) {
   const router = useRouter();
 
   // 상태 관리
@@ -176,7 +177,7 @@ export default function ProductListPage({
         : '';
 
       // API 호출 (카테고리로 필터링, 검색어 포함, OR 검색어 포함)
-      const response = await fetch(`/api/products?page=${pageNum}&limit=12&category=${category}${search ? `&search=${search}` : ''}${orKeywordsParam}`);
+      const response = await fetch(`/api/products?page=${pageNum}&limit=12${category ? `&category=${category}` : ''}${search ? `&search=${search}` : ''}${orKeywordsParam}${maxPrice ? `&maxPrice=${maxPrice}` : ''}`);
 
       if (!response.ok) {
         throw new Error('제품을 불러오는데 문제가 발생했습니다.');

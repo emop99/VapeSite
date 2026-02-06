@@ -47,7 +47,8 @@ async function getProducts(req, res) {
       limit = 12,
       category,
       search,
-      orKeywords
+      orKeywords,
+      maxPrice
     } = req.query;
 
     // 페이지네이션 파라미터 처리
@@ -162,6 +163,9 @@ async function getProducts(req, res) {
 
     // 기본 조건: PriceComparisons.price > 0
     const priceCondition = {'$PriceComparisons.price$': {[Op.gt]: 0}};
+    if (maxPrice) {
+      priceCondition['$PriceComparisons.price$'][Op.lt] = parseInt(maxPrice, 10);
+    }
     // 기본 조건: 제품이 노출되는 경우
     const isShowCondition = {isShow: true};
 
