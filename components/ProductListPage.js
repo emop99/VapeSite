@@ -208,7 +208,7 @@ export default function ProductListPage({
     } finally {
       setLoading(false);
     }
-  }, [category]);
+  }, [category, maxPrice]);
 
   // 페이지 변경 처리 함수
   const handlePageChange = useCallback((newPage) => {
