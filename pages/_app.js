@@ -2,7 +2,7 @@ import Layout from '../components/Layout';
 import '../styles/globals.css';
 import {useRouter} from 'next/router';
 import {useEffect} from 'react';
-import {SessionProvider} from 'next-auth/react';
+import {SessionProvider, useSession} from 'next-auth/react';
 import * as gtag from '../lib/gtag';
 import AdminLayout from '../components/admin/AdminLayout';
 import Script from 'next/script';
@@ -10,6 +10,31 @@ import {Toaster} from 'react-hot-toast';
 import {NotificationProvider} from '../contexts/NotificationContext';
 import PWAInstallPrompt from '../components/PWAInstallPrompt';
 import GoogleOneTapLogin from '../components/GoogleOneTapLogin';
+
+// Google AdSense 컴포넌트
+const GoogleAdSense = () => {
+  const {data: session, status} = useSession();
+  const router = useRouter();
+
+  // 세션 로딩 중이거나 개발 환경, 어드민 경로, 또는 관리자 계정인 경우 AdSense 로드를 제외
+  if (
+      status === 'loading' ||
+      process.env.NODE_ENV === 'development' ||
+      router.pathname.startsWith('/admin') ||
+      session?.user?.grade === 'ADMIN'
+  ) {
+    return null;
+  }
+
+  return (
+      <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4259248617155600"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+      />
+  );
+};
 
 // 앱 컴포넌트
 function MyApp({Component, pageProps}) {
@@ -95,13 +120,6 @@ function MyApp({Component, pageProps}) {
               `,
                   }}
               />
-              {/* Google AdSense */}
-              <Script
-                  async
-                  src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4259248617155600"
-                  crossOrigin="anonymous"
-                  strategy="afterInteractive"
-              />
             </>
         ) : ``}
 
@@ -109,6 +127,7 @@ function MyApp({Component, pageProps}) {
         <PWAInstallPrompt/>
 
         <SessionProvider session={pageProps.session}>
+          <GoogleAdSense/>
           <GoogleOneTapLogin/>
           <NotificationProvider>
             {router.pathname.startsWith('/admin') ?
