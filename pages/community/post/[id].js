@@ -347,7 +347,7 @@ export default function PostDetailPage({post: initialPost, comments: initialComm
           <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"/>
           <meta name="language" content="Korean"/>
           <meta name="author" content="쥬스고블린"/>
-          <meta name="viewport" content="width=device-width, initial-scale=1"/>
+          <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
           <meta httpEquiv="content-language" content="ko"/>
 
           {/* 캐노니컬 URL */}

@@ -113,7 +113,7 @@ export default function Layout({children, title = '쥬스고블린 | 전자담�
               <meta name="description" content="전자담배 액상 가격 비교 사이트, 전자담배 액상 가격비교, 전자담배 폐호흡 액상 가격비교, 전자담배 입호흡 액상 가격비교, 전자담배 인기 액상 정보 등등 다양한 정보를 제공하는 사이트입니다."/>
               <meta name="keywords" content="쥬스고블린, 베이핑, 전자담배, 입호흡, 폐호흡, 액상, 액상최저가, 최저가, 최저가검색, 액상 추천, 액상추천, 전자담배 추천, 전자담배추천, 가격비교, 액상가격비교, 액상 가격비교, 최저가 찾기, 최저가찾기"/>
               <link rel="icon" href="/favicon.ico" sizes="any"/>
-              <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+              <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
 
               <meta name="referrer" content="no-referrer-when-downgrade"/>
 

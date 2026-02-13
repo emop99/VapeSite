@@ -33,7 +33,7 @@ const AdminLayout = ({children, title = '관리자 페이지 - 쥬스고블린'}
         <title>{title}</title>
         <meta name="description" content="쥬스고블린 관리자 페이지"/>
         <link rel="icon" href="/favicon.ico"/>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
         <meta name="robots" content="noindex, nofollow"/>
       </Head>
 
