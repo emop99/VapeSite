@@ -484,6 +484,20 @@ CREATE TABLE IF NOT EXISTS vape_search_logs
     ) ENGINE = InnoDB
     DEFAULT CHARSET = utf8mb4
     COLLATE = utf8mb4_unicode_ci COMMENT ='검색어 트래킹 테이블';
+    
+CREATE TABLE vapesite.vape_chat_logs
+(
+    id        INT AUTO_INCREMENT PRIMARY KEY,
+    userId    INT                                  NULL COMMENT '유저 ID (NULL일 경우 비회원 또는 시스템)',
+    nickName  VARCHAR(25)                          NOT NULL COMMENT '채팅 시 표시될 닉네임',
+    message   TEXT                                 NOT NULL COMMENT '채팅 메시지',
+    ip        VARCHAR(45)                          NULL COMMENT '작성자 IP 주소',
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP() NOT NULL,
+    INDEX idx_chat_createdAt (createdAt),
+    CONSTRAINT fk_chat_user FOREIGN KEY (userId) REFERENCES vapesite.vape_user (id) ON DELETE SET NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci COMMENT ='전체 채팅 로그 테이블';
 
 CREATE TABLE vapesite.vape_red_dot
 (

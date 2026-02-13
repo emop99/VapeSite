@@ -10,6 +10,7 @@ import {Toaster} from 'react-hot-toast';
 import {NotificationProvider} from '../contexts/NotificationContext';
 import PWAInstallPrompt from '../components/PWAInstallPrompt';
 import GoogleOneTapLogin from '../components/GoogleOneTapLogin';
+import ChatFloatingButton from '../components/ChatFloatingButton';
 
 // Google AdSense 컴포넌트
 const GoogleAdSense = () => {
@@ -134,9 +135,12 @@ function MyApp({Component, pageProps}) {
              <AdminLayout>
                <Component {...pageProps} />
              </AdminLayout> :
-             <Layout>
-               <Component {...pageProps} />
-             </Layout>
+             <>
+               <Layout>
+                 <Component {...pageProps} />
+               </Layout>
+               <ChatFloatingButton />
+             </>
             }
           </NotificationProvider>
         </SessionProvider>

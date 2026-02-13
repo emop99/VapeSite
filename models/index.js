@@ -23,6 +23,7 @@ const PurchaseClickLog = require('./PurchaseClickLog');
 const ProductsViewCount = require('./ProductsViewCount');
 const WishList = require('./WishList');
 const RedDot = require('./RedDot');
+const ChatLog = require('./ChatLog');
 // 모델 간의 관계는 각 모델 파일에서 정의됨
 
 module.exports = {
@@ -48,4 +49,5 @@ module.exports = {
   ProductsViewCount,
   WishList,
   RedDot,
+  ChatLog,
 };
