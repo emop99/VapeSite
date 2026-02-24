@@ -98,11 +98,15 @@ export default async function handler(req, res) {
             vp.imageUrl,
             vp_cate.name AS categoryName,
             COUNT(*) as clicks,
-            MIN(vpc.price) as minPrice
+            minPrice
         FROM vapesite.vape_purchase_click_log AS vpcl
-          JOIN vapesite.vape_products vp ON vpcl.productId = vp.id
-          JOIN vapesite.vape_product_category vp_cate ON vp.productCategoryId = vp_cate.id
-          JOIN vapesite.vape_price_comparisons vpc ON vp.id = vpc.productId
+        JOIN vapesite.vape_products vp ON vpcl.productId = vp.id
+        JOIN vapesite.vape_product_category vp_cate ON vp.productCategoryId = vp_cate.id
+        JOIN (
+            SELECT productId, MIN(price) AS minPrice
+            FROM vapesite.vape_price_comparisons
+            GROUP BY productId
+        ) AS vpc ON vpcl.productId = vpc.productId
         WHERE vpcl.createdAt >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
         GROUP BY vpcl.productId, vp.visibleName, vp.imageUrl, vp.productCategoryId
         ORDER BY clicks DESC
