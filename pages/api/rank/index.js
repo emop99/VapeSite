@@ -52,6 +52,7 @@ export default async function handler(req, res) {
         FROM vapesite.vape_seller_site
                  JOIN vapesite.vape_price_comparisons ON vapesite.vape_seller_site.id = vapesite.vape_price_comparisons.sellerId
         GROUP BY sellerId
+        HAVING FLOOR(AVG(price)) > 0
         ORDER BY avgPrice;
     `);
 
